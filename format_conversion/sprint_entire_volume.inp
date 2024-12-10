@@ -1,0 +1,108 @@
+C       Sprint Script for Entire Volume Interpolation
+C       TRMM - MMM DD, YYYY  
+C       
+C  For the INPUT directive:
+C  Word   Bytes   Type    Description
+C  ----   -----   -----   ---------------------------------------------
+C   1      0-7    INPUT   The string 'INPUT' (c8).
+C   2     8-15    int     The unit number (i8).
+C   3    16-23    char    The tape id (c8).  Typically blank.
+C   4    24-31    int     Skip # files on tape (i8).  Typically blank.
+C   5    32-39    int     Experiment #. 24 == TRMM.  See sprint/src/INPFIL.f
+C                         See below for some experiment and radar numbers.
+C                         Specify negative number to use lat, lon, height
+C                         from words 8, 9 and 10, respectively. Default 24.
+C   6    40-47    int     Radar #. See sprint/src/INPFIL.f      User supplied.
+C   7    48-48    char    Rewind string.  ? unknown values ?    Default blank.
+C   8    49-56    int     Latitude.  (Decimal degrees).         Default blank.
+C   9    57-64    int     Longitude. (Decimal degrees).         Default blank.
+C  10    65-72    int     Height of radar (KM).                 Default blank.
+C
+C                       Sprint Experiment Numbers
+C                                                 1- CCOPE (DEFAULT)
+C                                                 2- JAWS
+C                                                 3- CYCLES
+C                                                 4- MAYPOLE-83
+C                                                 5- LAKE SNOW-84
+C                                                 6- MAYPOLE-84
+C                                                 7- PHOENIX-84
+C                                                 8- NIMROD-78
+C                                                 9- SOCORRO-84
+C                                                10- PRESTORM-85
+C                                                11- GALE-86
+C                                                12- MIST-86
+C                                                13- CINDE-87
+C                                                14- GERMAN
+C                                                15- TAMEX
+C                                                16- PROFS
+C                                                17- TDWR
+C                                                18- HARP
+C                                                19- WISP90
+C                                                20- WISP91
+C                                                21- CAPE
+C                                                22- FEST92
+C                                                23- TOGA COARE
+C                                                24- TRMM
+C                                                25- NEXRAD
+C                            Radar Number's
+C                                                 1 = CHILL
+C                                                 2 = CP-2
+C                                                 3 = CP-3
+C                                                 4 = CP-4
+C                                                 5 = NOAA-C
+C                                                 6 = NOAA-D
+C                                                 7 = NOAA-K
+C                                                 8 = SWR-75
+C                                                 9 = FL-2
+C                                                10 = UND
+C                                                11 = NOR
+C                                                12 = CIM
+C                                                13 = POLD
+C                                                14 = TOGA
+C                                                15 = CCAA
+C                                                16 = SPAN
+C                                                17 = MIT
+C                                                18 = MHR
+C                                                19 = ELDR-AFT
+C                                                20 = ELDR-FOR
+C                                                21 = MELB
+C                                                22 = DARW-TOGA
+C                                                23 = DARW-LAS
+C                                                24 = CAMANO
+C                                                25 = WICHITA
+C                                                26 = KWAJELEIN
+C                                                27 = EUREKA
+C                                                28 = OKLA CITY
+C                                                29 = TAMPA-BAY
+C                                                30 = MIAMI
+C                                                31 = JACKSONVILLE
+C                                                32 = KEY-WEST
+C                                                33 = TALLAHASSEE
+C                                                34 = HOUSTON
+C                                                35 = CORPUS-CRISTI
+C                                                36 = BROWNSVILLE
+C                                                37 = GRANGER AFB
+C                                                38 = NEW BRAUNFELS
+C                                                39 = TEXAS A&M ADRAD
+C                                                40 = LAKE-CHARLES
+C                                                41 = ISRAEL
+C                                                42 = OM KOI (THAILAND)
+C                                                43 = PHUKET (THAILAND)
+C                                                44 = DARW-GUNN-PT
+C                                                45 = HAWAII
+C                                                46 = SAO-PAULO (BRAZIL)
+C                                                47 = GUAM
+C                                                48 = TAIWAN
+C
+C
+C  1---12------23------34------45------56------67------78------89------90------0
+GRID    -150.0  150.0   -150.0  150.0   HORIZONTAL_RES     1.5     19.5    VERTICAL_RES
+INPUT   10                      24      RADAR_NUM
+INTERP  BI-LIN  2       1       2
+C        DZ      LINEAR
+        CZ      LINEAR
+END
+RADAR   UF                      SUNFOR
+OUTPUT  11              BEG                     STEINER TRMM    PUR
+PROCESS YYMMDD.                         FIXED   0.2
+QUIT

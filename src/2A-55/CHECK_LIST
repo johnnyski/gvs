@@ -1,0 +1,59 @@
+Check list for packing 2A-55:
+
+Note:  Since this product requires 2A-54 product's source code, I will 
+tag 2A-54 and 2A-55 products with gvs-2A-55-v2_1.  Therefore, step 1-4
+are done for 2A-54 and 2A-55 products (gvs/src/2A-54 and gvs/src/2A-55 
+respectively).
+
+1. cvs commit 
+
+2. make clean
+
+3. make
+
+
+4. cvs tag gvs-2A-55_v2_1
+
+5. cd ~/builds
+
+6. cvs export -d gvs-2A-55-v2.1 -r gvs-2A-55_v2_1 gvs
+
+7. cd gvs-2A-55-v2.1/
+
+8. make 
+
+9. make install
+
+10. go to a test directory and make sure the executables are in the 
+	search path
+
+11. 2A-55 -v -o 2 ~/test/gvs_1C-51_N00689/ref_melb_070193_1957.uf 
+	produce only 2A-55-a.
+
+12. 2A-55 -v -o 4 ~/test/gvs_1C-51_N00689/ref_melb_070193_1957.uf
+	produce only 2A-55-b.
+
+13. 2A-55 -v -o 8 ~/test/gvs_1C-51_N00689/ref_melb_070193_1957.uf
+	produce only 2A-55-c.
+
+14. 2A-55 -v -o 6 ~/test/gvs_1C-51_N00689/ref_melb_070193_1957.uf
+	produce only 2A-55-a and 2A-55-b.
+
+15. 2A-55 -v -o 10 ~/test/gvs_1C-51_N00689/ref_melb_070193_1957.uf
+	produce only 2A-55-a and 2A-55-c.
+
+16. 2A-55 -v ~/test/gvs_1C-51_N00689/ref_melb_070193_1957.uf
+	produce only 2A-55-a, 2A-55-b, and 2A-55-c.
+
+	If everything still looks okay, then
+
+17. go to ~/build/gvs-2A-55-v2.1
+
+18. make clean
+
+19. cd ..
+
+20. gtar zcf gvs-2A-55-v2.1.tgz gvs-2A-55-v2.1
+
+21. rcp  gvs-2A-55-v2.1.tgz trmm:/PUBLIC/ftp/pub/software
+

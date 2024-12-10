@@ -1,0 +1,62 @@
+C    DIMENSIONS AND PARAMETERS FOR VOSWIN
+
+C  DIMENSIONS OF RADAR 3-D MATRIX FOR DARWIN RADAR:
+	INTEGER bins,rays,raysmax,steps,sweep_size
+	PARAMETER (kms = 210)	!  range interval of saved data
+	PARAMETER (steps = 26)	!  max possible n of steps
+	PARAMETER (rays = 360)	!  number of rays in the polar matrix
+
+	PARAMETER (bins = 1200)		!  max possible n of bins
+	PARAMETER (raysmax = 400)	!  max possible n of rays
+
+
+	PARAMETER (sweep_size = rays*kms)
+	PARAMETER (ncpi = 6)	!  number of saved levels
+
+
+C
+C   VARIABLES ASSIGNED IN SETVOS AND USED IN BUILDV:
+
+C
+C   VARIABLES CONTAINING THE ANALYZED VOS DATA. ASSIGNED IN BUILDV AND USED
+C   IN WRVOS.FOR:
+C	INTEGER*2 IBIN2KM(0:bins,steps)	!  Convert bin number and elevation step
+C					! to horizontal range in km.
+C	INTEGER*2 IFAN2H(steps,kms)	!  Convert range and elevation step
+C					! to altitude.
+C	INTEGER*2 IBASTEP(kms)		!  Elevation step at cloud base level
+C	INTEGER*2 IFIRSTB(steps)	!  first bin to process
+C	INTEGER*2 IHBASE(kms*rays)	! echo base heigh in km/10
+C	INTEGER*2 IZGR(kms*rays)	! ground reflectivity in dBZ/3
+C	INTEGER*2 IZBASE(kms*rays)	! cloud base reflectivity in dBZ/3
+C	INTEGER*2 ITOP(kms*rays)	! echo top height in km/10
+C	INTEGER*2 IZMAX(kms*rays)	! max reflectivity at any level in dBZ/10
+C	INTEGER*2 IHZMAX(kms*rays)	! height of IZMAX in km
+C
+	COMMON /CINT2/ IBIN2KM(0:bins,steps),IFAN2H(steps,kms),
+     +	IBASTEP(kms),HCPI(ncpi),ICPISTEP(ncpi,kms),ICPI2H(ncpi,kms),
+     +	IFIRSTB(steps),IEL2STEP(0:900),IHFSTEP(kms),
+     +	IZGR(kms,rays),IZBASE(kms,rays),
+     +	IZMAX(kms,rays),NOISDBZ,IKM2BIN(0:bins,steps),
+     +	Z(kms,rays,steps)
+
+	INTEGER*2 IBIN2KM,IFAN2H,IBASTEP,ICPISTEP,ICPI2H,IFIRSTB,
+     +	IEL2STEP,IZGR,IZBASE,IZMAX,IHFSTEP,IKM2BIN,Z	!,IZCPI
+
+
+	COMMON /CINT3/IHBASE(kms,rays),IHBASE2(kms,rays),
+     +	ITOP1(kms,rays),ITOP(kms,rays),ITOP30(kms,rays),
+     +	IHZMAX(kms,rays),IZCPI(ncpi,kms,rays),ISTEPF2KM(steps)
+
+	BYTE IHBASE,IHBASE2,ITOP1,ITOP,IHZMAX,ITOP30
+
+ 
+
+ 	COMMON /CSWEEP/IBH(steps),IRH(kms)
+
+	INTEGER*2 NOISDBZ
+
+C   GENERAL USAGE HOUSE KEEPING VARIABLES. ASSIGNNED IN VOSBUILD.FOR (MAIN):
+	COMMON /COMIN1/ISTEP2EL(steps),RNGDLY,BINLENG,CBASE,
+     +	NRAYSTEP(0:steps),DELTAZ,HBBF,RADLAT,RADLON,RADELEV,
+     +	ISBINTR(2,kms),NBINS,NRAYS,NSTEPS

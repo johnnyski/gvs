@@ -1,0 +1,51 @@
+Check list for 2A-52i distribution:
+
+o cvs update
+
+o cvs commit
+
+o make clean
+
+o make
+
+o make clean
+
+o rcp -r 2A-52i echo (or ftp  ame; mput *):
+
+o On echo or ame:
+
+  - emacs makefile (change path & compiler)
+
+  - make clean
+
+  - make
+
+  - 2A-52i -v ref_melb_070193_1957.uf 
+
+  - emacs frac_area.c (set BUILD_GIF to 1 to create *gif files if want to see
+    the images)
+
+(does it look alright?)
+
+If everything looks cool, then, on radar, do:
+
+	o cvs tag v1_0
+
+    o cd ~/builds
+
+	o cvs export -d gvs-v1.0 -r v1_0 gvs
+
+	o make 
+
+	o 2A-52i -v ~/trmm/gvs/src/2A-52i/test/ref_melb_070193_1957.uf 
+
+
+	If everything still looks okay, then
+
+	o make clean
+
+	o cd ..
+
+	o gtar zcf 2A-52i-v1.0.tgz 2A-52i
+
+	o rcp 2A-52i-v1.0.tgz trmm:/PUBLIC/ftp/pub/software

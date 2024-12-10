@@ -1,0 +1,33 @@
+TSDIS,2A55,33
+33000,W_2A55_BAD_USAGE,NULL,2A-55: Improper usage.
+33001,W_2A55_ABORT_EXEC,NULL,2A-55: Abort execution--interrupted signal received..
+33002,W_2A55_STOP_ON_ERROR,NULL,2A-55: Stop execution--non-interrupted signal received.
+33003,W_2A55_INVALID_SITE,NULL,2A-55: Invalid site.
+33004,W_2A55_READ_RADAR_VOL_FAILED,NULL,2A-55: readRadarVolumn failed.
+33005,W_2A55_READ_GEOGRNEW_FAILED,NULL,2A-55: Failed to read the geograpical map.
+33006,W_2A55_INVALID_RANGE_MASK,NULL,2A-55: Can't determine range mask.
+33007,W_2A55_OPEN_CSMAP_FAILED,NULL,2A-55: Failed opening csmap.
+33008,W_2A55_OPEN_LOGFILE_FAILED,NULL,2A-55: Open logfile failed.
+33009,W_2A55_OPEN_OUTFILE_FAILED,NULL,2A-55: TKopen failed on 2A-55.
+33010,W_2A55_WRITE_OUTFILE_FAILED,NULL,2A-55: TKwriteGrid failed on 2A-55.
+33011,W_2A55_CLOSE_OUTFILE_FAILED,NULL,2A-55: TKclose failed on 2A-55.
+33012,W_2A55_OPEN_THRESHOLD_FILE_FAILED,NULL,2A-55: Error: Cannot open threshold file.
+33013,W_2A55_OPEN_CFAD_ASCII_OFILE_FAILED,NULL,2A-55: Error opening CFAD ASCII output file.
+33014,W_2A55_OPEN_CFAD_ASCII_IFILE_FAILED,NULL,2A-55: Error opening CFAD ASCII input file.
+33015,W_2A55_OPEN_VALIDRANGE_IFILE_FAILED,NULL,2A-55: Sorry, can't open input valid data range file.
+33016,W_2A55_INVALID_FORMAT_VALIDRANGE_IFILE,NULL,2A-55: Problem with valid data range file.
+33017,W_2A55_OPEN_ZRTRAN_IFILE_FAILED,NULL,2A-55: Sorry, can't open input Z-R conversion information file.
+33018,W_2A55_GRID_DIM_TOO_BIG,NULL,2A-55: Grid dimensions too big!
+33019,W_2A55_INVALID_ANAL_LEVEL,NULL,2A-55: Invalid analysis level: must be 0 <= level.
+33020,W_2A55_INVALID_MAXTYPE_LEVEL,NULL,2A-55: Invalid maxtype: must be either 0 or 1!
+33021,W_2A55_INVALID_FORMAT_ZRTRAN_IFILE,NULL,2A-55: Problem with Z-R conversion file.
+33022,W_2A55_INVALID_ZRTRAN_TYPE,NULL,2A-55: Invalid type of Z-R conversion!
+33023,W_2A55_INVALID_RADAR_EST_GS,NULL,2A-55: Invalid determination of radar estimates at gauge sites!
+33024,W_2A55_OPEN_GEN_OFILE_FAILED,NULL,2A-55: Sorry, can't open general output file.
+33025,W_2A55_BAD_USAGE2,NULL,2A-55: Improper usage for volume class.
+33026,W_2A55_INVALID_HISTOGRAM_DIM,NULL,2A-55: Please check the histogram dimensions!
+33027,W_2A55_OPEN_CFADRANGE_OFILE_FAILED,NULL,2A-55: Sorry, can't open output range-dependant CFAD information file.
+33028,W_2A55_WRITE_METADATA_FAILED,NULL,2A-55: Failed to write metadata.
+33029,W_2A55_GEOG_DIM_INCORRECT,NULL,2A-55: Geographical mask dimensions are not correct!
+33030,W_2A55_CANT_OPEN_GEOMAP_FILE,NULL,2A-55: Sorry, can't open geo map file.W33031,W_2A55_GEO_MAP_FORMAT_OBSOLETE,NULL,2A-55: Problem with the format of geographical map file.
+33032,W_2A55_GEO_MAP_ERROR,NULL,2A-55: Something is wrong with the geographical mask!   

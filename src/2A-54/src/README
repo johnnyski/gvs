@@ -1,0 +1,35 @@
+README file for 2A-54 (Convective-Stratiform Map)
+-------------------------------------------------
+
+This is an intermediate version of 2A-54.  While it is much more 
+straightforward to run than the original version, there is still a lot of 
+extraneous code.  This will be eliminated in the near future.
+
+To create an executable version, type "make".
+
+To run, type "2A54 [input mudras base scan] [site name] [full output path]"
+	[site name] will currently accept only
+	   ber -> Darwin
+	   mel -> Melbourne
+	   ict -> Wichita (used for testing but will be removed eventually)
+
+The output files are ASCII, convective/stratiform maps.  These maps are
+151x151 cartesian grids with the radar located at center of grid box at 
+location (76,76).  The entries are unitless as follows:
+	 0 -> no rain
+	 1 -> stratiform
+	 2 -> convective
+	-99 -> missing/bad data
+
+There are a couple test files included in the testfiles directory.  The
+input mudras basescan files are named *.pure and the output csmaps are
+named appropriately.
+
+If you have any questions or problems, let me know.
+	Stacy Brodzik
+	(206)685-9993
+	brodzik@atmos.washington.edu
+
+
+
+

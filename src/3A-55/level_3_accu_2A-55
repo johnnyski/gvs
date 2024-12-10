@@ -1,0 +1,118 @@
+#! /usr/bin/perl
+
+#----------------------------------------------------------------------------
+# Perform level 3 accumulation for CFAD and Vertical Profile 2A-55 datasets.
+#
+# Input : One single vos input hdf file.
+# Output: Intermediate accumulation files for:
+#           1. CFAD (ascii)
+#           2. Vertical profiles (binary)
+#
+#----------------------------------------------------------------------------
+# By:
+#
+#     John H. Merritt
+#     Space Applications Corporation
+#     NASA/GSFC Code 910.1
+#     John.H.Merritt@gsfc.nasa.gov
+#     10/9/97
+#
+#----------------------------------------------------------------------------
+#
+
+$PROG_VERSION = "gvs-v4.21";
+
+unshift (@INC, ".", "/usr/local/trmm/GVBOX/bin");
+do 'gv_utilities.pl';
+
+sub usage {
+	print STDERR "Usage ($PROG_VERSION):\n";
+	print STDERR " $this_prog in_singlevos.hdf inout_intermediate_cfad.ascii inout_intermediate_vprof.bin\n";
+}
+
+
+#----------------------------------------------------------------------
+#                               M A I N
+#----------------------------------------------------------------------
+if ($#ARGV != 2) {
+	&usage();
+	exit(-1);
+}
+
+$in_singlevos_hdf = $ARGV[0];
+$inout_cfad       = $ARGV[1];
+$inout_vprof      = $ARGV[2];
+
+#
+# This program creates a bunch of temporary files.  Hopefully, I clean
+# everything up.  Typically, hdfcfad??.dat (?? in [00-11]) and
+# hdfvprof.dat, and hdfslice??.dat (not used) are produced.
+#
+& do_system_call("2A-55_hdf2ascii $in_singlevos_hdf");
+
+# Produce one CFAD file.
+& do_system_call("cat hdfcfad??.dat > hdfcfad.dat");
+
+# Perform CFAD accumulation.
+& do_system_call("level_3_accu_cfad hdfcfad.dat $inout_cfad");
+
+# Perform Vertical profile accumulation.
+& do_system_call("level_3_accu_vprof hdfvprof.dat $inout_vprof");
+
+& clean_up();
+
+exit(0);
+
+######################################################################
+#                                                                    #
+#                              clean_up                              #
+#                                                                    #
+######################################################################
+sub clean_up {
+	
+	unlink <hdfslice??.dat>;
+	unlink <hdfcfad??.dat>;
+	unlink "hdfcfad.dat";
+	
+	unlink "hdfvprof.dat";
+}
+
+######################################################################
+#                                                                    #
+#                            do_system_call                          #
+#                                                                    #
+######################################################################
+sub do_system_call {
+        local($cmd) = @_;
+        # Return 1 for success; -1, otherwise.
+        return -1 if ($cmd eq "");
+        local($rc) = 1;
+# print STDERR "CMD: <$cmd>\n";
+        system($cmd);
+
+        $status = $? >> 8;
+        local($signal) = $? & 255;
+
+        do doexit_handler('INT') if (&interrupted($status));
+
+        if (&is_severe_error($status) || $signal != 0) {
+                $rc = -1; # failed
+        }
+        return $rc;
+}
+######################################################################
+#                                                                    #
+#                            doexit_handler                          #
+#                                                                    #
+######################################################################
+sub doexit_handler {
+        local($sig) = @_;
+		do clean_up();
+        $rc = $SEVERE_ERROR_CODE;
+        $rc = $INTER_CODE if ($signal eq 'INT' || $signal eq 'KILL' || $signal eq 'STOP');
+        if ($verbose) {
+                print STDERR "Received signal <$sig>\n";
+        }
+        exit($rc);
+}
+

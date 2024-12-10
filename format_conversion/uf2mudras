@@ -1,0 +1,288 @@
+#! /usr/bin/perl
+#-*-Perl-*-
+#
+# This script calls NCAR sprint interpolator to convert 1C-51 product 
+# (in Universal Format) to pure MUDRAS file.
+# It returns 0 upon successful completion; non-zero, otherwise. 
+#
+# If '-s' is not specified, this script uses the sprint input template,
+# 'sprint_base_scan.inp', located in $GVS_DATA_PATH.  This template is used 
+# to interpolate the base scan of the QC'ed UF file. 
+#
+# For information on sprint commands' syntax, see NCAR SPRINT 
+# interpolator's documentation. 
+#
+# Use netscape or mosaic to view 'uf2mudras.html' for more
+# information.
+#
+# Note: 
+# =====
+# Make sure 'sprint' is in your search path.
+#
+# To support parallel processing, execute sprint in a temp dir 
+# since it uses fort.10 and fort.11.
+#
+# When creating your own template, you must do the following:
+#  1. Use '10' for the Fortran logical unit number of the input file 
+#     (P2 of 'INPUT' command) and '11' for the Fortran logical unit 
+#     number of the output file (P2 of 'OUTPUT' command). 
+#  2. Fill P2 of the 'PROCESS' command with 'YYMMDD'.
+#  3. Fill P6 of the 'INPUT' command with 'RADAR_NUM'. 
+#  4. Fill P6 of the 'GRID' command with 'HORIZONTAL_RES'.
+#  5. Fill P9 of the 'GRID' command with 'VERTICAL_RES' if applicable.
+#
+#This program will substitude those strings with the appropriate values.
+#
+# This script removes "fort*", "ftn*", and and "sprint.inp.<process id>"
+# after it finished processing.
+#
+###########################################################################
+#
+# By:    Thuy Nguyen
+#        NASA/TRMM Office
+#        Thuy.Nguyen@gsfc.nasa.gov
+#        June 14, 1995
+#
+###########################################################################
+
+unshift (@INC, ".", "/usr/local/trmm/GVBOX/bin");
+do 'gv_utilities.pl';
+$PROG_VERSION = "gvs-v4.21";
+sub usage {
+	print STDERR "Usage ($PROG_VERSION): $this_prog [-v] [-S site_name] [-d YYMMDD] [-s sprint_input_template]\n";
+	print STDERR "                 [-V vertical_resolution] [-H horizontal_resolution]\n";
+	print STDERR "                 uffile outfile\n";
+	print STDERR "  where,\n";
+	print STDERR "   -v: Print verbose messages of program execution.\n";
+	print STDERR "   -S: Specify TSDIS site name. It is case insensitive. \n",
+                 "       See file, '\$GVS_DATA_PATH/gv_radar_site_info.data', for a list of \n",
+	             "       sites.  Default: Will obtain from the UF file.\n";
+	print STDERR "   -d: Specify date of the uf file. Default: date from uf filename (*yymmdd[.|_]*) \n";
+	print STDERR "   -s: Specify sprint script file. See uf2mudras.html for detail. \n",
+                 "       Default: \$GVS_DATA_PATH/sprint_base_scan.inp.\n";
+	print STDERR "   -V: Specify vertical resolution in km. Default: 1.5.\n";
+	print STDERR "   -H: Specify horizontal resolution in km. Default: 2.0.\n";
+    print STDERR "  Note: uffile and outfile must be specified with full or no path filename\n";
+   
+	exit (-1);
+}
+if ($#ARGV < 1) {
+	do usage();
+}
+$options_end = 0;
+$verbose = 0;
+$date_str = "";
+$site_name = "";
+$horizontal_res = "2.0";   # Default: 2 km
+$vertical_res   = "1.5";   # Default: 1.5 km
+
+# default sprint command file,'sprint.inp' is from $GVS_DATA_PATH
+$data_path = $ENV{'GVS_DATA_PATH'};
+if ($data_path eq "") { # Pick a nice default.
+    $data_path = "/usr/local/trmm/data";
+}
+$sprint_input = "$data_path/sprint_base_scan.inp";
+
+# process arguments
+while (@ARGV && $options_end == 0) {
+	$str = shift;
+	if ($str eq "-v") {
+		$verbose = 1;
+	}
+	elsif ($str eq "-d") {
+		$date_str = shift;
+		if ($date_str =~ /^\-/ || $date_str  !~ /^[0-9]/) {
+			do usage();
+		}
+	}
+	elsif ($str eq "-s") {
+		$sprint_input = shift;
+		if ($sprint_input =~ /^\-/) {
+			do usage();
+		}
+	}
+	elsif ($str eq "-S") {
+		$site_name = shift;
+		$site_name =~ y/A-Z/a-z/;    # Convert to lowercase.
+		if ($site_name =~ /^\-/) {
+			do usage();
+		}
+	}
+	elsif ($str eq "-V") {
+		$vertical_res = shift;
+		if ($vertical_res =~ /^\-/ || $vertical_res !~ /^[0-9]/) {
+			do usage();
+		}
+	}
+	elsif ($str eq "-H") {
+		$horizontal_res = shift;
+		if ($horizontal_res =~ /^\-/ || $horizontal_res !~ /^[0-9]/) {
+			do usage();
+		}
+	}
+	else {
+		$options_end = 1;
+	}
+}
+if ($#ARGV < 0 || $#ARGV > 0 || $str =~ /^\-/) {
+        do usage();
+}
+
+#extract the input files and output file
+$uf_file = &change2absolute_filename($curr_dir, $str);
+$mudras_file = &change2absolute_filename($curr_dir, shift);
+
+$site_name = &get_site_name_from_uf_file($uf_file) if ($site_name eq "");
+if (!(-e $sprint_input)) {
+	print STDERR "$this_prog: Error: sprint script file <$sprint_input> doesnot exist.\n";
+	exit(-1);
+}
+
+$radar_num = &gv_utils_get_radar_num_for_site_name($site_name);
+
+
+
+if ($radar_num < 0) {
+	print STDERR "$this_prog: Error: Unable to determine radar number for site <$site_name>.\n";
+	exit(-1);
+}
+
+
+if ($verbose == 1) {
+	print STDERR "$this_prog: which program: $0\n";
+	print STDERR "$this_prog: sprint_input_template = $sprint_input\n";	
+	print STDERR "$this_prog: site_name = $site_name\n";
+	print STDERR "$this_prog: horizontal resolution: $horizontal_res\n";
+	print STDERR "$this_prog: vertical resolution: $vertical_res\n";
+	print STDERR "$this_prog: infile = $uf_file\n";
+	print STDERR "$this_prog: outfile = $mudras_file\n";
+	print STDERR "$this_prog: radar_num = $radar_num\n";
+}
+
+# To support parallel processing, execute sprint in a temp dir 
+# since it uses fort.10 and fort.11.
+$top_tmp_working_dir = $curr_dir."/uf2mudras_$$/";
+do do_system_call("mkdir -p $top_tmp_working_dir");
+# Remember to go to the curr dir when exit.
+print STDERR "$this_prog: Will work in dir: $top_tmp_working_dir\n" if ($verbose);
+chdir($top_tmp_working_dir); 
+
+$prog = "sprint";
+$sprint_output = "sprint_$$.log";
+do do_system_call ("ln -fs ".$uf_file."  fort.10");
+do do_system_call ("ln -fs ".$mudras_file." fort.11");
+unlink $sprint_output;
+
+# modify the DATE field of the sprint input template.
+
+if ($date_str eq  "") {
+    #extract year, month, and day from input file where
+	# input filename has this format: '*yymmdd[.|_]*'
+	@fields = split('/', $uf_file);
+	$uf_file = $fields[$#fields];
+	($date_str, $tmp_str)  = $uf_file =~ /.*(\d\d\d\d\d\d)[\._].+$/;
+}
+($yy, $mm, $dd) = $date_str =~ /^(\d\d)(\d\d)(\d\d)/;
+if ($mm eq "" || $dd eq "" || $yy eq "") {
+	print STDERR "$this_prog: Error: Invalid date format. Date: $date_str\n";
+	print STDERR "yy/mm/dd=$yy/$mm/$dd, tmp_str=$tmp_str\n";
+	do cleanup();
+	exit(-1);
+}
+
+# use tmp file to store the copy of sprint.inp template with the date field.
+# tmp file is kept in the working directory.
+$tmpfile = "sprint.inp.$$";
+
+open(SPRINT_IN, $sprint_input) || (do cleanup() && die "$this_prog: Failed to open $sprint_input. Bye.!?\n");
+open(SPRINT_IN_TMP, ">".$tmpfile) || (do cleanup() && die "$this_prog: Failed to open $tmpfile. Bye.!?\n");
+
+if ($verbose) {
+	print "$this_prog: mm = $mm yy = $yy dd = $dd\n";
+}
+while (<SPRINT_IN>) {
+	# Replace YYMMDD, RADAR_NUM, HORIZONTAL_RES, and VERTICAL_RES from the 
+    # template with the actual values.
+	s/YYMMDD/$yy$mm$dd/g;
+	s/RADAR_NUM/$radar_num/g;
+	s/HORIZONTAL_RES/$horizontal_res/g;
+	s/VERTICAL_RES/$vertical_res/g;
+    print SPRINT_IN_TMP $_;
+}
+
+close SPRINT_IN_TMP;
+close SPRINT_IN;
+$cmd = $prog." < ".$tmpfile." > ".$sprint_output;
+
+if ($verbose == 1) {
+	print STDERR "$this_prog: Executing: $cmd ...\n";
+}
+
+local($rc) = & do_system_call ($cmd);
+do cleanup();
+
+exit (-1) if ($rc != 0);
+
+
+if (!(-e $mudras_file)) {
+    print STDERR "$this_prog: WARNING: $prog produced no file.\n";
+	exit(1);
+}
+
+if ($verbose == 1) {
+	print STDERR "$this_prog: successful\n";
+}
+
+exit(0);
+
+sub do_system_call {
+	local($cmd) = @_;
+
+	local($rc) = 0;
+	system($cmd);
+	
+	$stat = $? >> 8;
+	local($sig) = $? & 255;
+	do doexit_handler($sig) if ($sig != 0);
+# note 254 is checked also -- pc uses unsigned char
+	do doexit_handler('INT') if ($stat == -2 || $stat == 254);
+	if ($stat != 0) {
+		print STDERR "$this_prog: Error: Failed executing...$cmd\n";
+		$rc = -1;
+	}
+	return $rc;
+}
+sub cleanup {
+	chdir($save_curr_dir) if ($save_curr_dir ne "" && -d $save_curr_dir); # Go back to the original dir.
+	do do_system_call("rm -r $top_tmp_working_dir") if (-d $top_tmp_working_dir);
+}
+
+########################### Subroutines ##################################
+
+
+sub doexit_handler {
+	# This routine was called when interrupt occurred.
+	# Clean up and exit.
+	local($signal) = @_;
+	# Ignore signals--prevent from getting into an infinite loop.
+	do ignore_catched_signals();
+
+	kill $signal, 0;
+	if ($first_time_exit_handler) {
+		$first_time_exit_handler = 0;
+		# Restore STDERR and STDOUT.  This is required since both stderr and stdout
+		# were redirected in the calling program, all_tape_level_1n2.
+		close(1);
+		close(2);
+		open(STDOUT, ">/dev/tty");
+		open(STDERR, ">/dev/tty");
+		$| = 1;
+
+		do cleanup();
+		print STDERR "$this_prog: Got signal <$signal>. Abort execution. Time =".time."\n";
+	}
+	exit(-2) if ($signal == 'KILL' || $signal == 'STOP' || $signal == 'INT');
+	exit(-1);
+}
+
+

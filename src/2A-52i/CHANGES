@@ -1,0 +1,108 @@
+Changes for 2A-52i:
+
+
+10/5/00
+----------------------------------------------
+* Modified output formats in 2A-52i.c and
+  process_new_closest_vos_in_the_previous_granule to ensure that lines
+  in rain percent file do not exceed 80 characters in length.
+* 2A-52i.c: put code to call sort script into a function.  Added function call
+  at END period to fix problem of output for last granule being out of order.
+
+v3.7 (9/9/98) initially packaged w/ GVS v4.11
+----------------------------------------------
+* Bug fix -- Check TK_DEFAULT instead of -99.0 for missing/badval.
+  This fix affects the percentage of rain rate map.
+
+v3.6 (5/29/98) initially packaged w/ GVS v4.6
+----------------------------------------------
+* Minor mod. w.r.t. temp filename.
+* Bug fixes w.r.t. handling empty granule input.
+* Added the capability for uninstalling the software.
+* Creates product file even when there is no VOS entry.
+* Requires gv_utils v1.5.
+
+v3.5 (1/26/98) initially packaged w/ GVS v4.5
+-------------------------------------
+* Write %rain to TSDIS' db.
+
+v3.4 (12/08/97) initially packaged w/ GVS v4.4
+-------------------------------------
+* Ported to HP-UX.
+
+v3.3 (11/13/97) initially packaged w/ GVS v4.2
+-------------------------------------
+* Bug fixes regarding option -O.
+* Fixed the exit code when failed get satellite coinc. data.
+* Requires gv_utils.
+
+v3.2 (10/24/97) initially packaged w/ GVS v4.1
+-------------------------------------
+* Changed the output (regarding the 'hit' and CA fields) to conform 
+  with TSDIS' specification. Uses leading 0 in date and time fields.
+* Added new scripts:
+     process_closest_vos_in_the_last_granule
+     sort_2A52_and_remove_dups
+* Requires perl
+* Added a new option, '-O'.
+
+v3.1 (8/19/97) initially packaged w/ gvs v4.0
+--------------------------------------------
+* Move some routine to '$gvs/src/utils/'
+* Changed the Makefile to use libraries from gvs/src/utils.
+* Added option, -S, which allow processing without satellite coincident data
+  lookup.
+
+v3.0 (7/2/97)
+------------
+*  Program's usage messages contain version number.
+*  New command interface.
+*  Uses satellite coincident information.
+*  Updated doc.
+*  Requires  '$gvs/src/utils'.
+
+v2.8 (4/30/97)
+-------------------
+1. Fixed the Makefile w.r.t. install_doc and linked library.
+3. Uses TSDIS toolkit's TKreportWarning().
+4. Added 'tsdis_toolkit' dir.
+
+v2.7 (1/6/97)
+--------------------
+1. Changed 'install_doc' in Makefile.
+
+v2.6 (Froze: 12/12/96)
+-------------------
+1. Traps signals (SIGINT, SIGFPE, SIGKILL, SIGILL, SIGSEGV)
+   and abort execution of the program.
+2. Ported to Sun.
+3. Added a new exit code, -2, for interruption.
+
+v2.5 (Froze: 7/10/96)
+-------------------
+1. Input is an HDF file.
+2. Output file (ASCII)'s format is modified.
+3. Fixed algorithm bug (divide total fractional rain by total # of pixels within 
+   boundary instead of by 151X151).
+4. Not uses RSL library
+5. Requires TSDIS toolkit and HDF library.
+
+v2.4 (Froze: 5/1/96)
+-------------------
+1. Changed gts to gvs.
+
+v2.3 (Froze: 4/1/96)
+-------------------
+- Uses 2A-53 product (rain rate map) as input instead of 1C-51 product.
+- New command line syntax.
+
+v2.2 (Froze 3/4/96)
+----------------
+- Bug fixed.
+- Uses rsl-v0.43.tgz or above
+
+v2.1 (11/15/95):
+--------------
+- Removed -l and -h options. Added -t for threshold dbz.
+- Uses rsl-v0.41.tgz. or above
+- Added gvs.gif

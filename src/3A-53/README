@@ -1,0 +1,46 @@
+README for 3A-53: v1.4 (12/10/99) packaged w/ GVS v4.14
+
+
+3A-53 has the following executable, documentation, and data files:
+    * 3A-53 - The perl script, the front end to actual algorithm program.
+	          This produces product (5-day rainfall map).
+	* 3A-53.html        - Documentation.
+	* 3A53_metadata.txt - Data file.
+
+              ------------------------------------------
+
+(a) Documentation is located in *.html and can be viewed with netscape 
+    or mosaic.
+
+(b) The directories which you have installed the executable files for 
+     this product and the required software should be in your search path.
+
+
+
+
+EXECUTION NOTES:
+================
+The program will exit if the specified year or pentad does not correspond
+to the date from the input filename.
+
+
+QUESTIONS:
+=========
+
+Please contact the TRMM Office via e-mail at help@trmm.gsfc.nasa.gov.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

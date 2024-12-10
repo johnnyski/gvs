@@ -1,0 +1,186 @@
+CHANGES for 2A-54:
+
+v4.20 (6/??/03)
+----------------
+1. Modified 2A-54-dc to handle empty 2A-55 granules.
+2. Removed type specifier 'void' from main program in 2A54.cc and
+   singlevos_2A-54-dc.cc in gvs/src/2A-54/src.  It was causing compile error.
+
+v4.17 (6/28/00)
+----------------
+1. Added 2A-54/dual-cappi algorithm - singlevos_2A-54-dc. Similar to 2A-53-dc,
+   it extracts 2A-55 cappis (1.5 km and 3 km) instead of calling sprint on
+   1C-51 to create a pseudo-cappi. The 1.5 km cappi is used when range is from
+   15 km to 98 km, and the 3 km cappi for ranges of 98 km through 150 km.
+   The 2A-54-dc algorithm is the same as the Steiner algorithm used in 2A54.cc.
+
+v2.21 (11/19/99) initially packaged w/ GVS v4.13
+----------------------------------------------
+1. Added 2A54.h.
+2. Moved some #define for metadata items into 2A54.h from gvs/src/utils/.
+3. Added product_version number to the 2A54_metadata.txt files.
+
+v2.20 (8/13/98) initially packaged w/ GVS v4.9
+----------------------------------------------
+* Added explaination of noecho and missing/bad values
+  to the html page.
+
+v2.19 (5/29/98) initially packaged w/ GVS v4.6
+----------------------------------------------
+* Bug fixed for option -D (when product is an empty granule).
+* Requires gv_utils v1.5
+* Changed 2A-54 to execute in a tmp dir.
+* Doesnot read lat/lon info from  $GVS_DATA_PATH/gv_radar_lat_lon.data --
+  but from $GVS_DATA_PATH/gv_radar_site_info.data instead.
+* Hardcoded some of the metadata fields: alg_id, data_id, alg_version, contact.
+* Added the capability for uninstalling the software.
+
+v2.18 (1/26/98) initially packaged w/ GVS v4.5
+----------------------------------------------
+* Added lat/lon for Gunn Point, Darwin.
+* Corrected lat/lon for some sites (CORC, NWBR, THOM, KWAJ).
+* 2A-54 will create empty granule as appropriate.
+* Requiers gv_utils v1.2
+* Read lat/lon info from  $GVS_DATA_PATH/gv_radar_lat_lon.data 
+
+v2.17 (12/08/97) initially packaged w/ GVS v4.4
+----------------------------------------------
+* Added lat/lon for some sites.
+
+v2.16 (11/13/97) initially packaged w/ GVS v4.2
+----------------------------------------------
+* Requires gv_utils.
+
+v2.15 (10/24/97) initially packaged w/ GVS v4.1
+-----------
+*  Added 'MELB' to the site list.
+*  Changed the way it's setting product's specific metadata fields:
+   - Removed options: -q, -Q, -R, -b, -c
+   - Added option: -m
+   - Added '2A54_metadata.txt'
+
+v2.14 (8/19/97) (Packaged with GVS 4.0)
+---------------------------------------
+*  Changed Makefile; it requires libgvs_utils.a.
+*  Add a new option, -H, to allow changing the resolution.
+*  Added several radars and locations for them.  See 2A54.cc.
+   Need to get the locations for some of the foreign sites.
+*  Upgraded 2A-54 to call the new program name.
+
+v2.13 (7/2/97)
+--------------
+1. Set/write metadata.
+2. Requires '../../utils'.
+3. Program's usage messages contain version number.
+4. Bug fixes w.r.t. option: -D.
+5. Added new options: [-q qa_param_name], [-Q qa_param_value] 
+   [-R reprocess_status] [-b browse_name] [-c data_center_source]
+6. Requires toolkit v4.5r1 or later.
+
+v2.12 (4/30/97)
+------------------
+1. Fixed the Makefile w.r.t. install_doc and linking.
+2. Remove warning message regarding signal() function when compiling on SGI 6.2
+3. Uses TSDIS toolkit's TKreportWarning().
+4. Added 'tsdis_toolkit' dir.
+5. Changed 'change_perl_path' to 'install_scripts' in the Makefile.
+
+v2.11 (1/6/97)
+---------------------
+1. Changed 'install_doc' in Makefile.
+
+v2.10 (Froze: 12/12/96)
+----------------------
+1. Traps signals (SIGINT, SIGFPE, SIGKILL, SIGILL, SIGSEGV)
+   and abort execution of program.
+2. Ported to Sun.
+3. Added a new exit code, -2, for interruption.
+
+v2.9 (Froze: 7/29/96)
+----------------------
+1. Changed lat/lon to 28:06:48/80:39:15 for Melbourne.
+
+
+v2.8 (Froze: 7/10/96)
+----------------------
+1. Added a new return code, 1, in 2A-54 for failure occurred during
+   processing for some VOS but could continue for other VOSs.
+2. Needs to patch $gvs/IO_INTR_GV.c.diff to $toolkit/src/IO_INTR_GV.c
+   (toolkit v2.5)
+3. Fixed bug in 2A-54.
+
+v2.7 (Froze: 6/25/96)
+----------------------
+1. Requires output filename to be specified on the command line.
+2. Produces product in HDF file.
+3. Requires TSDIS Toolkit and HDF libraries.
+4. Requires programs from $GVS/format_conversion.
+5. Added singlevos_2A-54.
+
+v2.6 (Froze: 5/1/96)
+----------------------
+1. Changed gts to gvs.
+
+v2.5 (Froze: 4/1/96)
+----------------------
+* Minor mod. for compiling on the SGI.
+* Minor mod. in the script w. r. t. exit code.
+
+v2.4 (Froze: 3/21/96)
+----------------------
+* Minor mod. in the script and the Makefile
+
+v2.3 (Froze 3/4/96)
+------------------------------
+* New version of the algorithm.  This version is much simpler, and it works 
+  on the base scan instead of the whole volume.
+* The user interface is slightly different than the last version.
+* Requires no internal data files
+* Moved uf2mudras to format_conversion directory.
+* Requires ncar_sprint-v1.2.tgz
+
+v2.2 (Froze 11/15/95)
+------------------
+*  Added gvs.gif
+*  Splitted '2A-54' into 'run_analyze_volume' and '2A-54'.
+*  Added a product switch in the source code.  This enables
+   analyze_volume to produce 2A-54 and/or 2A-55 products.
+
+v2.1 (Froze 9/11/95)
+-------------------
+o Added internal data files for processing Melbourne data.
+o Fixed bug with respect to ZR conversion filename and working map.
+o Added option -A, -b, -P, -p and -G. Changed -S sprint_cmd_script to 
+  -s sprint_cmd_script, -s site_name to -t data_type, and -t threshold 
+  to -T threshold.
+o Renamed DARW.gauge-sites to DARW.gauge-sites.0793.
+o Modified in the source code:
+	analyze_volume.cc:  Disable write binary files.
+	VOLio.cc:  Added #if P2A-55 and $if P2A-53.  This allows the program to 
+    produce only 2A-54 product.
+
+
+v2.0 (Froze 7/19/95)
+-------------------
+o Algorithm from Matthias Steiner is used.
+o Requires NCAR SPRINT interpolator.
+
+
+v1.0.2 (5/19/95)
+---------------
+o Changed rsph.c. Print out messages if -v (verbose) is specified
+
+
+
+v1.0 (??)
+----------
+o Changed rsph.c & conv_strat_map.c to have program be able to run on 
+  sgi machine.
+
+o Changed conv_strat_map.c to let program flow messages print out only
+  when -v is specified.
+
+o Added code to check for data existence before access it for preventing
+  segmentation violation.
+
+o Set default value for img_height, img_width, altitude, and pix_res.

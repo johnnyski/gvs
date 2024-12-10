@@ -1,0 +1,162 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+   <TITLE></TITLE>
+   <META NAME="GENERATOR" CONTENT="Mozilla/3.01Gold (X11; I; Linux 2.0.28 i686) [Netscape]">
+</HEAD>
+<BODY BACKGROUND="gvs_bg.gif">
+
+<CENTER><TABLE BORDER=2 CELLPADDING=0 WIDTH="100%" >
+<TR ALIGN=CENTER VALIGN=CENTER>
+<TD><IMG SRC="gvs_logo.gif" HEIGHT=100 WIDTH=256 ALIGN=LEFT></TD>
+
+<TD ALIGN=CENTER VALIGN=CENTER>
+<H1><FONT COLOR="#000080">3A-53:</FONT> <FONT COLOR="#800080">5-Day Site
+R</FONT><FONT COLOR="#9400D3">a</FONT><FONT COLOR="#800080">infall Map</FONT></H1>
+</TD>
+</TR>
+</TABLE></CENTER>
+
+<P>
+<HR>
+<HR width="100%"></P>
+
+<H3><FONT COLOR="#000080">Synopsis</FONT></H3>
+
+<PRE><B><TT><FONT COLOR="#B22222">3A-53  [-v] [-m <I>metadata_file</I>]
+      <I>2A-53_HDF_infile</I> <I>HDF_outfile</I> <I>vos_times_ASCII_outfile
+</I>      <I>inter_acc_map_ASCII_InOut</I> <I>inter_admin_info_file_ASCII_InOut</I> 
+      {BEGIN | MIDDLE | END} <I>year</I> <I>pentad</I> <I>max_time_gap</I> <I>const_time_gap</I></FONT></TT></B></PRE>
+
+<P>
+<HR></P>
+
+<H3><B><FONT COLOR="#000080">Description</FONT></B></H3>
+
+<P><B><FONT COLOR="#B22222">3A-53</FONT> </B>product is a map of 5-day
+surface rain totals derived from the instantaneous rain rate maps (2A-53).
+The map is in Cartesian coordinates with a 2 km horizontal resolution and
+covers an area of 300 km x 300 km at single radar sites. This pentad rainfall
+map is not a simple accumulation of the instantaneous maps as gaps in the
+data must be factored into the calculation. The rainfall ranges from 0.0
+to 5,000.0 mm. It is multiplied by 10 and stored as a 2-byte integer.</P>
+
+<P>
+<HR></P>
+
+<H3><B><FONT COLOR="#000080">Inputs </FONT></B></H3>
+
+<UL>
+<LI><B><FONT COLOR="#B22222">2A-53_HDF_infile</FONT></B><FONT COLOR="#000000">:
+Granule rainfall map (2A-53) </FONT>Hierarchical Data Format (<FONT COLOR="#000000">HDF)
+file. Compression is allowed.</FONT> </LI>
+
+<LI>i<B><FONT COLOR="#B22222">nter_acc_map_ASCII_InOut</FONT></B>: Intermediate
+accumulated rain map file in ASCII format. If the BEGIN flag is specified,
+this file will be created; if either the MIDDLE or END flag is specified,
+this file will be used in the accumulation calculation and will be updated
+with the new result. </LI>
+
+<LI><B><FONT COLOR="#B22222">inter_admin_info_file_ASCII_InOut</FONT></B><FONT COLOR="#000000">:
+Administrative information file in ASCII format. It contains the information
+required to build product. If the BEGIN flag is specified, this file will
+be created; if either the MIDDLE or END flag is specified, this file will
+be used in the accumulation calculation and will be updated. </FONT></LI>
+
+<LI><B><FONT COLOR="#B22222">BEGIN</FONT></B><FONT COLOR="#000000">|</FONT><B><FONT COLOR="#B22222">MIDDLE</FONT></B><FONT COLOR="#000000">|</FONT><B><FONT COLOR="#B22222">END</FONT></B><FONT COLOR="#000000">:
+Flag indicates whether this is the beginning, middle, or end of the pentad
+period. It </FONT>indicates whether to create the product in HDF format
+and/or to store the intermediate product in ascii files. </LI>
+
+<P>If the specified flag is END, it will create the HDF file and the ascii
+file that contains the dates and times of all VOSes included in the calculation.
+Note: If either flag BEGIN or MIDDLE is specified, no HDF file nor vos_times_ASCII_oufile
+will be created. </P>
+
+<P>If the specified flag is BEGIN, it will create the two intermediate
+ascii files: one contained the time of the last VOS and the list of times
+for all VOSes included in the accumulation, the second file contained the
+accumulated rainfall map. </P>
+
+<P>If the specified flag if either MIDDLE or END, the two intermediate
+ascii files will be modified. </P>
+
+<LI><B><FONT COLOR="#B22222">year</FONT></B><FONT COLOR="#000000">: Four
+digit year. </FONT></LI>
+
+<LI><B><FONT COLOR="#B22222">pentad</FONT></B><FONT COLOR="#000000">: The
+number of the current pentad being processed. Number starts at 1.</FONT></LI>
+
+<LI><B><FONT COLOR="#B22222">max_time_gap</FONT></B><FONT COLOR="#000000">:
+Maximum time gap (minutes) between two consecutive VOSs for which VOS time difference factor will be used.</FONT></LI>
+
+<LI><B><FONT COLOR="#B22222">const_time_gap</FONT></B><FONT COLOR="#000000">: Constant time factor (minutes) to use if time gap between two VOSs exceeds max_time_gap.</FONT></LI>
+<
+</UL>
+
+<P>
+<HR></P>
+
+<H3><B><FONT COLOR="#000080">Temporary File or Directory</FONT></B></H3>
+
+<UL>
+<P><FONT COLOR="#000000">3A-53_&lt;<I>process_id</I>&gt;/</FONT></P>
+</UL>
+
+<P>
+<HR width="100%"></P>
+
+<H3><B><FONT COLOR="#000080">Output Files</FONT></B></H3>
+
+<UL>
+<LI><B><FONT COLOR="#B22222">HDF_outfile</FONT></B><FONT COLOR="#000000">:
+5-day site rainfall map (3A-53 product) in HDF format. This file will only
+be created when the END flag is specified. </FONT>When creating the HDF
+product, it will use some of the metadata values from the input granule
+HDF file (2A-53) and the metadata file (see option <B><FONT COLOR="#B22222">-m</FONT></B>).</LI>
+
+<LI><B><FONT COLOR="#B22222">vos_times_ASCII_outfile</FONT></B><FONT COLOR="#000000">:
+File contained a list of dates and times of all VOSes included in the product.
+This file will only be created when the END flag is specified.</FONT></LI>
+
+<LI><B><FONT COLOR="#B22222">inter_acc_map_ASCII_InOut</FONT></B><FONT COLOR="#000000">:
+Intermediate accumulated rain map file in ASCII format. See its entry in
+the <B>Inputs </B>section. </FONT></LI>
+
+<LI><B><FONT COLOR="#B22222">inter_admin_info_file_ASCII_InOut</FONT></B><FONT COLOR="#000000">:
+Administrative information file in ASCII format. See its entry in the <B>Inputs</B>
+section. </FONT></LI>
+</UL>
+
+<P>
+<HR></P>
+
+<H3><B><FONT COLOR="#000080">Options</FONT></B></H3>
+
+<P><B><FONT COLOR="#B22222">3A-53</FONT><FONT COLOR="#000000"> </FONT></B><FONT COLOR="#000000">recognizes
+the following options: </FONT></P>
+
+<P><B><TT><FONT COLOR="#B22222">-v</FONT><FONT COLOR="#000000">: </FONT></TT></B><FONT COLOR="#000000">Print
+diagnostic messages. </FONT></P>
+
+<P><B><FONT COLOR="#B22222">-m</FONT></B><FONT COLOR="#000000">: Specify
+filename for metadata file that contains some of program specific metadata
+values. Default:<B><I>$GVS_DATA_PATH/3A53_metadata.txt</I></B></FONT></P>
+
+<P><BR>
+
+<HR></P>
+
+<H3><B><FONT COLOR="#000080">Return value</FONT></B></H3>
+
+<P><B><FONT COLOR="#B22222">3A-53</FONT><FONT COLOR="#000000"> </FONT></B><FONT COLOR="#000000">returns
+<B>0</B> for successful completion; <B>-1</B> for failure; or <B>-2</B>
+for interruption. </FONT>
+<HR></P>
+
+<H3><B><FONT COLOR="#000080">Author</FONT></B></H3>
+
+<P><FONT COLOR="#000000">Stacy Brodzik, <I>University of Washington</I></FONT></P>
+
+</BODY>
+</HTML>

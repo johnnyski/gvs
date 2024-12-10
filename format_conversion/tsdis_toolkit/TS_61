@@ -1,0 +1,36 @@
+TSDIS,GVFC,61
+61000,W_GVFC_H2U_BAD_USAGE,NULL,H2U: Improper usage.
+61001,W_GVFC_H2U_ABORT_EXEC,NULL,H2U: Abort execution--interrupted signal received..
+61002,W_GVFC_H2U_STOP_ON_ERROR,NULL,H2U: Stop execution--non-interrupted signal received.
+61003,W_GVFC_H2U_OPEN_OUTFILE_FAILED,NULL,H2U: Failed to open outfile.
+61004,W_GVFC_S2G_BAD_USAGE,NULL,S2G: Improper usage.
+61005,W_GVFC_S2G_BAD_PARAMS,NULL,S2G: Bad parameters to process_argv.
+61006,W_GVFC_S2G_ABORT_EXEC,NULL,S2G: Abort execution--interrupted signal received..
+61007,W_GVFC_S2G_STOP_ON_ERROR,NULL,S2G: Stop execution--non-interrupted signal received.
+61008,W_GVFC_S2G_NO_INFILE,NULL,S2G: No input file specified.
+61009,W_GVFC_S2G_GRANULIZE_FAILED,NULL,S2G: Failed to granulize.
+61010,W_GVFC_S2G_OPEN_OUTFILE_FAILED,NULL,S2G: Unable to open outfile.
+61011,W_GVFC_S2G_WRITE_OUTFILE_FAILED,NULL,S2G: Failed writing grid to out file.
+61012,W_GVFC_S2G_CLOSE_OUTFILE_FAILED,NULL,S2G: Failed closing out file.
+61013,W_GVFC_S2G_READ_INFILE_FAILED,NULL,S2G: Failed reading grid from infile.
+61014,W_GVFC_S2G_OPEN_INFILE_FAILED,NULL,S2G: Unable to open infile.
+61015,W_GVFC_S2G_CLOSE_INFILE_FAILED,NULL,S2G: Failed closing infile.
+61016,W_GVFC_G2S_BAD_USAGE,NULL,G2S: Improper usage.
+61017,W_GVFC_G2S_BAD_PARAMS,NULL,G2S: Bad parameters to process_argv.
+61018,W_GVFC_G2S_ABORT_EXEC,NULL,G2S: Abort execution--interrupted signal received..
+61019,W_GVFC_G2S_STOP_ON_ERROR,NULL,G2S: Stop execution--non-interrupted signal received.
+61020,W_GVFC_G2S_NO_INFILE,NULL,G2S: No input file specified.
+61021,W_GVFC_G2S_GRANULIZE_FAILED,NULL,G2S: Failed to granulize.
+61022,W_GVFC_G2S_OPEN_OUTFILE_FAILED,NULL,G2S: Unable to open outfile.
+61023,W_GVFC_G2S_WRITE_OUTFILE_FAILED,NULL,G2S: Failed writing grid to out file.
+61024,W_GVFC_G2S_CLOSE_OUTFILE_FAILED,NULL,G2S: Failed closing out file.
+61025,W_GVFC_G2S_READ_INFILE_FAILED,NULL,G2S: Failed reading grid from infile.
+61026,W_GVFC_G2S_OPEN_INFILE_FAILED,NULL,G2S: Unable to open infile.
+61027,W_GVFC_G2S_CLOSE_INFILE_FAILED,NULL,G2S: Failed closing infile.
+61028,W_GVFC_G2S_DEGRANULIZE_FAILED,NULL,G2S: Failed to degranulize.
+61029,W_GVFC_G2S_CREATE_SVOS_HDF_FAILED,NULL,G2S: Failed creating svos hdf file.
+61030,W_GVFC_2A54_H2A_BAD_USAGE,NULL,2A54H2A: Improper usage.
+61031,W_GVFC_2A54_H2A_ABORT_EXEC,NULL,2A54H2A: Abort execution--interrupted signal received..
+61032,W_GVFC_2A54_H2A_STOP_ON_ERROR,NULL,2A54H2A: Stop execution--non-interrupted signal received.
+61033,W_GVFC_2A54_H2A_READ_INFILE_FAILED,NULL,2A54H2A: Failed to read data from infile.
+61034,W_GVFC_2A54_H2A_WRITE_OUTFILE_FAILED,NULL,2A54H2A: Failed writing data to out file.

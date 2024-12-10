@@ -1,0 +1,77 @@
+CHANGES for 2A-53-d
+
+v3.11 (4/30/97)
+-----------------
+1. Fixed the Makefile w.r.t. install_doc and linking
+2. Changed 'change_perl_path' to 'install_scripts' in the Makefile.
+
+v3.10 (1/6/97)
+---------------
+1. Removed drw_sitelist and added sitelist_cscale in Makefile
+2. Minor mod. in usage.
+3. Changed 'install_doc' in Makefile.
+
+v3.9 (12/12/96)
+---------------
+1. 2A53d traps signals (SIGINT, SIGFPE, SIGKILL, SIGILL, SIGSEGV)
+   and abort execution.
+2. Ported to Sun.
+3. Added a new exit code, -2, for interruption.
+4. Added: Check to see if data has a non-zero value before performing 
+   mathematical function.
+5. Removed 2A-53-d.
+
+v3.8 (7/29/96)
+---------------
+Branch (gvs-v3_1_patch1) 7/19/96
+
+A. For the AIW-II workshop:
+   1. Darwin Ze-R table: zr_drw.out
+   2. Darwin rain gauge site list: drw_sitelist
+
+
+
+v3.7 (7/10/96)
+---------------
+1. Added Out-Of-Bound (OOB) = -99 for output rainmap.  Only the circle
+   rainmap contains inbound data. (7/2/96)
+2. Changed the README file.
+3. Added a new return code, 1, in 2A-53-d for failure occurred during
+   processing for some VOS but could continue for other VOSs.
+4. Need to patch $gvs/IO_INTR_GV.c.diff to $toolkit/src/IO_INTR_GV.c 
+   (toolkit v2.5).
+
+v3.6 (6/25/96)
+---------------
+1. Produces product in HDF File.
+2. Requires programs from $GVS/format_conversion
+3. Added singlevos_2A-53-d.
+4. Requires TSDIS Toolkit and HDF libraries.
+5. Uses new version from Danny.
+
+v3.5 (5/1/96)
+---------------
+1. Removed unused files.
+2. Changed gts to gvs.
+
+v3.4 (4/1/96)
+---------------
+1. Added -P data_path, changed the default location for the data files 
+   (i.e., $GVS_DATA_PATH/data_file), and made csmapfile a mandatory input.
+
+v3.3 (3/15/96)
+---------------
+3/11/96 John Merritt
+
+Recieved the initial version of Danny Rosenfeld's rain estimate program, 2A-53.
+
+1. Fixed several Fortan compiler errors which were non-standard Fortran
+   features.  Compiled w/ f2c running Linux.
+
+2. Test ALPHA for 0.0 before applying math.  See readzr.f.
+
+
+
+
+
+

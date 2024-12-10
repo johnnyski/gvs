@@ -1,0 +1,194 @@
+CHANGES for 2A-55:
+==================
+
+v2.20 (??/99) initially packaged w/ GVS v4.13
+-----------------------------------------------
+1. Moved #defines for metadata declarations to 2A55.h (added file)
+   from gvs/src/utils/gvs_metadata.h.
+2. Added SOFTWARE_VERSION define.
+
+
+v2.19 (8/13/98) initially packaged w/ GVS v4.9
+-----------------------------------------------
+* Added explaination of vertical profile and CFAD to the 
+  html page.
+
+
+v2.18 (5/29/98) initially packaged w/ GVS v4.6
+----------------------------------------------
+* Requires gv_utils v1.5
+* Changed 2A-55 to run in a tmp dir.
+* singevos_2A-55 depends site info from the UF file.
+* Doesnot read lat/lon info from  $GVS_DATA_PATH/gv_radar_lat_lon.data --
+  but from $GVS_DATA_PATH/gv_radar_site_info.data instead.
+* Hardcoded some of the metadata fields: alg_id, data_id, alg_version, contact.
+* Added the capability for uninstalling the software.
+* Minor fix in the Makefile.
+
+v2.17 (1/26/98) initially packaged w/ GVS v4.5
+-------------------------
+* Added lat/lon for Gunn Point, Darwin.
+* Corrected lat/lon for some sites (CORC, NWBR, THOM, KWAJ).
+* Try again: Removed darw.thresholds.bin from the distribution.
+* Added 'hstn_landsea_new.map.gz' and renamed DarMelMaps* to mkgeomap*.
+* Requires gv_utils v1.2 or higher.
+* Read lat/lon info from  $GVS_DATA_PATH/gv_radar_lat_lon.data 
+
+
+v2.16 (12/08/97) initially packaged w/ GVS v4.4
+-------------------------
+* Added lat/lon for some sites.
+* Changed the min,max range to dBz.
+* New geomap that contains more programs and land-sea map for Kwajalein
+  in addition to Melbourne and Darwin.
+* Changed singlevos_2A-55 so it will automatically determine geomap file
+  for a pariticular site.
+
+v2.15 (11/13/97) initially packaged w/ GVS v4.2
+-------------------------
+1. Set seconds field for output metadata.
+2. TK_DEFAULT for < -15 or > 70 dBZ.
+3. x <==> y dimension swap
+4. Requires gv_utils.
+
+v2.14 (10/24/97) initially packaged w/ GVS v4.1
+-----------
+* Bug fixes -- The product now contains lat,lon info.
+* Added 'MELB' to the site list,
+* Bug fix -- Convert application's bad value to toolkit's bad value before 
+  calling TKwriteGrid();
+*  Changed the way it's setting product's specific metadata fields:
+   - Removed options: -q, -Q, -R, -b, -c
+   - Added option: -m
+   - Added '2A55_metadata.txt'
+
+
+v2.13 (8/19/97) (Packaged with GVS 4.0)
+----------------------------------------
+*  Changed Makefile; it requires libgvs_utils.a.
+*  Added more messages in TS_*.
+*  Added new options: -V, -H, -g. -- for allowing changing resolutions.
+*  Added long site names and locations.  Need lat/lon for some foreign sites.
+
+
+v2.12 (7/2/97)
+-------------
+1. Set/write metadata.
+2. Changed tsdis_toolkit/TS_* and tsdistk_2A-55_error_msg.txt.
+3. Program's usage messages contain version number.
+4. Added new options: [-q qa_param_name], [-Q qa_param_value] 
+   [-R reprocess_status] [-b browse_name] [-c data_center_source]
+5. Requires toolkit v4.5r1 or later.
+
+v2.11 (Froze: 4/30/97)
+-----------------------
+1. Fixed the Makefile w.r.t. install_doc and linking.
+2. Remove warning message regarding signal() function when compiling on SGI 6.2
+3. Uses TSDIS toolkit's TKreportWarning().
+4. Added 'tsdis_toolkit' dir.
+5. Changed 'change_perl_path' to 'install_scripts' in the Makefile.
+
+v2.10 (Froze: 1/6/97)
+--------------------
+1. Changed 'install_doc' in Makefile
+
+v2.9 (Froze: 12/12/96)
+--------------------
+1. Traps signals (SIGINT, SIGFPE, SIGKILL, SIGILL, SIGSEGV)
+   and abort execution of program.
+2. Ported to Sun.
+3. Added a new exit code, -2, for interruption.
+4. Integrated Stacy's latest modifications (10/29/96).
+5. Removed darw.thresholds.bin from the distribution.
+
+v2.8 (Froze: 7/29/96)
+--------------------
+1. Changed lat/lon to 28:06:48/80:39:15 for Melbourne and to 
+   -12.457222/130.925278 for Darwin.
+
+
+v2.7 (Froze: 7/10/96)
+--------------------
+1. Removed -ansi from CPPFLAG in the Makefile.
+2. Added a new return code, 1, in 2A-55 for failure occurred during
+   processing for some VOS but could continue for other VOSs.
+3. Needs to patch $gvs/IO_INTR_GV.c.diff to $toolkit/src/IO_INTR_GV.c
+   (toolkit v2.5)
+
+v2.6 (Froze: 6/25/96)
+--------------------
+Modifications to 2A-55, as submitted by the University of Washington,
+and different from GVS 2.5.5 versions, are as follows:
+
+1. Output HDF files using TSDIS toolkit 2.5 (Patch of $gvs/IO_GV.h.diff to
+   $toolkit/include/IO_GV.h) and HDF 4.0r1p1.
+
+2. Bug fix w.r.t. CFAD and Vertical profile output dimension.
+   For CFAD: 12x86.  For Vertical profile: 12 columns X #z-planes rows.
+   The number of CFAD's is the #z-planes.
+
+3. Added two routines for TSDIS toolkit incorporation, for output to HDF:
+   a. output_hdf.cc
+   b. write_grid_to_hdf.c
+
+4. The top level script, 2A-55 modified to take 2A-54 in HDF.
+   The script will call '2A-54_hdf2ascii' to convert it to ascii.
+
+5. Requires output filename prefix to be specified on the command line.
+   Modified CC files: 2A55.cc, VOLio.cc.
+
+6. Script 2A-55 automatically checks for the envrionment variable TSDISTK.
+   It sets it to the default /usr/local/toolkit_2.5, if necessary.
+
+7. Added singlevos_2A-55.
+
+8. Requires programs from $GVS/format_conversion.
+
+9. Added lat/lon and time information.  But, is lat/lon in the input
+   mudras.pure file?  I only see 0.0/0.0 for lat/lon.
+
+10. Add -M save_mudras_fname option.
+
+
+v2.5 (Froze: 5/1/96)
+--------------------
+1. Changed gts to gvs.
+
+v2.4 (Froze: 4/1/96)
+--------------------
+* Minor mod. for compiling on the SGI
+* Minor mod. in the script w. r. t. exit code.
+
+v2.3 (Froze 3/21/96)
+-------------------
+* Minor mod in the makefile and script.
+
+v2.2 (Froze 3/4/96)
+----------------------
+* Source code from The University of Washington.
+* Requires NCAR sprint interpolator v1.2.
+
+
+
+v2.1 (Froze 11/15/95)
+----------------------
+* Uses algorithm from The University of Washington.
+* Added gvs.gif
+* Requiress 2A-54 product and its required software.
+* Executable files, 2A-55-a and 2A-55-c, are removed; instead, 2A-55 is 
+  created which produces three products: 2A-55-a (Cube), 2A-55-b (Vertical 
+  profile), and 2A-55-c (CFAD).
+
+v2.0 (Froze 7/19/95)
+---------------------
+???
+
+      --------------------------------------------------------------
+o Changed process_args to allow specifying options in any order.
+o Print out messages only if -v (verbose) is specified.
+o Split cfad.h. Moved the C code to cfad.c.  Added prototypes to cfad.h
+o Programs are called 2A-55-a and 2A-55-c.
+o Cleaned 2A-55-c up quite a bit.  It now uses RSL_anyformat_to_radar.
+  Modified the options slightly.
+o Compiles with -ansi and -pedantic.
+o Changed to link with rsl v0.38.

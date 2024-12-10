@@ -1,0 +1,208 @@
+#! /usr/bin/perl
+#-*-Perl-*-
+#
+#
+# This script processes one of 2A-53-c, 2A-53-d, 2A-53-dc, 2A-53-v4, or 2A-53-w products
+# at granuled level.
+# It will execute any 2A-53 algorithm, if and only if, there is a program
+# called 'singlevos_2A-53-?'.  Where '?' is anything which uniquely
+# identifies the 2A-53 product.  Herein, we use single letters to 
+# distinguish running Danny's (d), Witek's (w), simple simon, PI-c (c),
+# dual-cappi (dc), or version 4 (v4).
+#
+# This script does the following:
+#   1. calls '2A-53or2A-55' to produce granuled HDF file for 2A-53-?.
+#
+#   2. Returns -2 Program was interrupted by ^C.
+#              -1 if failure occurred and couldn't continue.
+#               0 Successful.
+#               1 Failure occurred during processing for some VOS but could
+#                 continue for other VOSs.
+
+#
+# NOTES:
+#   Have access to the executable files located in $GVS/format_conversion and
+#   in this directory.
+#
+#
+# By:    Thuy Nguyen
+#        NASA/TRMM Office
+#        Thuy.Nguyen@gsfc.nasa.gov
+#        June 13, 1995
+#
+#############################################################################
+$PROG_VERSION = "gvs-v4.21";
+unshift (@INC, ".", "/usr/local/trmm/GVBOX/bin");
+do 'gv_utilities.pl';
+
+$product = $this_prog;
+
+do process_argv(@ARGV);
+
+# Work in a tmp dir to allow parallel processing in the same dir.
+$top_tmp_working_dir = "2A-53_$$/";
+do do_system_call("mkdir -p $top_tmp_working_dir");
+# Remember to go to the curr dir when exit.
+print STDERR "$this_prog: Will work in dir: $top_tmp_working_dir\n" if ($verbose);
+chdir($top_tmp_working_dir);
+
+$options_str = join (' ', @option_list);
+$files_str = join (' ', @files_list);
+
+# 'files_str' looks like: 2A-53-c qc.ghdf csmap.ghdf out.ghdf
+# Note: the suffix 'ghdf' means an HDF granule.
+$cmd = "2A-53or2A-55 $options_str $files_str";
+if ($verbose) {
+	print STDERR "$product: Executing ... $cmd\n";
+}
+system($cmd);
+$status = $? >> 8;
+local($sig) = $? & 255;
+do cleanup();
+do doexit_handler($sig) if ($sig != 0);
+# note 254 is checked also -- pc uses unsigned char
+do doexit_handler('INT') if ($status == -2 || $status == 254);
+
+# note 255 is checked also -- pc uses unsigned char
+if ($status == -1 || $status == 255) {
+	print STDERR "$product: Failed executing $cmd\n";
+	exit(-1);
+}
+
+if ($verbose) {
+	if ($status == 1) {
+		print STDERR "$product: Warning: Failure(s) has occurred when processing single VOS.\n";
+		$rc = 1;				# 
+	}							# 
+	else {						# 
+		print STDERR "$product: Successful.\n";
+		$rc = 0;				# 
+	}							# 
+}								# 
+
+exit($rc);
+
+
+############################## Subroutines Section #######################
+
+sub usage {
+	print STDERR "Usage ($PROG_VERSION):\n";
+	print STDERR "   $product [-v] [options_list] [True-product-name]\n";
+	print STDERR "\t qc_ghdf_file csmap_ghdf_file [l2A55_ghdf_file] rrmap_ghdf_file\n";
+	print STDERR "\n";
+	print STDERR "   Where:\n";
+    print STDERR "    True-product-name = One of: 2A-53-d, 2A-53-w, 2A-53-c, 2A-53-dc, 2A-53-v4\n";
+    print STDERR "                        If not specified, 2A-53-v4 is used.\n";
+    print STDERR "    qc_ghdf_file      = Input.  Granule 1C-51 HDF.\n";
+    print STDERR "    csmap_ghdf_file   = Input.  Granule 2A-54 HDF.\n";
+    print STDERR "    [l2A55_ghdf_file] = Input.  Granule 2A-55 HDF. (for 2A-53-dc ONLY)\n";
+    print STDERR "    rrmap_ghdf_file   = Output. Granule 2A-53 HDF.\n";
+	print STDERR "\n";
+	print STDERR "    options_list      = Additional options for the True-product-name.\n";
+	print STDERR "                        To determine what options apply, execute the\n";
+    print STDERR "                        appropriate 'singlevos' program:\n";
+	print STDERR "                           singlevos_2A-53-v4\n";
+	print STDERR "                           singlevos_2A-53-d\n";
+	print STDERR "                           singlevos_2A-53-w\n";
+	print STDERR "                           singlevos_2A-53-c\n";
+	print STDERR "                           singlevos_2A-53-dc\n";
+	print STDERR "\n";
+	print STDERR "                        singlevos_2A-53-v4 and -dc may need a ZR table.  Specify\n";
+	print STDERR "                        '-z ZR_table' in the options_list section.  The\n";
+	print STDERR "                        default ZR table is defined in \$GVS_DATA_PATH/runtime_2A-53_<site>.txt.\n";
+	
+	exit (-1);
+}
+
+# The last 3 or 4 parameters are not options.
+# The 4-th from the last may be an option, if and only if, it
+# is not a valid product specification: 2A-53-{c,w,d,v4}
+#
+sub process_argv{
+	local(@argv_list) = @_;
+
+	do usage() if $#argv_list < 2;
+	@files_list = @argv_list[$#argv_list-4..$#argv_list]; # last 5 items.
+	@option_list = @argv_list[0..$#argv_list-5]; # Every option up to ...
+	local($tmp_str);
+	if ($files_list[0] =~ "2A-53-dc") {
+	    
+	}
+	# might need to shift twice...
+	elsif ($files_list[0] =~ /^-/ || $files_list[1] =~ "2A-53") {
+		$tmp_str = shift @files_list;
+		push(@option_list, $tmp_str);
+	}
+	if ($files_list[0] =~ /^-/ || $files_list[1] =~ "2A-53") {
+		$tmp_str = shift @files_list;
+		push(@option_list, $tmp_str);
+	}
+	if ($files_list[0] =~ "2A-53") {
+	    
+	} else {
+		print STDERR " Warning, Don't have a valid product name.\n";
+		print STDERR "          Using 2A-53-v4 as the default.\n";
+		@files_list = ('2A-53-v4', @argv_list[$#argv_list-2..$#argv_list]); # last 3 items.
+		@option_list = @argv_list[0..$#argv_list-3]; # Every option up to ...
+	}
+
+	$verbose = 0;
+	for(@option_list) {
+		$verbose = 1 if $_ eq "-v";
+		last if $verbose;
+	}
+	local($i);
+	for($i = 1; $i <= $#files_list; $i++) {
+		# CHange filename to absolute filenames
+		$files_list[$i] = &change2absolute_filename($curr_dir, $files_list[$i]);
+	}
+	print STDERR "Options are: @option_list\n" if ($verbose);
+	print STDERR "Files   are: @files_list\n" if ($verbose);
+
+
+	if ($#files_list != 3 && $#files_list != 4) {
+		do usage();
+	}
+		
+}
+
+
+sub cleanup {
+	chdir ($curr_dir) if ($curr_dir ne "" && -d $curr_dir);  # Go back to the original dir.
+	do do_system_call("rm -r $top_tmp_working_dir") if (-d $top_tmp_working_dir);
+}
+
+sub doexit_handler {
+	# This routine was called when interrupt occurred.
+	# Clean up and exit.
+	local($signal) = @_;
+
+	# Restore STDERR and STDOUT.  This is required since both stderr and stdout
+    # were redirected in the calling program, all_tape_level_1n2.
+	close(1);
+	close(2);
+	open(STDOUT, ">/dev/tty");
+	open(STDERR, ">/dev/tty");
+	$| = 1;
+	do cleanup();
+	print STDERR "$product: Got signal <$signal>. Abort execution. \n";
+	exit(-2) if ($signal == 'STOP' || $signal == 'KILL' || $signal == 'INT');
+	exit(-1);
+}
+
+
+sub do_system_call {
+	local($cmd) = @_;
+	local($rc) = $SUCCESS_CODE;
+	system($cmd);
+	local($status) = $? >> 8;			# 
+	local($sig) = $? & 255;
+	do doexit_handler($sig) if ($sig != 0);
+	do doexit_handler('INT') if ($status == -2 || $status == 254);
+
+	if ($status != 0) {
+		print STDERR "$product: Failed executing ... $cmd\n";
+		$rc = $SEVERE_ERROR_CODE;
+	}
+	return $rc;
+}

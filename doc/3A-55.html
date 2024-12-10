@@ -1,0 +1,191 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+   <TITLE></TITLE>
+   <META NAME="GENERATOR" CONTENT="Mozilla/3.01Gold (X11; I; Linux 2.0.28 i686) [Netscape]">
+</HEAD>
+<BODY BACKGROUND="gvs_bg.gif">
+
+<CENTER><TABLE BORDER=2 CELLPADDING=0 WIDTH="100%" >
+<TR ALIGN=CENTER VALIGN=CENTER>
+<TD><IMG SRC="gvs_logo.gif" HEIGHT=100 WIDTH=256 ALIGN=LEFT></TD>
+
+<TD ALIGN=CENTER VALIGN=CENTER>
+<H1><FONT COLOR="#000080">3A-55:</FONT> <FONT COLOR="#800080">Monthly 3-D
+Structure</FONT></H1>
+</TD>
+</TR>
+</TABLE></CENTER>
+
+<P>
+<HR>
+<HR width="100%"></P>
+
+<H3><FONT COLOR="#000080">Synopsis</FONT></H3>
+
+<PRE><B><TT><FONT COLOR="#B22222">3A-55  [-v] [-m <I>metadata_file</I>]
+      <I>2A-55_HDF_infile</I> <I>HDF_outfile</I> <I>vos_times_outfile
+</I>      <I>inter_acc_CFAD_InOut</I> <I>inter_acc_vprofile_InOut</I> 
+      {BEGIN | MIDDLE | END} <I>year</I> <I>month
+</I>  </FONT></TT></B></PRE>
+
+<P>
+<HR></P>
+
+<H3><B><FONT COLOR="#000080">Description</FONT></B></H3>
+
+<P><B><FONT COLOR="#B22222">3A-55 </FONT></B>product provides radar site
+monthly 3-D structure information, including CFAD data and vertical profiles,
+obtained from 2A-55. The vertical profiles and CFAD data are computed at
+each analysis level for a month of radar data for the following categories:</P>
+
+<OL>
+<LI>Total</LI>
+
+<LI>Total over land</LI>
+
+<LI>Total over sea</LI>
+
+<LI>Convective</LI>
+
+<LI>Convective over land</LI>
+
+<LI>Convective over sea</LI>
+
+<LI>Stratiform</LI>
+
+<LI>Stratiform over land</LI>
+
+<LI>Stratiform over sea</LI>
+
+<LI>&quot;anvil&quot; (Anvil is defined as echo aloft with no contribution
+to surface rain.)</LI>
+
+<LI>&quot;anvil&quot; over land</LI>
+
+<LI>&quot;anvil&quot; over sea</LI>
+</OL>
+
+<P>The vertical profiles have values ranged from -15.00 to 70.00 dBZ multiplied
+by 100; the values are stored as 2-byte integers.</P>
+
+<P>The CFAD data are the number of pixels counted in specified height-reflectivity
+bin pairs for the categories listed above. Values range from 0 to 68,403,000
+(3,000 radar volumes/month x 151 x 151) for single radar sites.</P>
+
+<P>
+<HR></P>
+
+<H3><B><FONT COLOR="#000080">Inputs </FONT></B></H3>
+
+<UL>
+<LI><B><FONT COLOR="#B22222">2A-55_HDF_infile</FONT></B><FONT COLOR="#000000">:
+Granule 3-D Reflectivity (2A-55) </FONT>Hierarchical Data Format (<FONT COLOR="#000000">HDF)
+file. Compression is allowed.</FONT></LI>
+
+<LI><B><FONT COLOR="#B22222">vos_times_InOut</FONT>:</B> File contained
+dates and times of all VOSes.</LI>
+
+<LI><B><FONT COLOR="#B22222">inter_acc_CFAD_InOut</FONT></B>: Intermediate
+accumulated CFAD file in ASCII format. If the BEGIN flag is specified,
+this file will be created; if either the MIDDLE or END flag is specified,
+this file will be used in the accumulation calculation and will be updated
+with the new result. </LI>
+
+<LI><B><FONT COLOR="#B22222">inter_acc_vprofile_InOut</FONT></B><FONT COLOR="#000000">:
+</FONT>Intermediate accumulated vertical profiles file in binary format.
+If the BEGIN flag is specified, this file will be created; if either the
+MIDDLE or END flag is specified, this file will be used in the accumulation
+calculation and will be updated with the new result. </LI>
+
+<LI><B><FONT COLOR="#B22222">BEGIN</FONT></B><FONT COLOR="#000000">|</FONT><B><FONT COLOR="#B22222">MIDDLE</FONT></B><FONT COLOR="#000000">|</FONT><B><FONT COLOR="#B22222">END</FONT></B><FONT COLOR="#000000">:
+Flag indicates whether this is the beginning, middle, or end of the monthly
+period. It </FONT>indicates whether to create the product in HDF format
+and/or to store the intermediate product in the intermediate files. </LI>
+
+<P>If the specified flag is END, it will create the HDF file. Note: If
+either flag BEGIN or MIDDLE is specified, no HDF file will be created.
+</P>
+
+<P>If the specified flag is BEGIN, it will create the three intermediate
+files: one contains the list of times for all VOSes included in the accumulation,
+the second file contains the accumulated CFAD data, and the third file
+contains the accumulated vertical profile.</P>
+
+<P>If the specified flag if either MIDDLE or END, the three intermediate
+files will be modified. </P>
+
+<LI><B><FONT COLOR="#B22222">year</FONT></B><FONT COLOR="#000000">: Four
+digit year. </FONT></LI>
+
+<LI><B><FONT COLOR="#B22222">month</FONT></B><FONT COLOR="#000000">: The
+number of the current month being processed. Number starts at 1.</FONT></LI>
+</UL>
+
+<P>
+<HR></P>
+
+<H3><B><FONT COLOR="#000080">Temporary File or Directory</FONT></B></H3>
+
+<UL>
+<P><FONT COLOR="#000000">3A-55_&lt;<I>process_id</I>&gt;/</FONT></P>
+</UL>
+
+<P>
+<HR width="100%"></P>
+
+<H3><B><FONT COLOR="#000080">Output Files</FONT></B></H3>
+
+<UL>
+<LI><B><FONT COLOR="#B22222">HDF_outfile</FONT></B><FONT COLOR="#000000">:
+Monthly 3-D structure (3A-55 product) in HDF format. This file will only
+be created when the END flag is specified. </FONT>When creating the HDF
+product, it will use some of the metadata values from the input granule
+HDF file (2A-55) and the metadata file (see option <B><FONT COLOR="#B22222">-m</FONT></B>).</LI>
+
+<LI><B><FONT COLOR="#B22222">vos_times_outfile</FONT></B><FONT COLOR="#000000">:
+File contained a list of dates and times of all VOSes included in the product.
+</FONT></LI>
+
+<LI><B><FONT COLOR="#B22222">inter_acc_CFAD_InOut</FONT></B><FONT COLOR="#000000">:
+Intermediate accumulated CFAD data file in ASCII format. See its entry
+in the <B>Inputs </B>section. </FONT></LI>
+
+<LI><B><FONT COLOR="#B22222">inter_acc_vprofile_InOut</FONT></B><FONT COLOR="#000000">:
+</FONT>ntermediate accumulated vertical profiles file in binary format.
+<FONT COLOR="#000000">See its entry in the <B>Inputs</B> section. </FONT></LI>
+</UL>
+
+<P>
+<HR></P>
+
+<H3><B><FONT COLOR="#000080">Options</FONT></B></H3>
+
+<P><B><FONT COLOR="#B22222">3A-55</FONT><FONT COLOR="#000000"> </FONT></B><FONT COLOR="#000000">recognizes
+the following options: </FONT></P>
+
+<P><B><TT><FONT COLOR="#B22222">-v</FONT><FONT COLOR="#000000">: </FONT></TT></B><FONT COLOR="#000000">Print
+diagnostic messages. </FONT></P>
+
+<P><B><FONT COLOR="#B22222">-m</FONT></B><FONT COLOR="#000000">: Specify
+filename for metadata file that contains some of program specific metadata
+values. Default:<B><I>$GVS_DATA_PATH/3A55_metadata.txt</I></B></FONT></P>
+
+<P><BR>
+
+<HR></P>
+
+<H3><B><FONT COLOR="#000080">Return value</FONT></B></H3>
+
+<P><B><FONT COLOR="#B22222">3A-55</FONT><FONT COLOR="#000000"> </FONT></B><FONT COLOR="#000000">returns
+<B>0</B> for successful completion; <B>-1</B> for failure; or <B>-2</B>
+for interruption. </FONT>
+<HR></P>
+
+<H3><B><FONT COLOR="#000080">Author</FONT></B></H3>
+
+<P><FONT COLOR="#000000">John H. Merritt<I>, Space Applications Corporation/NASA/TRMM
+Office</I></FONT></P>
+
+</BODY>
+</HTML>

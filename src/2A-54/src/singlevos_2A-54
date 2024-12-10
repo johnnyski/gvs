@@ -1,0 +1,262 @@
+#! /usr/bin/perl
+#-*-Perl-*-
+#
+# This script is the front end to Matthias Steiner's algorithm program,
+# '2A54'.  It produces 2A-54 product, Convective/Stratiform 
+# map (polar) for one VOS.
+#
+# This script calls 'uf2mudras' to interpolate 1C-51 product (in Universal
+#  Format) before it calls the actual algorithm program, '2A54'.  '2A54'
+# works with the base scan  not the entire volume.
+#
+# Notes: 
+#  1. If 2A-54_product includes path, then output_dir  will not be used. 
+#  2. Returns -1 Failed.
+#              0 Successful.
+#              1 Successful but produces output.
+#             -2 Program was aborted by SIGINT (^C).
+#
+
+#
+# This script returns 0 upon successful completion; non-zero, otherwise.
+#
+# Requirements:
+#   - Have access to 'sprint', '2A54', and 'uf2mudras'.
+#   - Have 'sprint_base_scan.inp' installed under $GVS_DATA_PATH if 
+#     you don't want to specify '-s sprint_input_template'.  
+#   - If -d is not specified, qc_uf_file must be named, '*<yymmdd>*'.
+#
+#   Note: If $GVS_DATA_PATH = "", it assumes '/usr/local/trmm/data'.
+#
+# See 2A-54.html via netscape or Mosaic for more information.
+#
+#
+# By:    Thuy Nguyen
+#        NASA/TRMM Office
+#        Thuy.Nguyen@gsfc.nasa.gov
+#        June 8, 1995     
+#
+###########################################################################
+
+unshift (@INC, ".", "/usr/local/trmm/GVBOX/bin");
+do 'gv_utilities.pl';
+$product = $this_prog;
+$PROG_VERSION = "gvs-v4.21";
+
+sub usage {
+	print STDERR "Usage ($PROG_VERSION):\n";
+	print STDERR "   $product [-v] [-S site_name] [-d MMDDYY] [-H horizontal_resolution]\n";
+	print STDERR "\t[-s sprint_input_template] [-l result_log_filename]\n";
+	print STDERR "\t[-D output_dir] [-m metadata_fname] \n";
+	print STDERR "\tqc_uf_file csmap_shdf_file\n";
+	print STDERR "  where,\n";
+
+	print STDERR "   -v  Print verbose message of program execution.\n";
+	print STDERR "   -S  Specify TSDIS site name. It is case insensitive. See file,\n",
+	             "       '\$GVS_DATA_PATH/gv_radar_site_info.data', for a \n",
+	             "       list of sites.  Default: Will obtain from the UF file.\n";
+	print STDERR "   -d  Specify date of the uf file. Default: date from uf filename (*.yymmdd.*) \n";
+	print STDERR "   -H  Specify horizontal resolution in km (2.0 or 4.0). Default: 2.0.\n";
+	print STDERR "   -s  Specify sprint script file. See uf2mudras.html for detail. \n",
+	"       Default: \$GVS_DATA_PATH/sprint_base_scan.inp.\n";
+
+	print STDERR "   -l  Specify result log filename to be saved (Default: logfile).\n";
+	print STDERR "   -D  Specify directory for the result file(s) (default = \"./\"). \n",
+                 "       Note: If 2A-54_product name includes path, then output_dir will not be used. \n";
+	print STDERR "   -m Specify filename for metadata file. Default:\$GVS_DATA_PATH/2A54_metadata.txt\n";
+
+ 	exit (-1);
+}
+
+if ($#ARGV < 1) {
+	do usage();
+}
+$verbose = 0;
+$verbose_flag = "";
+$output_dir = "./";
+$options_end = 0;
+$result_log = 0;
+$site = ""; #
+$date_str = "";
+
+# default datapath is $GVS_DATA_PATH
+$data_path = $ENV{'GVS_DATA_PATH'};
+if ($data_path eq "") { # Pick a nice default.
+    $data_path = "/usr/local/trmm/data";
+}							# 
+$sprint_input = "$data_path/sprint_base_scan.inp";
+$horizontal_res = "2.0";  # Resolution in km.
+
+# process arguments 
+while (@ARGV && $options_end == 0) {
+	$str = shift ARGV;
+	if ($str eq "-S") {
+		$site = shift;
+		if ($site =~ /^\-/) {
+			do usage();
+		}
+	}
+	elsif ($str eq "-l") {
+		$result_log_file = shift;
+		if ($result_log_file =~ /^\-/) {
+			do usage();
+		}
+		$result_log = 1;
+	}
+	elsif ($str eq "-v") {
+		$verbose = 1;
+		$verbose_flag = "-v";
+		$sprint_options = $sprint_options." -v";
+	}
+	elsif ($str eq "-D") {
+		$output_dir = shift;
+	}
+	elsif ($str eq "-d") {
+		$date_str = shift;
+		if ($date_str =~ /^\-/) {
+			do usage();
+		}
+		$sprint_options = "$sprint_options -d $date_str";	# 
+	}
+	elsif ($str eq "-s") {
+		$str = shift;
+		if ($str =~ /^\-/) {
+			do usage();
+		}
+		$sprint_input = $str;
+	}
+	elsif ($str eq "-H") {
+		$str = shift;
+		if ($str =~ /^\-/) {
+			do usage();
+		}
+		$horizontal_res = $str;
+	}
+	elsif ($str eq "-m" ) {
+		local($str2) = shift;
+		if ($str2 =~ /^\-/) {
+			do usage();
+		}
+		$prog_options = "$prog_options $str $str2";
+		
+	}
+	else {
+		$options_end = 1;
+	}
+}
+
+if ($#ARGV < 0 || $#ARGV > 0 ||  $str =~ /^\-/) {
+	do usage();
+}
+# extract input filename
+$qc_uf_file = $str;
+
+# extract output filename
+$out_file = shift;
+$site = &get_site_name_from_uf_file($qc_uf_file) if ($site eq "");
+$site =~ y/A-Z/a-z/;    # Convert to lowercase.
+
+
+if ($verbose == 1) {
+	if ($result_log == 1) {
+		print STDERR "$product: result_log_file = $result_log_file\n";
+	}
+	print STDERR "$product: which program: $0\n"; 
+	print STDERR "$product: output_dir = $output_dir\n";
+	print STDERR "$product: outfile = $out_file\n";
+	print STDERR "$product: site = $site\n";
+	print STDERR "$product: hor. res = $horizontal_res\n";
+}
+
+$sprint_options = "$sprint_options -S $site -H $horizontal_res -s $sprint_input";
+# interpolate infile (UF file) into MUDRAS file
+# create mudras file name
+$MUD_file = "./tmp$$.pure";
+
+$cmd = "uf2mudras $sprint_options $qc_uf_file $MUD_file";
+if ($verbose == 1) {
+	print STDERR "$product: Executing: $cmd\n";
+}
+
+system ($cmd);
+$stat = $? >>8;
+local($sig) = $? & 255;
+do doexit_handler($sig) if ($sig != 0);
+if ($stat != 0) {
+	do doexit_handler('INT') if ($stat == -2 || $stat == 254);
+	if ($verbose == 1) {
+		print STDERR "$product: ERROR: Failed executing 'uf2mudras'. \n";
+		exit(-1);
+	}
+}
+#
+# call the actual program
+$prog = "2A54";
+$cmd = "$prog $verbose_flag $prog_options $MUD_file $site $output_dir $out_file";
+
+if ($verbose) {
+	print STDERR "$product: Executing: $cmd\n";
+}
+
+system ($cmd);
+
+$stat = $? >> 8;
+local($sig) = $? & 255;
+do doexit_handler($sig) if ($sig != 0);
+
+unlink ($MUD_file);
+do doexit_handler('INT') if ($stat == -2 || $stat == 254);
+# note 255 is checked also -- pc uses unsigned char
+if ($stat == 255 || $stat == -1) {
+		print STDERR "$product: ERROR: Failed executing $prog.\n";
+		unlink $result_log_file;
+		exit(-1);
+}
+elsif ($stat == 1) {
+	print STDERR "$product: WARNING: No product created.\n";
+	exit(1);
+}
+
+if ($result_log == 0) {
+		unlink "logfile";
+}
+else {
+	system("mv logfile $result_log_file");
+}
+
+if ($verbose) {
+	print STDERR "$product: Successful!\n";
+}
+
+exit(0);
+
+
+
+########################### Subroutines ##################################
+
+sub cleanup {
+	print STDERR "$product: clean up...\n";
+	unlink ($MUD_file)	if -e $MUD_file;
+	unlink $result_log_file if -e $result_log_file;
+	unlink "logfile" if -e "logfile";
+}
+
+sub doexit_handler {
+	# This routine was called when interrupt occurred.
+	# Clean up and exit.
+	local($signal) = @_;
+
+	# Restore STDERR and STDOUT.  This is required since both stderr and stdout
+    # were redirected in the calling program, all_tape_level_1n2.
+	close(1);
+	close(2);
+	open(STDOUT, ">/dev/tty");
+	open(STDERR, ">/dev/tty");
+	$| = 1;
+    do cleanup();
+	print STDERR "$product: Got signal <$signal>. Abort execution. \n";
+	kill $signal, 0;
+
+	exit(-2) if ($signal == 'KILL' || $signal == 'STOP' || $signal == 'INT');
+	exit(-1);
+}

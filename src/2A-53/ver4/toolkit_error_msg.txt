@@ -1,0 +1,15 @@
+W_2A53_BAD_USAGE,          2A-53: Improper usage.
+W_2A53_ZR_FORMAT,          2A-53: ZR table improperly formatted.
+W_2A53_NO_Z,               2A-53: No Z map.
+W_2A53_2A54_READ_FAIL,     2A-53: Failed to read 2A-54 data.
+W_2A53_NO_OUTPUT_HDF,      2A-53: No output HDF filename.
+W_2A53_TKOPEN_FAIL,        2A-53: TKopen failed.
+W_2A53_TKWRITEGRID_FAILED, 2A-53: TKwriteGrid failed.
+W_2A53_TKCLOSE_FAILED,     2A-53: TKclose failed.
+W_2A53_SYSTEM_FAILED,      2A-53: System function failed.
+W_2A53_CHILD_ABORTED,      2A-53: Child process aborted.
+W_2A53_CHILD_FAILED,       2A-53: Child process failed.
+W_2A53_MEM_ALLOC_FAILED,   2A-53: Dynamic memory allocation failed.
+W_2A53_FAILED_MUDRAS,      2A-53: Failed creating a mudras file.
+W_2A53_UF_INFO_FAILED,     2A-53: Couldn't get info from UF file.
+W_2A53_WRITE_METADATA_FAIL, 2A-53: Failed to write metadata.

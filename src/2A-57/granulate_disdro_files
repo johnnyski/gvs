@@ -1,0 +1,189 @@
+#! /usr/bin/perl
+#
+#
+# USE: disdro_to_hdf as the interface to this script.
+#-------------------------------------------------------------
+#
+# Granulates disdrometer ascii data files.
+#
+# Input: hourly disdrometer data files:
+#    JJJannHH.YY, where
+#        JJJ: julian day
+#         HH: hour
+#         YY: year
+#
+# Output: granulated ascii data files:
+#               2a57.g.###
+#
+#       where: g  --  gauge id.
+#            ###  --  granule number (julian day)
+#
+# Example output file is 2a57.KSC_0005.25
+#
+# The disdrometer data file format was not well defined at the time
+# of creation of this granule production script (3 Apr 97).
+# Hence this script is subject to future redesign or replacement.
+#
+
+
+#! /usr/bin/perl
+
+sub julian_to_gregorian {
+	local ($jday, $year) = @_;
+
+	# Return $mo $day.
+
+	@mo_noleap = (31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31);
+	@mo_leap   = (31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31);
+
+    @mo = (@mo_noleap, @mo_leap);
+
+	$qleap = 0;
+	if($year % 100 != 0 && $year % 4 == 0 || $year % 400 == 0) {$qleap = 1;}
+	$index = $qleap * 12;
+	$sum = 0;
+	for (0..11) {
+		$mo = $_+1;
+		last if ($jday - $mo[$index] <= 0);
+		$jday -= $mo[$index];
+		$index++;
+	}
+	return ($mo, $jday);
+}
+
+sub rebuild_header {
+	local ($file) = @_;
+
+	# The second and last record define the start and stop date/time.
+    # This information must be appended to the header record.  What a pain!
+
+	open(IN, $file);
+	@entire_file = <IN>;
+	close(IN);
+	
+	local($yy, $mm, $dd, $junk, $hh, $min);
+	($yy, $mm, $dd, $junk, $hh, $min) = split(/[ \t\n]+/, $entire_file[1]);
+	chop($entire_file[0]);
+	$h = $entire_file[0];
+	$h = sprintf("%s %.2d/%.2d/%.4d %.2d:%.2d",
+				 $h, $mm, $dd, $yy, $hh, $min);
+	($yy, $mm, $dd, $junk, $hh, $min) = split(/[ \t\n]+/, $entire_file[$#entire_file]);
+	$h = sprintf("%s %.2d/%.2d/%.4d %.2d:%.2d",
+				 $h, $mm, $dd, $yy, $hh, $min);
+	$entire_file[0] = $h . "\n";
+	
+	printf("OUTFILE is <$file>\n");
+	open(OUT, "> $file");
+	print OUT @entire_file;
+	close(OUT);
+	
+}
+###############################################################
+######################### M A I N #############################
+###############################################################
+$version = 1;
+
+if (!@ARGV)
+{
+		print STDERR "Usage: granulate_disdro_files disdroFile_1 [disdroFile_2 ...]\n";
+		exit (-1);
+}
+
+# Don't run if pre-existing 2A57*.ascii files.
+
+open(LS, "ls 2A57*.ascii 2>/dev/null |");
+@pre_exist = <LS>;
+close(LS);
+if ($#pre_exist >= 0) {
+	print STDERR "Can't run with pre-existing 2A57*.ascii files.  Files are:\n", @pre_exist, "\n";
+	exit(-1);
+}
+
+while (@ARGV)
+{
+	$infile = shift(@ARGV);
+	@fparts = split('/', $infile); # strip off leading directory chars.
+	$fname  = $fparts[$#fparts];
+
+# Retrieve date/time of data from the infile name.
+	$jday = substr($fname, 0, 3);
+	$hour = substr($fname, 6, 2);
+	$year = substr($fname, 9, 2) + 1900;
+
+	open(INFILE, "gzip -d -f --stdout $infile |") || die "Can't open file $file\n";
+
+	@disdro_data = <INFILE>; # Suck the whole file into memory.
+	close(INFILE);
+    $line1 = $disdro_data[0];
+# Check $line1, if it has a header, then use the header, otherwise create
+# a header from the filename.  For the latter, we assume JJJxxxHH.YY format.
+#
+	@line1 = split(/[ \t\n]+/, $line1);
+	if ($line1[0] eq "DISD") { # Header, use it.  JDAY and YEAR are last two.
+		$hdr = $line1;
+		($radar, $net, $d_no, $year, $jday) = @line1[2,9,3,$#line1-1, $#line1]; # New header format.
+		$data_start = 1;
+	
+# Determine the granule number.
+		@d1 = split(/[ \t\n]+/,$disdro_data[$data_start]);
+		$cur_granule = sprintf("%.4d%.2d",$d1[0], $d1[1]); # YYYYMM
+	} else {
+		# Make something up?
+		($radar, $net, $d_no) = ('UNKN', 'UNKN', '000');
+		$hdr = "DISD  ??? UNKN 0000 UNKN_0000    UKN 1.0  0.0  -180.0 UNKN 0. 0.  -99.9\n";
+		$data_start = 0;
+	
+# Determine the granule number.
+		($month, $day) = &julian_to_gregorian($jday);
+		$cur_granule = sprintf("%.4d%.2d",$year, $month ); # YYYYMM
+	}
+
+
+	for ($i=$data_start; $i<=$#disdro_data; $i++) {
+		# Need to compute the MM and DD from JJJ for each record
+		@data_rec = split(/[ \t\n]+/, $disdro_data[$i]);
+		if ($#data_rec == 20) { # This is a raw (old format) disdro file.
+# HHMM d1 ... d20
+			$hour = substr($data_rec[0], 0, 2);
+			$min  = substr($data_rec[0], 2, 2);
+			$sec  = 0;
+			$disdro_data[$i] = join(' ', $year, $month, $day, $jday, $hour, $min, $sec, @data_rec[$#data_rec-19..$#data_rec],"\n");
+		} else { # Similiar format to gmin. (25 fields)
+			($year, $jday, $hour, $min, $sec) = split(/[ \t\n]+/, $disdro_data[$i]);
+			($month, $day) = &julian_to_gregorian($jday, $year);
+			$disdro_data[$i] = join(' ', $year, $month, $day, $jday, $hour, $min, $sec, @data_rec[$#data_rec-19..$#data_rec],"\n");
+		}
+
+	}
+# Make an output filename.
+	$outfile = "2A57_".$radar."_".$net."_".$d_no."_".$cur_granule."_".$version.".ascii";
+
+# If this output file does not yet exist, write a header line into the
+# file. Use same header format as in raingauge gmin files.
+	if (!-e $outfile)
+	{
+			print "Creating new granule file: $outfile\n";
+			open(OUTFILE, "> $outfile");
+			print OUTFILE $hdr;
+	}
+	else # outfile exists. Open to append.
+	{
+			open(OUTFILE, ">> $outfile");
+	}
+
+	print OUTFILE @disdro_data[$data_start..$#disdro_data];
+
+	close(OUTFILE);
+}
+
+	
+
+
+open(LS, "ls 2A57*.ascii |");
+while(<LS>) {
+	chop;
+	&rebuild_header($_);
+}
+close(LS);
+
+exit(0);

@@ -1,0 +1,174 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+   <TITLE></TITLE>
+   <META NAME="GENERATOR" CONTENT="Mozilla/3.01Gold (X11; I; Linux 2.0.28 i686) [Netscape]">
+</HEAD>
+<BODY BACKGROUND="gvs_bg.gif">
+
+<CENTER><TABLE BORDER=2 CELLPADDING=0 WIDTH="100%" >
+<TR ALIGN=CENTER VALIGN=CENTER>
+<TD ALIGN=CENTER VALIGN=CENTER><IMG SRC="gvs_logo.gif" HEIGHT=100 WIDTH=256 ALIGN=LEFT></TD>
+
+<TD>
+<H1><FONT COLOR="#000080">2A-53-d:</FONT> <FONT COLOR="#800080">Rain Rate
+Maps </FONT></H1>
+</TD>
+</TR>
+</TABLE></CENTER>
+
+<P>
+<HR WIDTH="100%">
+<HR></P>
+
+<H3><FONT COLOR="#000080">Synopsis</FONT></H3>
+
+<PRE><B><FONT COLOR="#B22222">2A-53 [-v] [<I><TT>options_list</TT></I>] 2A-53-d <I><TT>qc_ghdf_file csmap_ghdf_file rrmap_ghdf_file
+
+</TT></I>singlevos_2A-53-d [-v] [<I><TT>options_list</TT></I>] <I><TT>qc_uf_file csmap_shdf_file rrmap_shdf_file</TT></I></FONT></B>
+</PRE>
+
+<PRE><B><I><TT>where:
+
+</TT></I><FONT COLOR="#B22222">options_list </FONT><FONT COLOR="#000000">:=</FONT><FONT COLOR="#B22222"> [-s {<I><TT>firstfile</TT></I>|<I><TT>site</TT></I>}] [-b <I><TT>HBASE</TT></I>] [-f <I><TT>HFREEZE</TT></I>] [-n <I><TT>DBZNOISE</TT></I>] 
+        [-p <I><TT>PRADAR</TT></I>] [-t <I><TT>TRADAR</TT></I>] [-d <I><TT>DEWPOINT</TT></I>] [-P <I><TT>DATAPATH</TT></I>] [-z <I><TT>ZRFILE</TT></I>] 
+        [-g <I><TT>GAGFILE</TT></I>] [-w <I><TT>GWINFILE</TT></I>] [-k <I><TT>XKMP</TT></I>] [-a <I><TT>ALPHA</TT></I>] [-m <I><TT>MPONLY</TT></I>] </FONT></B></PRE>
+
+<PRE> 
+</PRE>
+
+<P>
+<HR></P>
+
+<H3><FONT COLOR="#000080">Description</FONT></H3>
+
+<P>Radar site rain rate map. <B><FONT COLOR="#B22222">2A-53</FONT></B>
+calls <B><FONT COLOR="#B22222">singlevos_2A-53-d</FONT></B> which converts
+reflectivities of a single VOS for 1C-51 product to rain rates. It creates
+a 2 km x 2 km CARPI (Constant Altitude Rectangular Position Image) to 200
+km from radar. <B><FONT COLOR="#B22222">2A-53</FONT></B> produces rain
+rate maps for one hour-granule.</P>
+
+<P>
+<HR></P>
+
+<H3><FONT COLOR="#000080">Options</FONT></H3>
+
+<P><B><FONT COLOR="#B22222">2A-53</FONT></B> and <B><FONT COLOR="#B22222">singlevos_2A-53-d</FONT>
+</B>recognize the following options: </P>
+
+<P><B><FONT COLOR="#B22222">-v</FONT></B> Prints arguments and status of
+the program execution. <BR>
+<B><FONT COLOR="#B22222">-s {<I><TT>firstfile</TT></I>|<I><TT>site</TT></I>}</FONT>
+</B>First file or site name. <BR>
+<B><FONT COLOR="#B22222">-b <I><TT>HBASE</TT></I></FONT></B> Altitude for
+reflectivity map, to be used for rainfall. (Default: 2.0) <BR>
+<B><FONT COLOR="#B22222">-f <I><TT>HFREEZE</TT></I></FONT></B> Altitude
+of 0 C isotherm. (Default: 5.0) <BR>
+<B><FONT COLOR="#B22222">-n <I><TT>DBZNOISE</TT></I></FONT></B> Minimum
+reflectivity to process [dBZ]. (Default: 0.0) <BR>
+<B><FONT COLOR="#B22222">-p <I><TT>PRADAR</TT></I></FONT></B> Surface pressure
+at the radar [mb]. (Default: 1000.0) <BR>
+<B><FONT COLOR="#B22222">-t <I><TT>TRADAR</TT></I></FONT></B> Surface temperature
+at the radar [degrees kelvin]. (Default: 303.0) <BR>
+<B><FONT COLOR="#B22222">-d <I><TT>DEWPOINT</TT></I></FONT></B> Surface
+dew point at the radar [degrees kelvin]. (Default: 295.0) <BR>
+<B><FONT COLOR="#B22222">-P <I><TT>DATAPATH</TT></I></FONT> </B>Path name
+where ZRFILE and GAGFILE are located. (Default: <I><TT>$GVS_DATA_PATH</TT></I>)
+<BR>
+<B><FONT COLOR="#B22222">-z <I><TT>ZRFILE</TT></I></FONT></B> tring with
+the Ze-R input file name. (Default: <I><TT>zr_mlb.out</TT></I> (Melbourne)
+<I><TT>zr_drw.out </TT></I>(Lassen)) <BR>
+<B><FONT COLOR="#B22222">-g <I><TT>GAGFILE</TT></I></FONT></B> String with
+the Gauge coordinates file name. (Default: <I><TT>sitelist_cscale</TT></I>)
+<BR>
+<B><FONT COLOR="#B22222">-w <I><TT>GWINFILE</TT></I></FONT></B> String
+with the gauge windows output file name. (Default: <I><TT>gwin.out</TT></I>)
+<BR>
+<B><FONT COLOR="#B22222">-k <I><TT>XKMP</TT></I></FONT></B> Optional K
+for a power law Z-R. (Default: 0.0) <BR>
+<B><FONT COLOR="#B22222">-a <I><TT>ALPHA</TT></I></FONT></B> Optional ALPHA
+for a power law Z-R. (Default: 0.0) <BR>
+<B><FONT COLOR="#B22222">-m <I><TT>MPONLY</TT></I></FONT></B><FONT COLOR="#FFFFFF">
+</FONT>Flag for WPMM (0), or a power-law Z-R (1). (Default: 0.0) 
+<HR></P>
+
+<H3><FONT COLOR="#000080">Input Files</FONT></H3>
+
+<OL>
+<LI><FONT COLOR="#B22222">qc_uf_file</FONT> - Quality controlled reflectivities
+for a single VOS in Universal Format (1C-51 product). </LI>
+
+<LI><FONT COLOR="#B22222">qc_ghdf_file</FONT> - Quality controlled reflectivities
+for one hour-granule in Hierarchical Data Format (HDF) (1C-51 products).
+</LI>
+
+<LI><FONT COLOR="#B22222">csmap_hdf_file </FONT>- Convective/stratiform
+map for a single VOS in HDF (2A-54 product). </LI>
+
+<LI><FONT COLOR="#B22222">csmap_ghdf_file</FONT> - Convective/stratiform
+maps for one hour-granule in HDF (2A-54 products). </LI>
+
+<LI>sitelist_cscale (Default for GAGFILE)--Lookup table.</LI>
+
+<LI>zr_{<I><TT>drw</TT></I>|<I><TT>mlb</TT></I>}.out (Default for ZRFILE)--Lookup
+table.</LI>
+</OL>
+
+<P>
+<HR></P>
+
+<H3><FONT COLOR="#000080">Temporary Files</FONT></H3>
+
+<P>The following file(s) are removed upon completion by the program. </P>
+
+<OL>
+<LI>tmp&lt;<I><TT>process_id</TT></I>&gt;/&lt;<I><TT>YYMMDD</TT></I>&gt;.&lt;granule#&gt;.&lt;radar_site&gt;.&lt;version#&gt;.&lt;<I><TT>HHMM</TT></I>&gt;.uf.gz
+</LI>
+
+<LI>tmp&lt;<I><TT>process_id</TT></I>&gt;/&lt;<I><TT>csmap_ghdf_file prefix</TT></I>&gt;.<I><TT>HHMM</TT></I>.hdf
+</LI>
+
+<LI>tmp&lt;<I><TT>process_id</TT></I>&gt;/&lt;<I><TT>uf file prefix</TT></I>&gt;..hdf.2A-53-d
+</LI>
+
+<LI>csmap.ascii.tmp</LI>
+</OL>
+
+<P>
+<HR width="100%"></P>
+
+<H3><FONT COLOR="#000080">Output Files</FONT></H3>
+
+<OL>
+<LI><FONT COLOR="#B22222">rrmap_shdf_file</FONT> - Rain rate map for a
+single VOS in a HDF file. Map consists of a 151x151 pixel image, with radar
+located at 76x76. Resolution is 2 km/pixel, thus data extends 150 km radius
+from the radar.</LI>
+
+<LI><FONT COLOR="#B22222">rrmap_ghdf_file</FONT> - Rain rate maps for one
+hour-granule in a HDF file. </LI>
+
+<LI>gwin.out (Default for GWINFILE).</LI>
+</OL>
+
+<H3>
+<HR><FONT COLOR="#000080">Return value</FONT></H3>
+
+<P><B><FONT COLOR="#B22222">2A-53</FONT></B> returns 0 upon successful
+completion; 1 upon successful processing for some VOSs of granule; 2 upon
+interruption; non-zero, otherwise. </P>
+
+<P><B><FONT COLOR="#B22222">singlevos_2A-53-d</FONT></B> returns 0 upon
+successful completion; -2 upon interruption; -1 upon failure. </P>
+
+<P>
+<HR></P>
+
+<H3><FONT COLOR="#000080">Author</FONT></H3>
+
+<P>Danny Rosenfeld, <I><TT>The Hebrew University of Jerusalem</TT></I>.
+</P>
+
+</BODY>
+</HTML>

@@ -1,0 +1,86 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+   <TITLE></TITLE>
+   <META NAME="GENERATOR" CONTENT="Mozilla/3.01Gold (X11; I; Linux 2.0.28 i686) [Netscape]">
+</HEAD>
+<BODY BACKGROUND="gvs_bg.gif">
+
+<CENTER><TABLE BORDER=2 CELLPADDING=0 WIDTH="100%" >
+<TR ALIGN=CENTER VALIGN=CENTER>
+<TD><IMG SRC="gvs_logo.gif" HEIGHT=100 WIDTH=256 ALIGN=LEFT></TD>
+
+<TD ALIGN=CENTER VALIGN=CENTER>
+<H1><FONT COLOR="#000080">2A-57:</FONT> <FONT COLOR="#800080">Disdrometer</FONT></H1>
+</TD>
+</TR>
+</TABLE></CENTER>
+
+<P>
+<HR>
+<HR width="100%"></P>
+
+<H3><FONT COLOR="#000080">Synopsis</FONT></H3>
+
+<PRE><B><TT><FONT COLOR="#B22222">disdro_to_granule_ascii <I>Disdro_file1</I> [<I>Disdro_file2</I> [<I>Disdro_file3</I>...]]</FONT></TT></B></PRE>
+
+<P>
+<HR></P>
+
+<H3><FONT COLOR="#000080">Description</FONT></H3>
+
+<P>This program granulates the input disdrometer file(s) to monthly granule
+file(s).</P>
+
+<P>
+<HR></P>
+
+<H3><FONT COLOR="#000080">Input Files</FONT></H3>
+
+<P>ASCII disdrometer file(s). Compressed file is acceptable.</P>
+
+<P>
+<HR></P>
+
+<H3><FONT COLOR="#000080">Temporary File </FONT></H3>
+
+<P>None.</P>
+
+<P>
+<HR width="100%"></P>
+
+<H3><FONT COLOR="#000080">Output File</FONT></H3>
+
+<P><FONT COLOR="#000000">One or several ascii files having the name:</FONT></P>
+
+<PRE><B><FONT COLOR="#000000">2A-57_<I><TT>site</TT></I>_<I><TT>network</TT></I>_<I><TT>gaugeID</TT></I>_<I><TT>YYYYMM</TT></I>_<I><TT>ver#</TT></I>.ascii
+</FONT></B><FONT COLOR="#000000"><I>   where</I>:
+     site = <I><TT>MELB</TT></I>, <I><TT>DARW</TT></I>, <I><TT>KWAJ</TT></I>, <I><TT>HSTN</TT></I>, ...
+     network = <I><TT>KSC</TT></I>, <I><TT>STJ</TT></I>, ...
+     YYYY = Year (4 digit number)
+     MM = Month (2 digit number)
+     ver# = version (1)</FONT>
+</PRE>
+
+<P>
+<HR></P>
+
+<H3><FONT COLOR="#000080">Options</FONT></H3>
+
+<P>None.</P>
+
+<P><BR>
+
+<HR></P>
+
+<H3><FONT COLOR="#000080">Return value</FONT></H3>
+
+<P>Program returns zero for successful completion; -1 for failure. 
+<HR></P>
+
+<H3><FONT COLOR="#000080">Author</FONT></H3>
+
+<P>John H. Merritt, NASA/TRMM Office.</P>
+
+</BODY>
+</HTML>

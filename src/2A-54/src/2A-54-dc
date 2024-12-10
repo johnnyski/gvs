@@ -1,0 +1,336 @@
+#! /usr/bin/perl
+
+
+
+#
+#
+# 2A-54-dc
+# Program for creating dual-cappi ghdf csmaps
+#
+# This program does the following:
+#
+# 1. Degranulize l2A55_ghdf file using level_2_ghdf_to_shdf
+# 2. For each l2A55_shdf file, calls singlevos_2A-54-dc to create a
+#    csmap_shdf (using dual-cappi algorithm)
+# 3. Create csmap_ghdf with level_2_singlevos_hdf_to_ghdf
+#    using qc_ghdf for metadata
+#
+#
+# Galen J. Wilkerson
+# SSAI Inc., Lanham, MD
+#
+# Modified from 2A-54 by Thuy Nguyen
+#                        NASA/TRMM Office
+#######################################################
+
+$PROG_VERSION = "gvs-v4.21";
+unshift (@INC, ".", "/usr/local/trmm/GVBOX/bin");
+do 'gv_utilities.pl';
+$product = $this_prog;
+$metadata_file_opt = "";
+@save_option_list = ();
+@option_list = ();
+
+@l2A55_shdf_file_list;  # list of l2A55 filenames
+@csmap_shdf_file_list;  # file name of single VOS HDF files
+$output_dir = "";       # Default, use pathname from out filename
+
+$qc_hdf = "";
+$l2A55_ghdf = "";
+$output_ghdf = "";
+
+$verbose = 0;
+
+do process_argv(@ARGV);
+
+# Work in a tmp dir to allow parallel processing in the same dir.
+$top_tmp_working_dir = "2A-54_$$/";
+do do_system_call("mkdir -p $top_tmp_working_dir");
+# Remember to go to the curr dir when exit.
+print STDERR "$this_prog: Will work in dir: $top_tmp_working_dir\n" if ($verbose);
+chdir($top_tmp_working_dir);
+
+# create tmp dir to explode files
+$tmpdir = "tmp$$";
+system("mkdir $tmpdir");
+
+if ($verbose) {
+	print STDERR "$product: degranulizing $l2A55_ghdf\n";
+}
+
+# degranulize l2A55_ghdf
+@l2A55_shdf_file_list = degranulize_l2A55_ghdf($l2A55_ghdf);
+
+if($verbose) {
+    print STDERR "l2A55 file list: \n@l2A55_shdf_file_list\n";
+}
+
+#if (($len = @l2A55_shdf_file_list) == 0) {
+#    print STDERR "Problem creating l2A55_shdf_file_list\n";
+#    exit($SEVERE_ERROR_CODE);
+#}
+
+$failure = 0;
+# create the csmap_shdf files
+while (@l2A55_shdf_file_list) {
+    $l2A55_shdf_file = shift @l2A55_shdf_file_list;
+    chomp $l2A55_shdf_file;
+    $prog_exe = "singlevos_$product";
+
+    ($outfile = $l2A55_shdf_file) =~ s/2A55/2A54/;
+
+    @temp = split(/\//,$outfile);
+    #$outfile = pop(@temp);
+    $path = join('/',@temp)."/";
+    
+    $file_string = "$l2A55_shdf_file $outfile";
+    $option_string = join(' ',@option_list);
+
+    #looks like:
+    #singlevos_2A-54-dc -v -m metadata_file 2A-55_hdf_filename output_filename
+    $cmd = "$prog_exe $option_string $file_string";
+
+    if ($verbose) {
+	print STDERR "$product: Executing...$cmd\n";
+    }
+    $rc = &do_system_call($cmd);
+
+    #check success or failure
+
+    # create a list of csmap files
+    if($rc == $SUCCESS_CODE) {
+	push(@csmap_shdf_file_list, $outfile);
+    }
+    else {
+	$failure++;
+	next;
+    }
+}
+
+# create the csmap_ghdf 
+# call create_product
+$rc = create_product();
+#debug
+#&clean_up();
+if($rc != 0) {
+    print STDERR "$product: Failed producing granulized HDF file <$csmap_ghdf_file>\n";
+    exit($SEVERE_ERROR_CODE);
+}
+if($failure > 0) {
+    $msg = "$product: Failure(s) have occured when running $prog_exe for singlevos of $l2A55_shdf_file.\n";
+    $rc = 1;
+}
+else {
+    $msg = "$product: successful. \n";
+    $rc = $SUCCESS_CODE;
+}
+if ($verbose) {
+    print STDERR $msg;
+}
+exit($rc);
+
+
+# subroutines
+###########################################
+sub do_system_call {
+	local($cmd) = @_;
+	local($rc) = $SUCCESS_CODE;
+	system($cmd);
+	$status = $? >> 8;			# 
+	local($sig) = $? & 255;
+	do doexit_handler($sig) if ($sig != 0);
+	do doexit_handler('INT') if ($status == -2 || $status == 254);
+
+	if ($status != 0) {
+		print STDERR "$product: Failed executing ... $cmd\n";
+		$rc = $SEVERE_ERROR_CODE;
+	}
+	return $rc;
+}
+
+sub clean_up {
+	# remove l2A55 and csmap single VOS hdf file(s)
+
+	if ($#csmap_shdf_file_list > 0) {
+	    if ($verbose) {
+		print STDERR "$product: Removing single VOS CSMAP files:  @csmap_shdf_file_list\n";
+	    }
+	    unlink (@csmap_shdf_file_list);
+	}
+
+	if ($#l2A55_shdf_file_list > 0) {
+	    if ($verbose) {
+		print STDERR "$product: Removing single VOS l2A55 files:  @l2A55_shdf_file_list\n";
+	    }
+	    unlink (@l2A55_shdf_file_list);
+	}
+	chdir ($curr_dir) if ($curr_dir ne "" && -d $curr_dir);  # Go back to the original dir.
+	do do_system_call("rm -r $top_tmp_working_dir") if (-d $top_tmp_working_dir);
+}
+
+sub degranulize_l2A55_ghdf{
+    # return a list of shdf files
+
+    local ($ghdf_file) = @_;
+    local ($cmd) = "level_2_ghdf_to_singlevos_hdf $verbose_opt -d $tmpdir 5 $ghdf_file|";
+
+    if($verbose) {
+	print STDERR "$product: Executing... $cmd\n";
+    }
+
+    open(SHDF_FILES, $cmd) || die "Couldn't run $cmd: $!\n";
+    @shdf_files= <SHDF_FILES>;
+
+    close(SHDF_FILES);
+    return @shdf_files;
+}
+
+
+
+
+sub process_argv{
+	local(@argv_list) = @_;
+
+	$option_end = 0;
+	while (@argv_list && $option_end != 1) {
+		$str = shift @argv_list;
+		if ($str =~ /^\-/) {
+
+			if ($str eq "-v") {
+				$verbose = 1;
+				$verbose_opt = "-v";
+				push(@option_list, $str);
+			} 
+			elsif ($str eq "-D") {
+				# Not push to option list
+				$output_dir = shift @argv_list;
+				do usage() if ($output_dir =~ /^-/);
+			}
+			elsif ($str eq "-m") {
+				push(@option_list, $str);
+				$str = shift @argv_list;
+				$metadata_file_opt = "-m $str";
+				push(@option_list, $str);
+			}
+			else {
+
+				push(@option_list, $str);
+				# Push option's value
+				$str = shift @argv_list;
+				push(@option_list, $str);
+			}
+		}
+		else {
+			$option_end = 1;
+		}
+	    }
+
+	if ($#argv_list != 1) {
+		do usage();
+	}
+	@save_option_list = @option_list;
+	if ($output_dir ne "") {
+		push(@save_option_list, "-D");
+		push(@save_option_list, $output_dir);
+	}
+	else {
+		$output_dir = "$curr_dir/";
+	}
+	$qc_ghdf_file =  &change2absolute_filename($curr_dir, $str);
+	$l2A55_ghdf = &change2absolute_filename($output_dir, shift @argv_list);
+	$csmap_ghdf_file = &change2absolute_filename($output_dir, shift @argv_list);
+		
+    }
+
+
+
+sub usage{
+    print STDERR "Usage ($PROG_VERSION)\n ";
+    print STDERR "\t$product [-v] [-m metadata file] [options_list]\n ";
+    print STDERR "\t\tqc_ghdf_file l2A55_ghdf_file csmap_ghdf_file\n";
+    
+    print STDERR "\twhere, \n";
+    print STDERR "\t -m:  Specify filename for metadata file.\n",
+	"\t     Default:\"\$GVS_DATA_PATH/2A54_metadata.txt\"\n";
+
+    print STDERR "\t[options_list] = options for singlevos_2A-54-dc\n";
+    print STDERR "\tExecute 'singlevos_2A-54-dc' to see a list of options.\n";
+
+    exit ($SEVERE_ERROR_CODE);
+}
+
+
+sub get_file_mod_date {
+	local($fname) = @_;
+	# Return last modified date for file
+
+	local($dev, $ino, $mod, $nlink, $uid, $gid, $rdv, $size, $atime, $mtime, $ctime, $blksize, $blocks) = stat($fname);
+	local($sec, $min, $hour, $mday, $mon, $yr, $wday, $yday, $isdst) = localtime($mtime);
+	$yr += 1900;
+	$mon ++;
+	do change_to_2digits(*mon);
+	do change_to_2digits(*mday);
+	local($mdate) = "$yr/$mon/$mday";
+	return $mdate;
+}
+
+
+sub change_to_2digits {
+	local(*num) = @_;
+	# Change num to tw0-digit number
+
+	$num = "0".$num if ($num eq "1" || $num eq "2" || $num eq "3" || 
+						$num eq "4" || $num eq "5" ||
+						$num eq "6" || $num eq "7" || $num eq "8" ||
+						$num eq "9");
+}
+
+
+sub create_product {
+	# Granulize single vos products or create an empty granule product.
+    # Return 0 for successful; -1, otherwise
+
+	local($rc);
+	
+    # Place input files, their gen. date, and program's options to a tmp file.
+    # file format: 
+	#    line 1: input files separated by space
+	#    line 2: input files' generated date separated by space
+	#    line 3: program's runtime options.
+	#
+	local($param_info_fname) = "$tmpdir/param_info.dat";
+	open(TMP_FILE, "> $tmpdir/param_info.dat") || return -1;
+	local(@qc_path) = split(/\//, $qc_ghdf_file);
+	print TMP_FILE "$qc_path[$#qc_path]\n";
+	# Get infiles' modified dates.
+	local($qc_file_mdate) = &get_file_mod_date($qc_ghdf_file);
+
+	print TMP_FILE "$qc_file_mdate \n";
+	print TMP_FILE "@save_option_list\n";
+	close(TMP_FILE);
+
+	if ($#csmap_shdf_file_list < 0) {
+		# Create an empty granule product
+		local($outfile) = $csmap_ghdf_file;
+		$outfile = $output_dir."/".$csmap_ghdf_file 
+			if ($output_dir ne "" && $csmap_ghdf_file !~ /.*\/.+/);
+		local($cmd) = "level_2_create_empty_granule_hdf $verbose_opt $metadata_file_opt -p $param_info_fname 4 $qc_ghdf_file $outfile";
+		$rc = & do_system_call($cmd);
+	}
+	else {
+		# Granulize single vos file(s).
+		local(@qc_path) = split(/\//, $qc_ghdf_file);
+		$qc_path[$#qc_path] = "";    # remove fname 
+		local($qc_dir) = join('/', @qc_path);
+	$qc_dir = "." if ($qc_dir eq "");
+		local($csmap_shdf_file_str) = join (' ', @csmap_shdf_file_list);
+		local($out_dir_opt) = "";
+		$out_dir_opt = "-o $output_dir" if ($output_dir ne "");
+		local($cmd) = "level_2_singlevos_hdf_to_ghdf $verbose_opt $out_dir_opt -q $qc_dir -p $param_info_fname 4 $csmap_shdf_file_str $csmap_ghdf_file";
+		if ($verbose) {
+			print STDERR "$product: Executing...$cmd\n";
+		}
+		$rc = & do_system_call($cmd);
+	}
+	return $rc;
+}

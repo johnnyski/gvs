@@ -1,0 +1,651 @@
+#! /usr/bin/perl
+#-*-Perl-*-
+#
+#
+# This script process 2A-53-{w|d|c|v4|dc} or 2A-55 product at granuled level. 
+# It will execute any 2A-53 algorithm, if and only if, there is a program
+# called 'singlevos_2A-53-?'.  Where '?' is anything which uniquely
+# identifies the 2A-53 product.  Herein, we use single letters to 
+# distinguish running Danny's (d), Witek's (w), simple simon, PI-c (c),
+# version 4 (v4), or dual-cappi (dc).
+#
+# It does the following:
+#   1. Degranulize the HDF file for 1C-51 via level_1_ghdf_to_singlevos_uf. Note: This script
+#      reads UF filenames from stdin which is stdout of level_1_ghdf_to_singlevos_uf.
+#
+#    **Note: skip steps 2 and 3 if a 2A-55 HDF is being produced without 
+#      a 2A-54 csmap (the 2A-55 will contain no CFAD or VPROF)
+#
+#   2. Degranulize the HDF file for 2A-54 via level_2_ghdf_to_singlevos_hdf. 
+#      Note: This script reads csmap filenames from stdin which is stdout 
+#      of level_2_ghdf_to_singlevos_hdf.
+#   3. For each UF file and its associated 2A-54 HDF file, it calls 
+#      'singlevos_2A-53-w', 'singlevos_2A-53-v4', 'singlevos_2A-53-dc',
+#      'singlevos_2A-53-d', or 'singlevos_2A-55' to produce product 
+#      (single VOS HDF file).
+#
+#   4. Implode single VOS HDF file(s) to one hour granuled HDF file.
+#   5. Returns -2 Program was aborted by SIGINT (^C).
+#              -1 if failure occurred and couldn't continue.
+#               0 Successful.
+#               1 Failure occurred during processing for some VOS but could
+#                 continue for other VOS.
+#              
+#   Requires: 
+#
+#     $GVS_DATA_PATH/gv_radar_site_info.data -- when the program creates 
+#             an empty granule product.
+#
+# NOTES:
+#   This script will remove all temporary UF, csmap, and product's single 
+#   VOS HDF files.
+#
+# By:    Thuy Nguyen
+#        NASA/TRMM Office
+#        Thuy.Nguyen@gsfc.nasa.gov
+#        June 11, 1995
+#
+#############################################################################
+unshift (@INC, ".", "/usr/local/trmm/GVBOX/bin");
+do 'gv_utilities.pl';
+$PROG_VERSION = "gvs-v4.21";
+$product = $this_prog;
+
+$product = $path[$#path];
+$p2a53v4 = "2A-53-v4";
+$p2a53dc = "2A-53-dc";
+
+$fpath = $ENV{'GVS_DATA_PATH'};
+if ($fpath eq "") {
+	$fpath = "/usr/local/trmm/GVBOX/data";  # Default
+}
+$zr_table_fname = ""; # Default will be picked later.
+@output_shdf_file_list = ();  # file name of single VOS HDF files
+$csmap_ghdf_file = "";
+$qc_ghdf_file  = "";
+$l2A55_ghdf_file = "";
+@save_option_list = ();
+$prod = "";
+$output_dir = "";      # Default, use pathname in output_ghdf_file
+$site = "";
+$metadata_file_opt = "";
+$use_csmap = 1;         # Default, use 2A54 csmap (for 2A55 product)
+do process_argv(@ARGV);
+
+# If site name is not specified, try to get it from 1C-51 HDF file here at
+# this level of processing. Passing site info down to the actual program 
+# would improve performance since it eliminates the actual program from
+# getting site name from the input file each time it is called.
+if ($site eq "" && $prod eq "2A-55") {
+	$site = &get_site_name_from_uf_file($qc_ghdf_file);
+	# Add option to option list.
+	push(@option_list, "-S");
+	push(@option_list, $site);
+}
+
+$third_infile = "";
+$third_infile = $zr_table_fname if ($prod eq $p2a53v4 || $prod eq $p2a53dc);
+print STDERR "which prog: $0\n" if $verbose;
+# create tmp dir to explode data to 
+$tmpdir = "tmp$$";
+do do_system_call("mkdir $tmpdir");
+if($prod ne $p2a53dc) {
+# degranulize the HDF file for 1C-51
+    if ($verbose) {
+	print STDERR "$product: degranulizing $qc_ghdf_file\n";
+    }
+    @uf_file_list = &degranulize_qc_hdf($qc_ghdf_file);
+}
+
+if($use_csmap) {
+    @csmap_shdf_file_list = &degranulize_csmap_hdf($csmap_ghdf_file);
+}
+
+if($prod eq $p2a53dc) {
+    @l2A55_shdf_file_list = &degranulize_2A55_hdf($l2A55_ghdf_file);
+}
+
+if ($verbose) {
+    print STDERR "uf file = \n@uf_file_list\n";
+    if($use_csmap) {
+        print STDERR "csmap file = \n@csmap_shdf_file_list\n";
+    }
+}
+
+$vos_id = 0;
+$failure = 0;
+
+# call progam to produce csmap for one VOS.
+if ($prod eq $p2a53dc) {
+    
+    while(@csmap_shdf_file_list) {
+	$csmap_shdf_file = shift @csmap_shdf_file_list;
+	chomp($csmap_shdf_file);
+	chomp($l2A55_file);
+
+	if ($zr_table_fname eq "") {
+            # csmap looks like this:           
+            # tmp4193/2A54.981202.24.KWAJ.2.2301.hdf
+
+	    # Construct the command 'grep_runtime_parm.pl'
+	    @csmap = split('/', $csmap_shdf_file);
+	    $csmap = $csmap[$#csmap];
+	    ($pref, $z_date, $z_gran, $z_site, $z_ver, $z_time) = split(/\./,$csmap);
+	    # Cannonicalize the date and time.
+	    $z_date =~ s/(\d\d)(\d\d)(\d\d)/$2\/$3\/$1/;
+	    $z_time =~ s/(\d\d)(\d\d)/$1:$2/;
+	    
+	    $cmd = "grep_runtime_parm.pl $z_date $z_time < $fpath/runtime_2A-53_"."$z_site".".txt";
+	    print STDERR "\n==<$cmd>==\n" if $verbose;
+	    $third_infile = `$cmd`;
+	    chop $third_infile;
+	    $third_infile =~ s/[ ]*-z\s+//; # Remove -z string.
+	    if ($third_infile eq "") {
+		$third_infile = "$fpath/dual.zr";
+	    } else {
+		$third_infile = "$fpath/$third_infile" if ($third_infile !~ /^\//);
+	    }
+	    print STDERR "\n\n=== third_infile = $third_infile ===\n\n" if ($verbose);
+
+	}
+
+
+        # set output filename
+	($tmp_file = $csmap_shdf_file) =~ s/\/2A54./\//;
+	$output_shdf_file = "$tmp_file.$prod";
+
+	$l2A55_file = get_l2A55_hdf_file($csmap_shdf_file);
+	if ($l2A55_file eq "") {
+	    if ($verbose) {
+		print STDERR "$product: There is no l2A55 associated with $csmap_shdf_file. Skip.\n";
+	    }
+	    next;
+	}
+	$options_str = join(' ', @option_list);
+	$cmd = "$prog_exe $options_str $l2A55_file $csmap_shdf_file $third_infile $output_shdf_file"; 
+	
+	if ($verbose) {
+	    print STDERR "$product: Executing...$cmd\n";
+	}
+	local ($rc) = & do_system_call($cmd);  
+	
+	unlink ($csmap_shdf_file);  # remove csmap file 
+	unlink ($l2A55_file);       # and l2A55_file
+
+	if ($rc != 0) {
+	    $failure++;
+	    next;   # continue 
+	}
+	if ($verbose) {
+	    print STDERR "$product: Success producing $output_shdf_file\n";
+	}
+	push(@output_shdf_file_list, $output_shdf_file);
+	
+    }
+}
+# all products other than 2A-53-dc
+else{
+
+    while (@uf_file_list) {
+	$uf_file = shift @uf_file_list;
+
+	chop($uf_file);  # remove newline 
+ 	($tmp_file = $uf_file) =~ s/.uf.*/.hdf/;
+	$output_shdf_file = "$tmp_file.$prod";
+
+# Determine the zr_table filename.  This is done when it is 
+# not specified on the command line (ie. when using the default)
+# by extracting time information from the uf filename and calling
+# a program 'grep_runtime_parm.pl mm/dd/yy hh:mm'.  The string written
+# to stdout are the runtime parameters; typically, only the actual
+# ZR file is specified.  ZR file names can be anything, but, from here
+# they'll have the form: *_<site>.zr.  Where '*' is typically, 'dual' or
+# 'dual_jan98'.
+#
+# Note: '-z ZR_table' is a preferred way to used this program, however,
+#       this program will automatically generate a ZR filename when one
+#       is not specified.
+#
+# The runtime file used has the form:
+#    runtime_2A-53_<site>.txt
+#
+#    For site = MELB, DARW, KWAJ, GUAM, ISBN, SAOP, THOM, TWWF, HSTN
+#
+	if ($zr_table_fname eq "" && $prod eq $p2a53v4) {
+	    # Construct the command 'grep_runtime_parm.pl'
+	    @uf = split('/', $uf_file);
+	    $uf = $uf[$#uf];
+	    ($z_date, $z_gran, $z_site, $z_ver, $z_time) = split(/\./,$uf);
+# Cannonicalize the date and time.
+	    $z_date =~ s/(\d\d)(\d\d)(\d\d)/$2\/$3\/$1/;
+	    $z_time =~ s/(\d\d)(\d\d)/$1:$2/;
+	    
+	    $cmd = "grep_runtime_parm.pl $z_date $z_time < $fpath/runtime_2A-53_"."$z_site".".txt";
+	    print STDERR "\n==<$cmd>==\n" if $verbose;
+	    $third_infile = `$cmd`;
+	    chop $third_infile;
+	    $third_infile =~ s/[ ]*-z\s+//; # Remove -z string.
+	    if ($third_infile eq "") {
+		$third_infile = "$fpath/dual.zr";
+	    } else {
+		$third_infile = "$fpath/$third_infile" if ($third_infile !~ /^\//);
+	    }
+	    print STDERR "\n\n=== third_infile = $third_infile ===\n\n" if ($verbose);
+
+	}
+
+
+	if ($use_csmap) {
+	    
+            # get the csmap file associated with the UF file
+	    $csmap_shdf_file = &get_csmap_hdf_file($uf_file);
+	    if ($csmap_shdf_file eq "") {
+		if ($verbose) {
+		    print STDERR "$product: There is no csmap associated with $uf_file. Skip.\n";
+		}
+		next;
+	    }
+	    $options_str = join(' ', @option_list);
+
+
+	    $cmd = "$prog_exe $options_str $uf_file $csmap_shdf_file $third_infile $output_shdf_file"; 
+
+	}
+	else {
+	    # call progam to produce 2A55 map for one VOS.
+	    $options_str = join(' ', @option_list);
+	    $cmd = "$prog_exe $options_str $uf_file $third_infile $output_shdf_file";  
+	}
+
+	if ($verbose) {
+	    print STDERR "$product: Executing...$cmd\n";
+	}
+	local ($rc) = & do_system_call($cmd);				# 
+
+	unlink ($uf_file);          # remove uf file 
+	if($use_csmap) {
+	    unlink ($csmap_shdf_file);  # remove csmap file 
+	}
+	if ($rc != 0) {
+	    $failure++;
+	    next;   # continue 
+	}
+	if ($verbose) {
+	    print STDERR "$product: Success producing $output_shdf_file\n";
+	}
+	push(@output_shdf_file_list, $output_shdf_file);
+    }
+}
+# 	
+$rc = do create_product();
+#debug
+#do cleanup();
+if ($rc != 0) {
+    if ($verbose) {
+	print STDERR "$product: Failed.\n";
+    }
+    exit(-1);
+}
+
+if ($failure > 0) {
+    $msg = "$product: Warning: Failure(s) has occurred when running $prog_exe for single VOS of $qc_ghdf_file.\n";
+    $rc = 1;
+}
+else {
+    $msg = "$product: Successful.\n";
+    $rc = 0;
+}
+if ($verbose) {
+	print  STDERR $msg;
+}
+exit($rc);
+
+
+
+############################## Subroutines Section #######################
+
+sub usage {
+	print STDERR <<EOF;
+Usage ($PROG_VERSION):  $product [-v] [-m metadata_file]
+\t\t\t[options_list]
+\t\t\t{2A-53-{c,w,d,v4,dc} | 2A-55}
+\t\t\tqc_ghdf_file csmap_ghdf_file [l2A55_ghdf_file] output_ghdf_file
+  where:
+    -m metadata_file  -- Filename for metadata file.
+                         Default: '\$GVS_DATA_PATH/2A5{3|5}_metadata.txt'
+
+    options_list = options for 2A-53-{d,w,c,v4,dc} or 2A-55.
+
+                   Execute any one of:
+                        singlevos_2A-53-w,
+                        singlevos_2A-53-d,
+                        singlevos_2A-53-c,
+                        singlevos_2A-53-v4,
+                        singlevos_2A-53-dc,
+                        singlevos_2A-55
+
+                   to see a list of options for that product.  You must
+                   specify one of these products.  'singlevos_2A-53-v4'
+                   and 'singlevos_2A-55' are production ready.
+
+    For 'singlevos_2A-53-v4' and 'singlevos_2A-53-dc', use [-z ZR_table] 
+    to specify a ZR_table.  Default: \$GVS_DATA_PATH/dual.zr.  Or, ZR
+    tables may be specified via the 2A-53 runtime file:
+    \$GVS_DATA_PATH/runtime_2A-53_<SITE>.txt which is the
+    default action, if no ZR table is specified.
+   
+    For 2A-55, if [csmap_ghdf_file] is passed in as NULL,
+    an [output_ghdf_file] is produced containing only 3d reflectivity 
+    (no CFAD or VPROF) - only do this to make 2A55 product.
+
+    2A-53-dc product requires [l2A55_ghdf_file] command-line argument.
+    
+EOF
+        exit (-1);
+}
+
+
+sub process_argv{
+	local(@argv_list) = @_;
+
+	do usage() if $#argv_list < 0;
+	@files_list = @argv_list[$#argv_list-4..$#argv_list]; # last 5 items.
+	@option_list = @argv_list[0..$#argv_list-4]; # Every option up to ...
+	if($files_list[1] =~ /2A-5[35]/){
+	    shift @files_list;
+
+	    if ($#files_list != 3) {
+		do usage();
+	    }
+	}
+	else { 
+	    # assume files_list has 5 elements, and that noone is _trying_ to 
+	    # run this incorrectly by passing strange arguments
+	    # need to remove last option
+	    pop @option_list;
+
+	    if ($#files_list != 4) {
+		do usage();
+	    }
+	}
+
+	$prod = $files_list[0];
+	$qc_ghdf_file = $files_list[1];
+	$csmap_ghdf_file = $files_list[2];
+	if ($csmap_ghdf_file =~ "NULL") {  # to produce 2A55 without CFAD and VPROF
+	    if ($prod =~ "2A-55") {
+		$use_csmap = 0;
+	    }
+	    else {
+		do usage();
+	    }
+	}
+	if ($prod =~ "2A-53-dc") {
+	    $l2A55_ghdf_file = $files_list[3];
+	    $output_ghdf_file = $files_list[4];
+	}
+	else {
+	    $output_ghdf_file = $files_list[3];
+	}
+
+	if ($prod =~ "2A-53") {
+		$pcode = "3";
+	}
+	elsif ($prod =~ "2A-55") {
+		$pcode = "5";
+	}
+	else {
+		print STDERR "$product: $prod is not recognized.\n";
+		do usage();
+	}
+	$verbose = 0;
+	@save_option_list = @option_list;
+	@new_option_list = ();
+	while(@option_list) {
+		$s = shift @option_list;
+		if ($s eq "-v") {
+			$verbose = 1;
+			$verbose_opt = "-v";
+		}
+
+		if ((($prod eq $p2a53v4) || ($prod eq $p2a53dc)) && ($s eq "-z")) {
+			# Don't want to include the '-z' string for zr_table
+            # specification in the option list for singlevos_2A_53-v4 or singlevos_2A_53-dc
+			$s = shift @option_list;
+			$zr_table_fname = $s;
+		}
+		elsif ($s eq "-D" && $prod eq "2A-55") {
+			# Not push to option list
+			$output_dir = shift @option_list;
+			do usage() if ($output_dir =~ /^-/);
+
+		}
+		elsif ($s eq "-S" && $prod eq "2A-55") {
+			$site = shift @option_list;
+			push(@new_option_list, $s);
+			push(@new_option_list, $site);
+		}
+		elsif ($s eq "-m") {
+			push(@new_option_list, $s);
+			local($str) = shift @option_list;
+			$metadata_file_opt = "-m $str";
+			push(@new_option_list, $str);
+		}
+		else {
+
+			push(@new_option_list, $s);
+		}
+
+	}
+	@option_list = @new_option_list;
+	$prog_exe = "singlevos_$prod";
+}
+
+sub degranulize_qc_hdf {
+	# splits and converts granuled hdf file to UF file(s) for 1C-51 
+	# Returns a list of UF files
+	local($ghdf_file) = @_;
+	local($cmd) = "level_1_ghdf_to_singlevos_uf $verbose_opt -u $tmpdir $ghdf_file|";
+	if ($verbose) {
+		print STDERR "$product: Executing ... $cmd\n";
+	}
+	open(UF_FILES, $cmd) || die "Couldn't run $cmd: $!\n";
+	@uf_files = <UF_FILES>;
+	close(UF_FILES);
+	return @uf_files;
+}
+
+sub degranulize_csmap_hdf {
+	# splits granuled hdf file to single VOS HDF file(s) for 2A-54
+	# Returns a list of single HDF files
+	local($ghdf_file) = @_;
+	
+	local($cmd) = "level_2_ghdf_to_singlevos_hdf $verbose_opt -d $tmpdir 4 $ghdf_file|";
+	if ($verbose) {
+		print STDERR "$product: Executing ... $cmd\n";
+	}
+	open(SHDF_FILES, $cmd) || die "Couldn't run $cmd: $!\n";
+	@shdf_files = <SHDF_FILES>;
+	close(SHDF_FILES);
+	return @shdf_files;
+}
+
+# for dual-cappi 2A53 product
+sub degranulize_2A55_hdf {
+	# splits granuled hdf file to single VOS HDF file(s) 
+	# Returns a list of single hdf files
+	local($ghdf_file) = @_;
+	
+	local($cmd) = "level_2_ghdf_to_singlevos_hdf $verbose_opt -d $tmpdir 5 $ghdf_file|";
+	if ($verbose) {
+		print STDERR "$product: Executing ... $cmd\n";
+	}
+	open(SHDF_FILES, $cmd) || die "Couldn't run $cmd: $!\n";
+	@shdf_files = <SHDF_FILES>;
+	close(SHDF_FILES);
+	return @shdf_files;
+}
+
+sub do_system_call {
+	local($cmd) = @_;
+	local($rc) = 0;
+	system($cmd);
+	$status = $? >> 8;			# 
+	local($sig) = $? & 255;
+	do doexit_handler($sig) if ($sig != 0);
+	do doexit_handler('INT') if ($status == -2 || $status == 254);
+
+	if ($status != 0) {
+		print STDERR "$product: Failed executing ... $cmd\n";
+		$rc = -1;
+	}
+	return $rc;
+}
+
+sub cleanup {
+	# remove uf, csmap, and output single VOS hdf file(s)
+
+	unlink (@uf_file_list);
+	unlink (@csmap_shdf_file_list);
+	unlink (@output_shdf_file_list);
+	do do_system_call("rm -rf $tmpdir");
+}
+
+sub get_csmap_hdf_file {
+	# get csmap file that has the same <HHMM> as the UF file.
+	# This assumes that the data files are from the same date.
+
+	local($uf_file) = @_;
+	@tmp_csmap_shdf_file_list = @csmap_shdf_file_list;
+
+	while (@tmp_csmap_shdf_file_list) {
+		local($tmp_file) = shift @tmp_csmap_shdf_file_list;
+		chop $tmp_file;  # remove newline
+		local($time_str) = $tmp_file =~ /\.(\d\d\d\d)\..+$/;
+		if ($uf_file =~ /\.${time_str}\./) {
+			return $tmp_file;
+		}
+	}
+	return "";
+}
+
+
+sub get_l2A55_hdf_file {
+	# get l2A55 file that has the same <HHMM> as the csmap file.
+	# This assumes that the data files are from the same date.
+
+	local($csmap_file) = @_;
+	@tmp_2A55_shdf_file_list = @l2A55_shdf_file_list;
+
+	while (@tmp_2A55_shdf_file_list) {
+		local($tmp_file) = shift @tmp_2A55_shdf_file_list;
+		print STDERR "get_l2A55: $tmp_file $csmap_file\n";
+		chop $tmp_file;  # remove newline
+		local($time_str) = $tmp_file =~ /\.(\d\d\d\d)\.hdf$/;
+		if ($csmap_file =~ /\.${time_str}\.hdf/) {
+			return $tmp_file;
+		}
+	}
+	return "";
+}
+
+sub doexit_handler {
+	# This routine was called when interrupt occurred.
+	# Clean up and exit.
+	local($signal) = @_;
+
+	# Restore STDERR and STDOUT.  This is required since both stderr and stdout
+    # were redirected in the calling program, all_tape_level_1n2.
+	close(1);
+	close(2);
+	open(STDOUT, ">/dev/tty");
+	open(STDERR, ">/dev/tty");
+	$| = 1;
+	while(wait != -1) {;}
+#debug
+#    do cleanup();
+	print STDERR "$product: Interrupted. Got signal <$signal>. Abort execution. Time =".time."\n";
+
+	exit(-2) if ($signal == 'KILL' || $signal == 'INT' || $signal == 'STOP');
+	exit(-1);
+}
+
+sub change_to_2digits {
+	local(*num) = @_;
+	# Change num to tw0-digit number
+
+	$num = "0".$num if ($num eq "1" || $num eq "2" || $num eq "3" || 
+						$num eq "4" || $num eq "5" ||
+						$num eq "6" || $num eq "7" || $num eq "8" ||
+						$num eq "9");
+}
+
+sub get_file_mod_date {
+	local($fname) = @_;
+	# Return last modified date for file if it exists; "", otherwise.
+
+	return "" if ($fname eq "" || !(-e $fname));
+	local($dev, $ino, $mod, $nlink, $uid, $gid, $rdv, $size, $atime, $mtime, $ctime, $blksize, $blocks) = stat($fname);
+	local($sec, $min, $hour, $mday, $mon, $yr, $wday, $yday, $isdst) = localtime($mtime);
+	$yr += 1900;
+	$mon ++;
+	change_to_2digits(*mon);
+	change_to_2digits(*mday);
+	local($mdate) = "$yr/$mon/$mday";
+	return $mdate;
+}
+
+
+sub create_product {
+	# Create empty granule or granulize single VOS file(s).
+	# Return 0 for successful; -1, otherwise
+
+	local($rc);
+	
+    # Place input files, their gen. date, and program's options to a tmp file.
+    # file format: 
+	#    line 1: input files separated by space
+	#    line 2: input files' generated date separated by space
+	#    line 3: program's runtime options.
+	#
+	local($param_info_fname) = "$tmpdir/param_info.dat";
+	open(TMP_FILE, "> $tmpdir/param_info.dat") || return -1;
+
+	local(@qc_path) = split(/\//, $qc_ghdf_file);
+	local(@csmap_path) = split(/\//, $csmap_ghdf_file);
+	local(@third_file_path) = split(/\//, $third_infile);
+	print TMP_FILE "$qc_path[$#qc_path] $csmap_path[$#csmap_path] $third_file_path[$#third_file_path]\n";
+	# Get infiles' modified dates.
+	local($qc_file_mdate) = &get_file_mod_date($qc_ghdf_file);
+	local($csmap_file_mdate) = &get_file_mod_date($csmap_ghdf_file);
+	local($third_infile_mdate) = &get_file_mod_date($third_infile);
+	print TMP_FILE "$qc_file_mdate $csmap_file_mdate $third_infile_mdate\n";
+	print TMP_FILE "@save_option_list\n";
+	close(TMP_FILE);
+
+
+	if ($#output_shdf_file_list < 0) {
+		# Create an empty granule product
+		local($outfile) = $output_ghdf_file;
+		$outfile = $output_dir."/".$output_ghdf_file 
+			if ($output_dir ne "" && $output_ghdf_file !~ /.*\/.+/);
+		local($cmd) = "level_2_create_empty_granule_hdf $verbose_opt $metadata_file_opt -p $param_info_fname $pcode $qc_ghdf_file $outfile";
+		$rc = & do_system_call($cmd);
+	}
+	else {
+		# Granulize single VOS file(s).
+		local(@qc_path) = split(/\//, $qc_ghdf_file);
+		$qc_path[$#qc_path] = "";    # remove fname 
+		local($qc_dir) = join('/', @qc_path);
+		$qc_dir = "./" if ($qc_dir eq "");
+		local($output_shdf_file_str) = join (' ', @output_shdf_file_list);
+		local($out_dir_opt) = "";
+		$out_dir_opt = "-o $output_dir" if $output_dir ne "";
+		local($cmd) = "level_2_singlevos_hdf_to_ghdf $verbose_opt $out_dir_opt -q $qc_dir $metadata_file_opt -p $param_info_fname $pcode $output_shdf_file_str $output_ghdf_file";
+		if ($verbose) {
+			print STDERR "$product: Executing...$cmd\n";
+		}
+		$rc = & do_system_call($cmd);
+	}
+	return $rc;
+}

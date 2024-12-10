@@ -1,0 +1,225 @@
+<HTML>
+<HEAD>
+   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+   <META NAME="GENERATOR" CONTENT="Mozilla/4.04 [en] (X11; I; Linux 2.0.28 i686) [Netscape]">
+</HEAD>
+<BODY BACKGROUND="gvs_bg.gif">
+&nbsp;
+<CENTER><TABLE BORDER=2 CELLPADDING=0 WIDTH="100%" >
+<TR ALIGN=CENTER VALIGN=CENTER>
+<TD ALIGN=CENTER VALIGN=CENTER><IMG SRC="gvs_logo.gif" HEIGHT=100 WIDTH=256 ALIGN=LEFT></TD>
+
+<TD>
+<H1>
+<FONT COLOR="#000080">2A-55:</FONT> <FONT COLOR="#800080">Three-Dimensional
+Reflectivity</FONT>&nbsp;</H1>
+</TD>
+</TR>
+</TABLE></CENTER>
+
+<HR WIDTH="100%">Last updated: 8/12/98
+<HR>
+<H3>
+<FONT COLOR="#000080">Synopsis</FONT></H3>
+
+<PRE><B><FONT COLOR="#B22222">2A-55 [-v] [<I><TT>options_list</TT></I>] <I><TT>qc_ghdf_file</TT></I> <I><TT>csmap_ghdf_file 2A55_ghdf_file
+
+</TT></I>singlevos_2A-55 [-v] [<I><TT>options_list</TT></I>] <I><TT>qc_uf_file csmap_shdf_file 2A55_shdf_file</TT></I></FONT></B></PRE>
+
+<PRE><B>where:
+
+<FONT COLOR="#B22222">options_list</FONT> := <FONT COLOR="#B22222">[-S</FONT></B><I><TT><FONT COLOR="#B22222"> <B>site_name</B></FONT></TT></I><B><FONT COLOR="#B22222">] [-s <I><TT>sprint_input_template</TT></I>]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [-g <I>geographical_mask_filename</I>] [-H <I>horizontal_resolution</I>]&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [-V <I>vertical_resolution</I>][-d <I><TT>YYMMDD_HHMM</TT></I>]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [-l <I><TT>result_log_file</TT></I>] [-p <I><TT>data_path</TT></I>] [-D <I><TT>output_dir</TT></I>]&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [-M <I><TT>save_mudras_fname</TT></I>][<TT>-m <I>metadata_fname</I>]</TT></FONT></B></PRE>
+
+<HR>
+<H3>
+<FONT COLOR="#000080">Description</FONT></H3>
+Three-Dimensional reflectivity.<B> <FONT COLOR="#B22222">2A-55</FONT></B>
+calls <B><FONT COLOR="#B22222">singlevos_2A-55</FONT></B><FONT COLOR="#000000">
+which i</FONT>nterpolates the entire volume for a single VOS of 1C-51 product
+from polar to cartesian coordinate. It produces an HDF file containing
+vertical profile, CUBE (3D radar volume) , and CFADs (Array of histograms
+by height). <B><FONT COLOR="#B22222">2A-55</FONT></B> produces product
+for one hour-granule.
+
+<P>
+<HR>
+<H3>
+<FONT COLOR="#000080">Options</FONT></H3>
+<B><FONT COLOR="#B22222">2A-55</FONT></B> and <B><FONT COLOR="#B22222">singlevos_2A-55</FONT></B>
+recognize the following options:
+
+<P><B><FONT COLOR="#B22222">-v</FONT></B>: Prints arguments and status
+of the program execution.
+
+<P><B><FONT COLOR="#B22222">-S</FONT></B>: Specify TSDIS site name. It
+is case insensitive. See file, <I><TT>$GVS_DATA_PATH/gv_radar_sit_info.data</TT></I>,
+for a list of sites. Default: Will obtain from the UF file.
+
+<P><B><FONT COLOR="#B22222">-s <I><TT>sprint_input_template</TT></I></FONT>:
+</B>File contains SPRINT commands. Default is set to '<I><TT>$GVS_DATA_PATH/sprint_entire_volume.inp</TT></I>'
+or '<I><TT>/usr/local/trmm/data/sprint_entire_volume.inp</TT></I>' when
+<I><TT>$GVS_DATA_PATH</TT></I> = ""). See option <I><TT>-s</TT></I> of
+<A HREF="uf2mudras.html">uf2mudras</A> for more
+information on creating your own template.
+
+<P><B><FONT COLOR="#B22222">-g</FONT></B> Specify geographical mask filename.
+Default: <I><TT>$GVS_DATA_PATH/&lt;GV_site>_landsea_new.map.bin</TT></I>
+or <I><TT>$GVS_DATA_PATH/melb_landsea_new.map.bin</TT></I> (for other sites).
+Note: GV_site is any of the 4-char TSDIS GV site names.
+
+<P><B><FONT COLOR="#B22222">-H</FONT></B> Specify horizontal resolution
+in km. Default: 2.0.
+
+<P><B><FONT COLOR="#B22222">-V</FONT></B> Specify vertical resolution in
+km. Default: 1.5.
+
+<P><B><FONT COLOR="#B22222">-d <I><TT>YYMMDD</TT></I></FONT>: </B>Date
+of radar data. Default is set to the date string of 1C-51_product (<I><TT>*&lt;YYMMDD>*</TT></I>).
+
+<P><B><FONT COLOR="#B22222">-l <I><TT>result_log_file</TT></I></FONT>:</B>
+Result log filename to save. (Default = "<I><TT>logfile</TT></I>").
+
+<P><B><FONT COLOR="#B22222">-p <I><TT>data_path</TT></I></FONT>:</B> Pathname
+of the data files. Default is the value of the environment variable, <I><TT>$GVS_DATA_PATH</TT></I>
+or '<I><TT>/usr/local/trmm/data</TT></I>' when <I><TT>$GVS_DATA_PATH</TT></I>
+= "").
+
+<P><B><FONT COLOR="#B22222">-D <I><TT>output_dir</TT></I></FONT></B>: Directory
+to keep the result file(s). (Default="<I><TT>./</TT></I>").
+
+<P><B><FONT COLOR="#B22222">-M <I><TT>save_mudras_fname</TT></I></FONT></B>:
+Specify filename for the mudras file if you want to keep it. By default,
+the mudras file will be removed upon completion.
+
+<P><B><FONT COLOR="#B22222">-m</FONT></B> Specify filename for metadata
+file. Default: $GVS_DATA_PATH/2A55_metadata.txt.
+
+<P>
+<HR>
+<H3>
+<FONT COLOR="#000080">Input Files</FONT></H3>
+
+<OL>
+<LI>
+<FONT COLOR="#B22222">qc_uf_file</FONT> - Quality controlled reflectivity
+for a single VOS in Universal Format (1C-51 product). It must follows the
+following naming convention in order to use the default date value: <I><TT>*&lt;yymmdd>*</TT></I>.</LI>
+
+<LI>
+<FONT COLOR="#B22222">qc_ghdf_file</FONT> - Quality controlled reflectivity
+for one hour-granule in Hierarchical Data Format (HDF) (1C-51 products).
+It must follows the following naming convention in order to use the default
+date value: <I><TT>*&lt;yymmdd>*</TT></I>.</LI>
+
+<LI>
+<FONT COLOR="#B22222">csmap_shdf_file</FONT> - Convective/stratiform map
+for a single VOS in HDF (2A-54 product).</LI>
+
+<LI>
+<FONT COLOR="#B22222">csmap_ghdf_file</FONT> - Convective/stratiform map
+for one hour-granule in HDF (2A-54 products).</LI>
+
+<LI>
+<FONT COLOR="#000000">sprint_entire_volume.inp</FONT> (default for sprint_input_template).</LI>
+
+<LI>
+{gv_site}_landsea_new.map.bin (lookup tables).</LI>
+
+<LI>
+<FONT COLOR="#000000"><I>$GVS_DATA_PATH</I>/gv_radar_site_info.data --This
+is not specified on the command line (Note: Check and modify the DARW entry
+if necessary when data is from Darwin).</FONT></LI>
+</OL>
+
+<HR>
+<H3>
+<FONT COLOR="#000080">Temporary Files</FONT></H3>
+The following files are removed upon completion by this program.
+<UL>2A-55_&lt;<I>process_id</I>>/</UL>
+
+<HR WIDTH="100%">
+<H3>
+<FONT COLOR="#000080">Output Files</FONT></H3>
+
+<OL>
+<LI>
+<FONT COLOR="#B22222">2A-55-shdf_file</FONT> - This HDF file contains vertical
+profile, cube, and CFAD for a single VOS.</LI>
+
+<LI>
+<FONT COLOR="#B22222">2A-55-ghdf_file</FONT> - This HDF file contains vertical
+profiles, cubes, and CFADs for one hour-granule.</LI>
+
+<LI>
+logfile (if '<I><TT>-l'</TT></I> was specified).</LI>
+</OL>
+Stacy Brodzik's explaination for vertical profile and CFAD is as followed
+The vertical profiles are calculated from the 3d volumes.&nbsp; For each
+category (total, convective, over land, etc) and height level, the appropriate
+reflectivity values from the 3d volume are added up (missing values are
+not added in) and counted up.&nbsp; If the count for a certain category
+and height is greater than zero (i.e. there were some non-missing values
+that were added into the sum of reflectivities), the average is computed.&nbsp;
+Otherwise, a -99 or MISSINGV is assigned.<BR>
+<BR>
+The logic goes like this:<BR>
+<BR>
+for (j = 0; j &lt; params.xydim; ++j) {&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+/* for all y's */<BR>
+&nbsp;&nbsp; for (i = 0; i &lt; params.xydim; ++i) {&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+/* for all x's */<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if (grids.range_mask[j][i] == 1) {&nbsp;&nbsp;&nbsp;&nbsp;
+/* only use in-range values */<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; for (k = 0; k &lt; params.zdim;
+++k) { /* for all height levels */<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if (grids.reflog[k][j][i]
+> MISSINGV) { /* if point from 3d&nbsp;<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+volume isn't MISSINGV */<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+linearize reflectivity value<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+add it to total reflectivity for this height and category<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+increment the number of pts in sum by 1<BR>
+<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+. . . Do this summation for each category . . .<BR>
+<BR>
+for each height level and category<BR>
+&nbsp;&nbsp; if number of pts in reflectivity sum > 0<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; compute average reflectivity<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; unlinearize average value<BR>
+&nbsp;&nbsp; }<BR>
+&nbsp;&nbsp; else {<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; assign MISSINGV to this category and height<BR>
+&nbsp;&nbsp; }<BR>
+. . .<BR>
+<BR>
+<BR>
+When the visual cfads are computed, each entry is computed as the percent
+of data per dBZ per km and a cutoff altitude is computed.&nbsp; The cutoff
+is established at the altitude where the number of points (per flight level)
+drops below 10% of the max number of points at any level.<BR>
+<BR>
+<H3>
+
+<HR><FONT COLOR="#000080">Return value</FONT></H3>
+<B><FONT COLOR="#B22222">2A-55</FONT> </B>returns 0 upon successful completion;
+1 upon successful processing for some VOSs of granule; -2 upon interruption;
+non-zero upon failure.
+
+<P><B><FONT COLOR="#B22222">singlevos_2A-55</FONT></B> returns 0 upon successful
+completion; -2 upon interruption; -1 upon failure.
+
+<P>
+<HR>
+<H3>
+<FONT COLOR="#000080">Author</FONT></H3>
+Matthias Steiner et al., <I><TT>University of Washington</TT></I>
+</BODY>
+</HTML>

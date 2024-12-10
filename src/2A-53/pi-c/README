@@ -1,0 +1,41 @@
+README for 2A-53-c PI-C algorithm (12/10/99).  Packaged w/ gvs 4.14.
+
+This is a super simple simon algorithm and is meant as a place
+holder 2A-53 algorithm for TSDIS processing.  This may be the 
+DAY 1 algorithm.  Output is HDF.
+
+  Executable files:
+  ----------------
+  * 2A-53-c - The perl script, the front end to PI-C algorithm program.
+	          This produces product for one hour-granule.
+  * singlevos_2A-53-c - The perl script, the front end to PI-C
+              algorithm program.  This produces product for a single VOS.
+  * 2A53c   - Actual algorithm program.
+
+  Documentation:
+  -------------
+  * 2A-53-c.html - Documentation for 2A-53-c.
+
+  Data files:
+  ----------
+  None.
+
+
+
+EXECUTION NOTES:
+================
+'alltape_level_1n2' calls 2A-53 (in format_conversion/) which 
+calls singlevos_2A-53-c which calls 2A53c.
+
+2A-53 works on HDF granules (one hour granules).
+
+singlevos_2A-53-c works for HDF files with only one volume scan present.
+
+2A53c (2A53c.c) reads the raw data, C/S map, and outputs HDF.
+
+
+
+QUESTIONS:
+=========
+
+Please contact the TRMM Office help via email at help@trmm.gsfc.nasa.gov.

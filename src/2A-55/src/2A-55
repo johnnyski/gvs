@@ -1,0 +1,181 @@
+#! /usr/bin/perl
+#-*-Perl-*-
+#
+#
+# This script process 2A-55 product at granuled level. It does the following:
+#   1. calls '2A-53or2A-55' to produce granuled HDF file for 2A-55.
+#   2. Returns -1 if failure occurred and couldn't continue.
+#               0 Successful.
+#               1 Failure occurred during processing for some VOS but could
+#                 continue for other VOSs.
+#              -2 Program was interrupted by ^C.
+#
+#
+# Note:
+#   Have access to the executable files located in $GVS/format_conversion and
+#   in './src'.
+#
+#
+# By:    Thuy Nguyen
+#        NASA/TRMM Office
+#        Thuy.Nguyen@gsfc.nasa.gov
+#        June 13, 1995
+#
+#############################################################################
+unshift (@INC, ".", "/usr/local/trmm/GVBOX/bin");
+do 'gv_utilities.pl';
+$PROG_VERSION = "gvs-v4.21";
+
+$product = $this_prog;
+$output_dir = "";
+do process_argv(@ARGV);
+
+# Work in a tmp dir to allow parallel processing in the same dir.
+$top_tmp_working_dir = "2A-55_$$/";
+do do_system_call("mkdir -p $top_tmp_working_dir");
+# Remember to go to the curr dir when exit.
+print STDERR "$this_prog: Will work in dir: $top_tmp_working_dir\n" if ($verbose);
+chdir($top_tmp_working_dir); 
+
+$options_str = join(' ', @option_list);
+$files_str = join(' ', @files_list);
+$cmd = "2A-53or2A-55 $options_str 2A-55 $files_str";
+if ($verbose) {
+	print STDERR "$product: Executing ... $cmd\n";
+}
+system($cmd);
+$status = $? >> 8;
+local($sig) = $? & 255;
+do clean_up();
+do doexit_handler($sig) if ($sig != 0);
+do doexit_handler('INT') if ($stat == -2 || $stat == 254);
+# note 255 is checked also -- pc uses unsigned char
+if ($status == -1 || $status == 255) {
+	print STDERR "$product: Failed executing $cmd\n";
+	exit(-1);
+}
+
+if ($verbose) {
+	if ($status == 1) {
+		print STDERR "$product: Warning: Failure(s) has occurred when processing single VOS.\n";
+		$rc = 1;
+	}
+	else {
+		print STDERR "$product: Successful.\n";
+		$rc = 0;
+	}
+}
+
+exit($rc);
+
+
+
+
+############################## Subroutines Section #######################
+
+sub usage {
+        print STDERR "Usage ($PROG_VERSION):\n";
+	print STDERR "  $product [-v] [options_list]\n";
+        print STDERR "\tqc_ghdf_file [csmap_ghdf_file] output_ghdf_file\n";
+	print STDERR "  where:\n";
+	print STDERR "\toptions_list:  Execute 'singlevos_2A-55' to see a list of options.\n";
+	print STDERR "\n\tIf [csmap_ghdf_file] is not passed in, an [output_ghdf_file]\n";
+	print STDERR "\tis produced containing only 3d reflectivity (no CFAD or VPROF).\n";
+	 
+        exit (-1);
+}
+
+
+
+sub process_argv{
+	local(@argv_list) = @_;
+
+	$option_end = 0;
+	while (@argv_list && $option_end != 1) {
+		$str = shift @argv_list;
+		if ($str =~ /^\-/) {
+
+			if ($str eq "-v") {
+				$verbose = 1;
+				$verbose_opt = "-v";
+				push(@option_list, $str);
+			} 
+			elsif ($str eq "-D") {
+				# Not push to option list
+				$output_dir = shift @argv_list;
+				do usage() if ($output_dir =~ /^-/);
+			}
+			else {
+				push(@option_list, $str);
+				# skip option's value
+				$str = shift @argv_list;
+				push(@option_list, $str);
+			}
+
+		}
+		else {
+			$option_end = 1;
+		}
+	}
+	if ($#argv_list != 0 && $#argv_list != 1 ) {
+		do usage();
+	}
+	
+	push (@files_list, &change2absolute_filename($curr_dir, $str));
+	if ($#argv_list == 1) {
+	    push (@files_list, &change2absolute_filename($curr_dir, shift @argv_list));
+	}
+	# otherwise, creating a 2A55 without cfad of vprof
+	else {
+	    push (@files_list, "NULL");
+	}
+	
+	$output_dir = $curr_dir if ($output_dir eq "");
+	push (@files_list, &change2absolute_filename($output_dir, shift @argv_list));
+	
+	
+}
+
+sub clean_up {
+	chdir ($curr_dir) if ($curr_dir ne "" && -d $curr_dir);  # Go back to the original dir.
+	do do_system_call("rm -r $top_tmp_working_dir") if (-d $top_tmp_working_dir);
+}
+
+sub doexit_handler {
+	# This routine was called when interrupt occurred.
+	# Clean up and exit.
+	local($signal) = @_;
+
+	# Restore STDERR and STDOUT.  This is required since both stderr and stdout
+    # were redirected in the calling program, all_tape_level_1n2.
+	close(1);
+	close(2);
+	open(STDOUT, ">/dev/tty");
+	open(STDERR, ">/dev/tty");
+	$| = 1;
+#debug
+#	do clean_up();
+	print STDERR "$product: Got signal <$signal>. Abort execution. \n";
+	kill $signal, 0;
+	exit(-2) if ($signal ==  'STOP' || $signal == 'KILL' || $signal == 'INT'); 
+	exit(-1);
+}
+
+
+sub do_system_call {
+	local($cmd) = @_;
+
+	local($rc) = 0;
+	system($cmd);
+	
+	local($stat) = $? >> 8;
+	local($sig) = $? & 255;
+	do doexit_handler($sig) if ($sig != 0);
+# note 254 is checked also -- pc uses unsigned char
+	do doexit_handler('INT') if ($stat == -2 || $stat == 254);
+	if ($stat != 0) {
+		print STDERR "$this_prog: Error: Failed executing...$cmd\n";
+		$rc = -1;
+	}
+	return $rc;
+}

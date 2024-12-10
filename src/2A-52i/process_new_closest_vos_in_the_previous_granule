@@ -1,0 +1,241 @@
+#! /usr/bin/perl
+#-+-Perl-+-
+#
+#
+# process_closest_vos_in_the_last_granule-
+#      Find a vos from the previous granule in the end of outfile that has
+#      the time closer to the ca_date/ca_time than curr_hour_hit_vos does. 
+#      The curr_hour_hit_vos must be within 30 minutes of ca_date/ca_time
+#      or 0000-00-00 00:00:00.
+#      The new closest VOS in the previous granule must be within 30 minutes
+#      of ca_date/time also.
+#      
+#      Set the hit and CA' fields of non-closest VOSes within 30 mins of 
+#      the CA's time to the default value (no hit).
+#      Update that vos' satellite coincidence information if it exists.
+#
+#    The file must be sorted and contains no duplication.
+#
+# Exit code:
+#      1:  Closest VOS was found; file is updated.
+#      0:  No closest VOS found; file might be updated.
+#     -1:  Error
+#
+#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+# By: Thuy Nguyen
+#     Science Systems and Applications, Inc. (SSAI)
+#     NASA/TRMM Office
+#     nguyen@trmm.gsfc.nasa.gov
+#     October 15, 1997
+#
+############################################################################
+############################################################################
+
+
+############################ Main Program ##################################
+
+require "bigint.pl";  # For math functions
+
+$PROG_VERSION = "gvs-v4.21";
+unshift (@INC, ".", "/usr/local/trmm/GVBOX/bin");
+do 'gv_utilities.pl';
+$verbose = 0;
+do process_argvs(*ARGV, *ca_date, *ca_time, 
+				 *ca_distance, *curr_vos_date, *curr_vos_time, *inout_file);
+
+# Convert date/time to seconds
+	# Truncate second
+$ca_time_sec = &date_time_strs2seconds($ca_date, $ca_time);
+$curr_vos_time_sec = &date_time_strs2seconds($curr_vos_date, $curr_vos_time);
+$curr_vos_ca_diff_time_sec =  &babs($curr_vos_time_sec - $ca_time_sec);
+# curr vos time must be +/- 30 mins of the CA 's time.
+if ($curr_vos_ca_diff_time_sec > 30 * 60) {
+	print STDERR "$this_prog: The current vos' time must be +/- 30 minutes of the CA's time.\n";
+	printf STDERR "current vos date/time = %s, %s\n",$curr_vos_date, $curr_vos_time;
+	printf STDERR "CA date/time =          %s, %s\n",$ca_date, $ca_time;
+	exit($SEVERE_ERROR_CODE);
+}
+
+$rc = SUCCESS_CODE;
+# 
+#      Find a vos from the previous granule (within 30 minutes of the CA's 
+#      time) in the end of outfile that has
+#      the time closer to the ca_date/ca_time than curr_hour_hit_vos does. 
+#      Update that vos' satellite coincidence information if it exists.
+#      Reset vos that has status as 'hit' to 'no hit' since the curr_vos is
+#      the new closest VOS.
+#
+open(INFILE, $inout_file) || (do clean_up() && exit($SEVERE_ERROR_CODE));
+@infile_entries = <INFILE>;
+close(INFILE);
+# File has 3 header lines.
+do clean_up() && exit($SUCCESS_CODE) if ($#infile_entries <3);  # File has no VOS entry
+# Check the last few entries only (particularly vos within 30 mins
+# of the CA' time.
+local($i);
+$num_of_entries = $#infile_entries;
+
+$need_to_modify_file = 0;
+$suspected_closest_vos_index = -1;
+$min_time_diff = $curr_vos_ca_diff_time_sec;
+for ($i = $num_of_entries; $i >= 3; $i--) {
+	# Line format:
+	#    Data of  Time of             Distance of           Date of  Time of
+	#      VOS      VOS   % Rain Hit Closest Approach (CA)    CA       CA
+	# 1992-10-02 12:05:40.000 46  1     86.974          1992-10-02 12:30:18.697
+	#
+	local(@line_items) = split(' ', $infile_entries[$i]);
+	next if $#line_items != 6;
+	local($vos_date) = $line_items[0];
+	local($vos_time) = $line_items[1];
+	local($vos_hit) = $line_items[3];
+	# Convert date/time to seconds
+	# Truncate second
+	local($vos_time_sec) = &date_time_strs2seconds($vos_date, $vos_time);
+	local($vos_ca_time_diff_sec) = &babs($vos_time_sec - $ca_time_sec);
+
+	if ($vos_ca_time_diff_sec > 30 * 60) {
+		# Break out of loop assuming that the file is sorted in ascending 
+		# order.
+		last;
+	}
+
+	# Let the vos from file be the closest if it has the same time difference
+	if ($vos_ca_time_diff_sec <= $min_time_diff) {
+		# Suspected closest VOS is found, update its CA's fields and hit.
+		$need_to_modify_file = 1;
+		$rc = 1;   # New closest VOS found
+		$suspected_closest_vos_index = $i;
+		$min_time_diff = $vos_ca_time_diff_sec; # New closest time
+    }
+
+	# Reinitialize VOS's status of hit to default if it has been set to 1
+	# since it might not be the closest VOS any longer.
+	if ($vos_hit == 1) {
+		# SGI can't left-justify floating point, thus requiring the
+		# "ca_distanceString" workaround.
+		$ca_distanceString = sprintf "%.3f", -9999.9;
+		$infile_entries[$i] = sprintf "%s  %s    %-5d %-5d    %-10.10s    %-10.10s %s\n", $line_items[0], $line_items[1], $line_items[2], 0, 
+		$ca_distanceString, "   NULL", " NULL";
+		$need_to_modify_file = 1;			
+		if ($verbose) {
+		    print STDERR "$this_prog: Reinitialize VOS's status of hit\n";
+		    print STDERR  $infile_entries[$i];
+		}
+	}
+} # for loop
+
+if ($need_to_modify_file == 1) {
+	if ($rc == 1 && $suspected_closest_vos_index >= 3) {
+		# Update closest VOS' CA info.
+		local(@line_items) = split(' ', $infile_entries[$suspected_closest_vos_index]);
+		# SGI can't left-justify floating point, thus requiring the
+		# "ca_distanceString" workaround.
+		$ca_distanceString = sprintf "%.3f", $ca_distance;
+		$infile_entries[$suspected_closest_vos_index] = 
+			sprintf "%s  %s    %-5d %-5d    %-10.10s    %-10.10s %s\n", 
+			$line_items[0], $line_items[1], $line_items[2], 1, $ca_distanceString,
+			$ca_date, $ca_time;
+		if ($verbose) {
+		    print STDERR "$this_prog: Update closest VOS' CA info\n";
+		    print STDERR $infile_entries[$suspected_closest_vos_index];
+		}
+	}
+
+	# Write @infile_entries to file
+	open(OUTFILE, ">$inout_file");
+	print OUTFILE @infile_entries;
+	close(OUTFILE);
+}
+do clean_up();
+exit($rc);
+
+############################### Subroutines ################################
+sub usage {
+	print STDERR "Usage ($PROG_VERSION):\n";
+	print STDERR " $this_prog \n",
+	             "     ca_date ca_time ca_distance curr_vos_date curr_vos_time InOut_file\n";
+	print STDERR "  where: \n",
+	             "    date: yyyy-mm-dd\n",
+	             "    time: hh:mm:ss.sss\n",
+                 "    InOutfile is 2A-52i product file.\n",
+                 "\n",
+	             "  Note: * The time of curr_vos must be +/- 30 minutes of the ca's time or 0000-00-00 00:00:00.\n",
+	             "        * The new closest VOS in the previous granule must be within 30 minutes\n",
+	             "          of ca_date/time also.\n",
+	             "        * Set the hit and CA' fields of non-closest VOSes within 30 mins of\n",
+	             "          the CA's time to the default value (no hit).\n";
+	exit(-1);
+}
+
+sub process_argvs {
+	local(*argvs, *ca_date, *ca_time, 
+		  *ca_distance, *curr_vos_date, *curr_vos_time, *inout_file) = @_;
+	do usage() if ($#argvs < 5);
+	$ca_date = shift @argvs;
+	$ca_time = shift @argvs;
+	$ca_distance = shift @argvs;
+	$curr_vos_date = shift @argvs;
+	$curr_vos_time = shift @argvs;
+	$inout_file = shift @argvs;
+} # process_argvs
+
+sub clean_up {
+
+}
+
+sub doexit_handler {
+	local($sig) = @_;
+	do clean_up();
+	$rc = $SEVERE_ERROR_CODE;
+	$rc = $INTER_CODE if ($signal eq 'INT' || $signal eq 'KILL' || $signal eq 'STOP');
+	if ($verbose) {
+		print STDERR "Received signal <$sig>\n";
+	}
+	exit($rc);
+}
+
+
+######################################################################
+#                                                                    #
+#                            do_system_call                          #
+#                                                                    #
+######################################################################
+sub do_system_call {
+	local($cmd) = @_;
+	# Return 1 for success; -1, otherwise.
+	return -1 if ($cmd eq "");
+	local($rc) = 1;
+#print STDERR "CMD: <$cmd>\n";
+	system($cmd);
+
+	$status = $? >> 8;
+	local($signal) = $? & 255;
+
+	do doexit_handler('INT') if (&interrupted($status));
+
+	if (&is_severe_error($status) || $signal != 0) {
+		$rc = -1; # failed
+	}
+	return $rc;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

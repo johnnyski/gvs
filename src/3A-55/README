@@ -1,0 +1,75 @@
+README for 3A-55: v1.6 (12/10/99) packaged w/ GVS v4.14.
+
+Version 4.0 algorithms for level 3 for the TRMM Ground Validation Program.
+
+Contents:
+
+
+   3A-55     - Mainline code to process granules (input and output).
+               Critical arguments are BEGIN, MIDDLE, END.  These
+               control when accumulations are performed and when 
+               the final HDF files are produced.
+
+   3A-55_ascii2hdf - Called by 3A-55 for END.
+                     Input is ASCII for both CFADS and Vertical
+                     profiles, and metadata (binary form).
+                     Output is 3A-55 HDF product.
+
+   level_3_accu_cfad  - Called by 3A-55 for BEGIN, MIDDLE and END.  Output
+                        is ready for 3A-55_ascii2hdf.
+
+   level_3_accu_vprof - Called by 3A-55 for BEGIN and MIDDLE.  Output is
+                        a binary intermediate file that must be
+                        processed through level_3_mean_vprof to produce
+                        the ascii file for 3A-55_ascii2hdf.
+
+   level_3_mean_vprof - Called by 3A-55 for END.  Read the intermediate
+                        file of level_3_accu_vprof and output ascii.
+
+
+   level_2_dump_metadata - Dump level 2 granule (HDF) metadata to STDOUT
+                           in binary form.  (you'll get a mess on your
+                           terminal, if you forget to redirect the output!)
+
+   level_3_finalize_metadata - Modify a binary metadata file (the structure
+                               is in ../utils/hdf_metadata.h) with additional
+                               metadata items specified on the command
+                               line.
+   3A-55.html - Documentation.
+
+   3A55_metadata.txt - Data file.
+
+
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+(a) Documentation is located in 3A-55.html and can be viewed with 
+    netscape or mosaic.
+
+(b) The directories which you have installed the executable files
+    should be in your search path.
+
+
+EXECUTION NOTES:
+---------------
+
+None.
+
+
+QUESTIONS:
+----------
+
+Please contact the TRMM Office help via e-mail at help@trmm.gsfc.nasa.gov.
+
+
+
+AUTHOR:
+---------
+  John H. Merritt
+  Space Applications Corporation
+  NASA/TRMM Office
+  Vienna VA
+  John.H.Merritt@gsfc.nasa.gov
+
+------------------------------------------------------------------------------
+

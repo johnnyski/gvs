@@ -1,0 +1,19 @@
+# QC PARAMETERS	TABLE
+# SITE: Tampa Bay, FL USA
+
+# Add line(s) to the end of this table to complement or override those
+# QC parameters specified on previous lines of the table.
+#
+# Use '#' as the 1st character of a comment line.
+#
+# The QC parameters applied to a radar volume scan are found via a
+# bottom_to_top table search for a match between the VOS date/time and a
+# table entry date/time.
+
+
+
+#min hour day mon year hThresh1 hThresh2 hThresh3 zThresh0 zThresh1 zThresh2 zThresh3 hFreeze dbzNoise zCalibr
+#------------------------------------------------------------------------------------------------------------
+ *    *    *    *   *   1.5      2.5      3.0        5.3      10.0     18.0     30.0     -99.0     0.0    0.0
+# Example: Hours 6pm to midnight of the 1st 16 days of months Jan thru Mar of 1992
+ *  18-23 1-16 1-3  92  1.5      2.5      2.0        5.3       5.0     18.0     30.0     -99.0     0.0    0.0

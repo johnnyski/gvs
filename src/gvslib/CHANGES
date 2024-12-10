@@ -1,0 +1,94 @@
+gvs/src/gvslib/CHANGES
+
+11/22/02
+----------------------------------------------------
+1. D. Silberstein corrected computation of bounding coordinates in
+   gvs_metadata.c
+
+10/16/01
+----------------------------------------------------
+1. Modified  gvs_metadata.c to use product version number from metadata file
+   for level 3 HDF.
+
+5/09/00
+----------------------------------------------------
+* Fixed Y2K bug.
+
+v1.12 (??/99) initially packaged w/ GVS v4.13
+----------------------------------------------------
+1. Moved files from ../utils that make the library, to here.
+2. Makes only libgvs.a
+3. Grabbed the hdf routines from rsl-v1.24.1.
+
+v1.11 (8/13/98) initially packaged w/ GVS v4.9
+----------------------------------------------------
+* Incremented P2A53_ALG_VERSION to 2.
+
+v1.10 (5/29/98) initially packaged w/ GVS v4.6
+----------------------------------------------------
+* Ported to HP.
+* get_info_from_file accepts compressed HDF file.
+* Requires gv_utils-v1.5
+* Doesnot read lat/lon info from  $GVS_DATA_PATH/gv_radar_lat_lon.data --
+* Read lat/lon info from  $GVS_DATA_PATH/gv_radar_lat_lon.data 
+* Removed some options in metadata_file and added more parameters to
+  set_l2_specific_metadata().
+* Added the capability for uninstalling the software.
+
+v1.9 (1/26/98) initially packaged w/ GVS v4.5
+----------------------------------------------------
+* Added level_2_create_empty_granule_hdf.c.
+* Minor mods in 'hdf_metadata.c.'.
+* Requires gv_utils-v1.2.tgz 
+* Added 'get_info_from_file.c'
+* Added more comments in 'gvs_sat_coin.c'.
+
+v1.8 (12/08/97) initially packaged w/ GVS v4.4
+----------------------------------------------------
+* Added more function in hdf_metadata.c
+* get_radar_name_from_file.c will return site name correspondent to TSDIS'
+  naming convention instead of radar's name.
+
+v1.7 (11/18/97) initially packaged w/ GVS v4.3
+----------------------------------------------------
+* Fixed bug w.r.t. setting metadata field (num of vos).
+
+v1.6 (11/13/97) initially packaged w/ GVS v4.2
+----------------------------------------------------
+* Added some more time functions in gvs_time.h,c
+* More gvs_time.{h,c}, construct_time_in_seconds.c 
+   and gvs_utilities.pl outside of gvs (to gv_utils)--
+  so use -lgv_utils.
+* Removed Perl requirement.
+* Renamed gvs_utilities.{h,c} to gvs_sat_coin.{h,c}.
+
+v1.5 (10/24/97) initially packaged w/ GVS v4.1
+--------------------------------------------------
+* Changed variable names in the routines that get satellite coincident data.
+* Removed qa_param_name from metadata structure.
+* Changed the interface of set_l2_specific_metadata().
+
+v1.4 (10/10/97)  initially packaged w/ gvs pre-v4.1
+--------------------------------------------------
+* Added more programs
+* Added more lib. routines, especially for level 3.
+* Fixed bug (set metadata field, num vos, to 1 for single vos);
+* Added new metadata field: radar wave length and anomaly flag.
+
+v1.3 (8/19/97)  initially packaged w/ gvs v4.0
+------------------------------------------------
+* Minor mod in get_radar_name_from_file.c.
+
+v1.2 (8/5/97) -- Initially packaged with gvs v3.7
+------------------------------------------------
+* Added a new program: get_radar_name_from_file
+
+
+v1.1 
+-----------------------------------------------
+* Added gvs_utilities.*, Makefile, gvs_time.*.
+* Creates a library to be used by packages in gvs.
+
+v1.0 (7/2/97) packed with gvs v3.5
+---------------------------------
+* Initially created.

@@ -1,0 +1,196 @@
+#! /usr/bin/perl
+#-*-perl-*-
+#
+#   3A-54: Perl script, front end interface, calls 'acc_rrmaps_granule_hdf'
+#          to process 3A-54 product.
+#
+#     3A-54 product is a map of monthly surface rain totals derived from the
+#     instantaneous rain rate maps (2A-53). The map is in Cartesian 
+#     coordinates with a 2 km horizontal resolution and covers an area
+#     of 300 km x 300 km at single radar sites. This monthly rainfall map is 
+#     not a simple accumulation of the instantaneous maps as gaps in the 
+#     data must be factored into the calculation. The rainfall
+#     ranges from 0.0 to 10,000.0 mm. It is multiplied by 10 and stored as 
+#     a 2-byte integer.
+#
+#     Accumulate site rainfall map using granule HDF 2A-53 file as input. 
+#     The flag [BEGIN|MIDDLE|END] indicates whether to create the product in
+#     HDF format and/or to store the intermediate product in ascii files.
+#
+#     If the specified flag is END, it will create the HDF file and the 
+#     ascii file that contains the dates and times of all VOSes included in the
+#     calculation.  When creating the HDF product, it will use some of the 
+#     metadata values from the input granule HDF file. Note: If either flag
+#     BEGIN or MIDDLE is specified, no HDF file nor vos_times_ASCII_oufile
+#     will be created.
+#
+#     If the specified flag is BEGIN, it will create the two intermediate 
+#     ascii files: one contains the time of the last VOS and the list of 
+#     times for all VOSes included in the accumulation, the second file 
+#     contains the accumulated rainfall map.
+#
+#     If the specified flag if either MIDDLE or END, the two intermediate ascii
+#     files will be modified.
+#
+#
+#  Program's exit code:
+#          -1 Failed.
+#           0 Successful.
+#           1 Warning occured -- accumulation of at least one map failed.
+#          -2 Program was aborted by SIGINT (^C).
+#     
+# Requires:
+#      acc_rrmaps_granule_hdf
+#      Programs required by 'acc_rrmaps_granule_hdf'
+#
+#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+# By: Thuy Nguyen
+#     Science Systems and Applications, Inc. (SSAI)
+#     NASA/TRMM Office
+#     nguyen@trmm.gsfc.nasa.gov
+#     September 2, 1997
+#
+##############################################################################
+############################################################################
+
+############################# Main Routine #################################
+$PROG_VERSION = "gvs-v4.21";
+unshift (@INC, ".", "/usr/local/trmm/GVBOX/bin");
+do 'gv_utilities.pl';
+
+do usage() if ($#ARGV < 9);
+
+$verbose = 0;
+$data_path =  $ENV{'GVS_DATA_PATH'};
+if ($data_path eq "") {
+	$data_path = "/usr/local/trmm/GVBOX/data";  # Default
+}
+$metadata_file = "$data_path/3A54_metadata.txt";
+$metadata_file_option_str = "-m $metadata_file";
+$prod = "3A-54";    
+
+for ($i = 0; $i < $#ARGV; $i++) {
+	if ($ARGV[$i] eq "-m") {
+		$metadata_file_option_str = "";
+		last;
+	}
+	elsif ($ARGV[$i] eq "-v") {
+		$verbose = 1;
+	}
+}
+# Work in a tmp dir to allow parallel processing in the same dir.
+$top_tmp_working_dir = "3A-54_$$/";
+do do_system_call("mkdir -p $top_tmp_working_dir");
+# Remember to go to the curr dir when exit.
+print STDERR "$this_prog: Will work in dir: $top_tmp_working_dir\n" if ($verbose);
+chdir($top_tmp_working_dir);
+
+for ($j = 0, $i = $#ARGV - 9; $j <= 4; $i++,$j++) {
+	# Just change the filenames.
+	$ARGV[$i] = &change2absolute_filename($curr_dir, $ARGV[$i]);
+}
+$cmd = "acc_rrmaps_granule_hdf -p $prod $metadata_file_option_str @ARGV";
+print STDERR "$this_prog: Executing <$cmd>...\n" if ($verbose);
+if (&do_system_call($cmd) == -1) {
+	$rc = $SEVERE_ERROR_CODE;
+	printf STDERR "$this_prog: Failed.\n" if ($verbose);
+}
+else {
+	printf STDERR "$this_prog: Successful.\n" if ($verbose);
+	$rc = $SUCCESS_CODE;
+}
+
+do clean_up();
+exit($rc);
+
+
+######################################################################
+#                                                                    #
+#                            usage                                   #
+#                                                                    #
+######################################################################
+sub usage {
+	print STDERR "Site Rainfall Map.\n";
+	print STDERR "Usage ($PROG_VERSION):\n";
+	print STDERR "$this_prog [-v] [-m metadata_file]\n",
+               "      2A-53_HDF_infile HDF_outfile vos_times_ASCII_outfile\n",
+               "      inter_acc_map_ASCII_InOut inter_admin_info_file_ASCII_InOut \n",
+               "      {BEGIN | MIDDLE | END} year month max_time_gap const_time_gap\n";
+  print STDERR "  where,\n",
+               "    -v: Print diagnostic messages.\n",
+               "    -m: Specify filename for metadata file. \n",
+               "        Default:\"\$GVS_DATA_PATH/3A54_metadata.txt\"\n",
+               "\n",
+               "    2A-53_HDF_infile: Granule 2A-53 HDF file. Compression is allowed.\n",
+               "    HDF_outfile:      Filename for 3A-54 product in HDF format. This file \n",
+               "                      will only be created when the END flag is specified.\n",
+               "    vos_times_ASCII_outfile: Filename that will contain a list of dates and\n",
+               "                      times of all VOSes included in the product. This file\n",
+               "                      will only be created when the END flag is specified.\n",
+               "    inter_acc_map_ASCII_InOut: Filename for intermediate accumulated rain\n",
+               "                      map in ASCII format.  If the BEGIN flag is specified, this\n",
+               "                      file will be created.  If either the MIDDLE or END flag\n",
+               "                      is specified, this file will be used in the accumulation \n",
+               "                      calculation and will be updated with the new result. \n",
+               "                      File will not be created if there is no inter. rain map.\n",
+               "    inter_admin_info_file_ASCII_InOut: Filename for admin. info. file in ASCII\n",
+               "                      format.  It contains info. required to build product.\n",
+	           "                      If the BEGIN flag is specified, this file will be \n",
+               "                      created.  If either the MIDDLE or END flag\n",
+               "                      is specified, this file will be used in the accumulation \n",
+               "                      calculation and will be updated.\n",
+               "    BEGIN|MIDDLE|END: Flag indicates whether this is the beginning, middle,\n",
+               "                      or end of the monthly period. HDF output file and\n",
+               "                      vos_times_outfile will be created if the flag is END.\n",
+               "    year:             Four digit year.\n",
+               "    month:            The number of the current month being processed.\n",
+               "                      Number starts at 1.\n",
+               "    max_time_gap:     Maximum time gap (minutes) between two consecutive VOSs\n",
+               "                      for which VOS time difference factor will be used.\n",
+               "    const_time_gap:   Constant time factor (minutes) to use if time gap between\n",
+	       "                      VOSs exceeds max_time_gap.\n",
+               "\n";
+                
+  exit($SEVERE_ERROR_CODE);
+		  
+} 
+
+
+sub clean_up {
+	chdir ($curr_dir) if ($curr_dir ne "" && -d $curr_dir);  # Go back to the original dir.
+	do do_system_call("rm -r $top_tmp_working_dir") if (-d $top_tmp_working_dir);
+}
+
+
+
+sub doexit_handler {
+	local($sig) = @_;
+	do clean_up();
+	$rc = $SEVERE_ERROR_CODE;
+	$rc = $INTER_CODE if ($signal eq 'INT' || $signal eq 'KILL' || $signal eq 'STOP');
+	if ($verbose) {
+		print STDERR "Received signal <$sig>\n";
+	}
+	exit($rc);
+}
+
+sub do_system_call {
+	#Return 1 for successful; -1 otherwise.
+	local($cmd) = @_;
+	local($rc) = 1;
+	system($cmd);
+	local($status) = $? >> 8;			# 
+	local($sig) = $? & 255;
+	do doexit_handler($sig) if ($sig != 0);
+	do doexit_handler('INT') if ($status == -2 || $status == 254);
+
+	if ($status != 0) {
+		print STDERR "$this_prog: Failed executing ... $cmd\n";
+		$rc = -1;
+	}
+	return $rc;
+}
+
+

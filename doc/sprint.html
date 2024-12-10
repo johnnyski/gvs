@@ -1,0 +1,399 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.5 [en] (X11; U; Linux 2.0.32 i686) [Netscape]">
+</head>
+<body>
+&nbsp;
+<table BORDER=2 CELLSPACING=2 CELLPADDING=2 >
+<tr>
+<td><img SRC="gvs_logo.gif" height=100 width=256></td>
+
+<td>
+<h1>
+<font color="#000080">sprint: </font><font color="#800080">Interpolate
+polar radar data</font></h1>
+</td>
+</tr>
+</table>
+
+<p>
+<hr WIDTH="100%">
+<hr>
+<h3>
+<font color="#000080">Synopsis</font></h3>
+<b><tt><font color="#B22222">sprint &lt; sprint.inp > sprint.log</font></tt></b>
+<br>
+<hr>
+<h3>
+<font color="#000080">Description</font></h3>
+Interpolates polar radar data to produce a gridded dataset, either 2D or
+3D.&nbsp;&nbsp; All runtime parameters are controlled from the input file,
+read from stdin.&nbsp; These runtime parameters include data resolution,
+other input and output filenames, type of interpolation, etc.&nbsp; The
+format of the input file will be described in further detail.&nbsp; Normal
+operation of this program, for GVS, is usually done via the program <a href="uf2mudras.html">uf2mudras</a>.
+<br>
+<hr>
+<h3>
+<font color="#000080">Options</font></h3>
+<font color="#000000">None.</font>
+<br>
+<hr>
+<h3>
+<font color="#000080">Input</font></h3>
+<font color="#000000">Standard input is read and contains runtime parameters
+controlling how sprint functions.&nbsp; A descriptin of the format of the
+input file is described here.&nbsp; I will only list commands used for
+GVS&nbsp;processing.</font>
+<ol>
+<li>
+<font color="#000000">Comments in this file must be '<tt>C&nbsp; </tt>',
+<b>NOTE THE TWO SPACES</b> following the <tt>C</tt>, or '<tt>*</tt>' in
+column one (1), no extra spaces needed, if you use '<tt>*</tt>'.</font></li>
+
+<li>
+<font color="#000000">NO BLANK LINES please, but, blank comment are ok.</font></li>
+
+<li>
+<font color="#000000">Any charactes beyond column 80 are ignored.</font></li>
+
+<li>
+<font color="#000000">Each command begins in column 1 and is 8 characters
+wide, all uppercase.</font></li>
+
+<li>
+<font color="#000000">Each field, be it character or number is 8 characters
+wide.</font></li>
+</ol>
+<font color="#000000">Here is an example input file.&nbsp; Following that,
+a brief description of the format.</font>
+<br><b><tt><font color="#000099">C</font></tt></b>
+<br><b><tt><font color="#000099">C</font></tt></b>
+<br><b><tt><font color="#000099">GRIDPPI -150.0&nbsp; 150.0&nbsp;&nbsp;
+-150.0&nbsp; 150.0&nbsp;&nbsp; 2.0</font></tt></b>
+<br><b><tt><font color="#000099">INPUT&nbsp;&nbsp; 10&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+24&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 21</font></tt></b>
+<br><b><tt><font color="#000099">INTERP&nbsp; BI-LIN&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2</font></tt></b>
+<br><b><tt><font color="#000099">C&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+DZ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; LINEAR</font></tt></b>
+<br><b><tt><font color="#000099">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+CZ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; LINEAR</font></tt></b>
+<br><b><tt><font color="#000099">END</font></tt></b>
+<br><b><tt><font color="#000099">RADAR&nbsp;&nbsp; UF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+SUNFOR</font></tt></b>
+<br><b><tt><font color="#000099">FXTABLE ACCEPT</font></tt></b>
+<br><b><tt><font color="#000099">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+1</font></tt></b>
+<br><b><tt><font color="#000099">END</font></tt></b>
+<br><b><tt><font color="#000099">OUTPUT&nbsp; 11&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+BEG&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+STEINER TRMM&nbsp;&nbsp;&nbsp; PUR</font></tt></b>
+<br><b><tt><font color="#000099">PROCESS 981222.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+FIXED&nbsp;&nbsp; 0.5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+FXTABLE</font></tt></b>
+<br><b><tt><font color="#000099">QUIT</font></tt></b><font color="#000000"></font>
+<p><font color="#000000">The 'P#' denote fields.&nbsp; Field 1 is the command
+and 2..n are the options. When a field is missing, only spaces (8 of them)
+exist to fill the gap.</font><font color="#000000"></font>
+<p><tt><font color="#000099">INPUT P2 P3 P4 P5 P6 P7 P8 P9</font></tt>
+<br><tt><font color="#000000">Where:</font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp; VARIABLE&nbsp;
+DESCRIPTION&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+FIELD&nbsp; NOTES</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp; --------&nbsp;
+-----------&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+-----&nbsp; -----</font></font></tt><tt><font color="#000000"><font size=-1></font></font></tt>
+<p><tt><font color="#000000"><font size=-1>&nbsp;&nbsp; KOMM&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+'INP'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+P1&nbsp;&nbsp;&nbsp; COMMAND</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp; IUN&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+UNIT NUMBER&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+P2&nbsp;&nbsp;&nbsp; Default=10</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp; ITAP&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+TAPE NAME&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+P3&nbsp;&nbsp;&nbsp; Default=''</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp; ISKP&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+FILES TO SKIP BEFORE READING&nbsp; P4&nbsp;&nbsp;&nbsp; Default=0</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp; IEXP&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+EXPERIMENT NUMBER&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+P5&nbsp;&nbsp;&nbsp; 1- CCOPE (DEFAULT)</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+2- JAWS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 9-
+SOCORRO-84&nbsp;&nbsp; 16- PROFS</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+3- CYCLES&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10- PRESTORM-85&nbsp;
+17- TDWR</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+4- MAYPOLE-83&nbsp;&nbsp;&nbsp; 11- GALE-86&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+18- HARP</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+5- LAKE SNOW-84&nbsp; 12- MIST-86&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 19- WISP90</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+6- MAYPOLE-84&nbsp;&nbsp;&nbsp; 13- CINDE-87&nbsp;&nbsp;&nbsp;&nbsp; 20-
+WISP91</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+7- PHOENIX-84&nbsp;&nbsp;&nbsp; 14- GERMAN&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+21- CAPE</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+8- NIMROD-78&nbsp;&nbsp;&nbsp;&nbsp; 15- TAMEX&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+22- FEST92</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+23- TOGA COARE</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+24- TRMM</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+24- TRMM</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+25- NEXRAD</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp; NMRAD&nbsp;&nbsp;&nbsp;&nbsp;
+RADAR NUMBER&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+P6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1 = CHILL (Default)</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp; 2 = CP-2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+14 = TOGA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 26 = KWAJELEIN&nbsp;&nbsp;&nbsp;&nbsp;
+38 = NEW BRAUNFELS</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp; 3 = CP-3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+15 = CCAA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 27 = EUREKA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+39 = TEXAS A&amp;M ADRAD</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp; 4 = CP-4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+16 = SPAN&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 28 = OKLA CITY&nbsp;&nbsp;&nbsp;&nbsp;
+40 = LAKE-CHARLES</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp; 5 = NOAA-C&nbsp;&nbsp;&nbsp;
+17 = MIT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 29 = TAMPA-BAY&nbsp;&nbsp;&nbsp;&nbsp;
+41 = ISRAEL</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp; 6 = NOAA-D&nbsp;&nbsp;&nbsp;
+18 = MHR&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 30 = MIAMI&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+42 = OM KOI</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp; 7 = NOAA-K&nbsp;&nbsp;&nbsp;
+19 = ELDR-AFT&nbsp; 31 = JACKSONVILLE&nbsp; 43 = PHUKET</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp; 8 = SWR-75&nbsp;&nbsp;&nbsp;
+20 = ELDR-FOR&nbsp; 32 = KEY-WEST&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 44 = DARW-GUNN-PT</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp; 9 = FL-2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+21 = MELB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 33 = TALLAHASSEE&nbsp;&nbsp; 45
+= HAWAII</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp; 10 = UND&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+22 = DARW-TOGA 34 = HOUSTON&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 46 = SAO-PAULO</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp; 11 = NOR&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+23 = DARW-LAS&nbsp; 35 = CORPUS-CRISTI 47 = GUAM</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp; 12 = CIM&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+24 = CAMANO&nbsp;&nbsp;&nbsp; 36 = BROWNSVILLE&nbsp;&nbsp; 48 = TAIWAN</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp; 13 = POLD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+25 = WICHITA&nbsp;&nbsp; 37 = GRANGER AFB</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp; REWSTR&nbsp;&nbsp;&nbsp;
+Whether to rewind the tape&nbsp;&nbsp;&nbsp;&nbsp; P7&nbsp;&nbsp;&nbsp;
+Default=(notused)</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp; XRAD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Longitude of radar (decimal)&nbsp;&nbsp; P8&nbsp;&nbsp;&nbsp; Default=0</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp; YRAD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Latitude of radar (decimal)&nbsp;&nbsp;&nbsp; P9&nbsp;&nbsp;&nbsp; Default=0</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp; ZRAD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Height of radar (meters)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; P10&nbsp;&nbsp;
+Default=0</font></font></tt><tt><font color="#000000"></font></tt>
+<p><tt><font color="#000099">GRIDPPI P2 P3 P4 P5 P6 P7 P8 P9 P10</font></tt>
+<br><tt><font color="#000000">Where:</font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp; X1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+STARTING X&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+P2&nbsp;&nbsp;&nbsp; IN KM</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp; X2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+ENDING X&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+P3&nbsp;&nbsp;&nbsp; IN KM</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp; Y1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+STARTING Y&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+P4&nbsp;&nbsp;&nbsp; IN KM</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp; Y2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+ENDING Y&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+P5&nbsp;&nbsp;&nbsp; IN KM</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp; XYD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+DELTA(SPACING)FOR X ! Y AXES&nbsp; P6&nbsp;&nbsp;&nbsp; IN KM</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp; Z1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+STARTING Z OR COPLANE ANGLE&nbsp;&nbsp; P7&nbsp;&nbsp;&nbsp; IN (KM + MSL)</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp; Z2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+ENDING Z OR COPLANE ANGLE&nbsp;&nbsp;&nbsp;&nbsp; P8&nbsp;&nbsp;&nbsp;
+IN (KM + MSL)</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp; ZD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+DELTA (SPACING) FOR 3RD CRD.&nbsp; P9&nbsp;&nbsp;&nbsp; IN KM</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp; ANGXAX&nbsp;&nbsp;&nbsp;
+ANGLE OF X-AXIS,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+P10&nbsp;&nbsp; IN DEG,</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+CLOCKWISE FROM NORTH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+ROTATED ABOUT THE</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+LOWER LEFT CORNER</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+OF THE CARTESIAN</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+COORDINATE SYSTEM</font></font></tt><tt><font color="#000000"></font></tt>
+<p><tt><font color="#000099">INTERP P2&nbsp;P3 P4 P5 P6 P7</font></tt>
+<br><tt><font color="#000000">Where:</font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp; VARIABLE&nbsp;&nbsp;
+DESCRIPTION&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+FIELD&nbsp;&nbsp; NOTES</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp; --------&nbsp;&nbsp;
+-----------&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+-----&nbsp;&nbsp; -----</font></font></tt><tt><font color="#000000"><font size=-1></font></font></tt>
+<p><tt><font color="#000000"><font size=-1>&nbsp;&nbsp; KOMM&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+'INT'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+P1&nbsp;&nbsp;&nbsp;&nbsp; COMMAND</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp; METH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+INTERPOLATION METHOD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+P2&nbsp;&nbsp;&nbsp;&nbsp; B - BILINEAR (DEFAULT)</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+C - CLOSEST POINT</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp; NGAVG&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+NUMBER OF GATES TO AVERAGE&nbsp;&nbsp;&nbsp; P3&nbsp;&nbsp;&nbsp;&nbsp;
+MUST BE >= 0</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+ALONG RANGE</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp; MING&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+MINIMUM NUMBER OF GOOD POINTS P4</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+TO ACCEPT ALONG RANGE</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp; DMIN&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+MAXIMUM ACCEPTABLE DISTANCE&nbsp;&nbsp; P5&nbsp;&nbsp;&nbsp;&nbsp; IN KM</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+TO RELOCATE A CLOSEST</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+POINT ESTIMATE</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp; GCOEF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+P6</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp; GCMIN&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+P7</font></font></tt><tt><font color="#000000"></font></tt>
+<p><tt><font color="#000099">INTERP has additional control records.&nbsp;
+Each record is a field name and other criteria.&nbsp; The additional fields
+are context sensitive.</font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+POWER FIELD CARD</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+----- ----- ----</font></font></tt><tt><font color="#000000"><font size=-1></font></font></tt>
+<p><tt><font color="#000000"><font size=-1>&nbsp;&nbsp; FLDNAM&nbsp;&nbsp;&nbsp;&nbsp;
+NAME OF FIELD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+P2&nbsp;&nbsp;&nbsp;&nbsp; 4 CHARACTERS LONG</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp; ITRANS&nbsp;&nbsp;&nbsp;&nbsp;
+TRANSFORMATION CRITERIA;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; P3</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+'LI'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+TO LINEAR UNITS</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+'NO'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+NO CONVERSION (DEFAULT)</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp; IDERIV&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+P4</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+'TRA'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+TRANSFORM TO DBZ</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+'CRE'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+CREATE A DBZ FIELD</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+'NON'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+NO DBZ (DEFAULT)</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp; NAMDBZ&nbsp;&nbsp;&nbsp;&nbsp;
+NAME OF THE DBZ FIELD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; P5&nbsp;&nbsp;&nbsp;&nbsp;
+MUST BE SPECIFIED FOR</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+IDERIV.EQ.'TRA' OR</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+IDERIV.EQ.'CRE'</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp; THRESH&nbsp;&nbsp;&nbsp;&nbsp;
+THRESHOLD ON THIS FIELD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; P6</font></font></tt><tt><font color="#000000"><font size=-1></font></font></tt>
+<p><tt><font color="#000000"><font size=-1>&nbsp;&nbsp; LLIMIT&nbsp;&nbsp;&nbsp;&nbsp;
+LOWER LIMIT FOR THRESHOLDING&nbsp; P7</font></font></tt><tt><font color="#000000"><font size=-1></font></font></tt>
+<p><tt><font color="#000000"><font size=-1>&nbsp;&nbsp; ULIMIT&nbsp;&nbsp;&nbsp;&nbsp;
+UPPER LIMIT FOR THRESHOLDING&nbsp; P8</font></font></tt><tt><font color="#000000"><font size=-1></font></font></tt>
+<p><tt><font color="#000000"><font size=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+DBZ FIELD CARD</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+--- ----- ----</font></font></tt><tt><font color="#000000"><font size=-1></font></font></tt>
+<p><tt><font color="#000000"><font size=-1>&nbsp;&nbsp; FLDNAM&nbsp;&nbsp;&nbsp;&nbsp;
+NAME OF FIELD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+P2&nbsp;&nbsp;&nbsp;&nbsp; 4 CHARACTERS LONG</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp; ITRANS&nbsp;&nbsp;&nbsp;&nbsp;
+TRANSFORMATION CRITERIA;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; P3</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+'LI'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+TO LINEAR UNITS</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+'NO'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+NO CONVERSION (DEFAULT)</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp; THRESH&nbsp;&nbsp;&nbsp;&nbsp;
+THRESHOLD ON THIS FIELD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; P6</font></font></tt><tt><font color="#000000"><font size=-1></font></font></tt>
+<p><tt><font color="#000000"><font size=-1>&nbsp;&nbsp; LLIMIT&nbsp;&nbsp;&nbsp;&nbsp;
+LOWER LIMIT FOR THRESHOLDING&nbsp; P7</font></font></tt><tt><font color="#000000"><font size=-1></font></font></tt>
+<p><tt><font color="#000000"><font size=-1>&nbsp;&nbsp; ULIMIT&nbsp;&nbsp;&nbsp;&nbsp;
+UPPER LIMIT FOR THRESHOLDING&nbsp; P8</font></font></tt><tt><font color="#000000"><font size=-1></font></font></tt>
+<p><tt><font color="#000000"><font size=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+VELOCITY FIELD CARD</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+-------- ----- ----</font></font></tt><tt><font color="#000000"><font size=-1></font></font></tt>
+<p><tt><font color="#000000"><font size=-1>&nbsp;&nbsp; FLDNAM&nbsp;&nbsp;&nbsp;&nbsp;
+NAME OF FIELD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+P2&nbsp;&nbsp;&nbsp;&nbsp; 4 CHARACTERS LONG</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp; IVLFLG&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+P3</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+'MISSING'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+SET ALL NCAR-FLAGGED</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+BAD VELOCITIES TO</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+-32768, FOR DISCARDING</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+'NO'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+LEAVE THE VELOCITIES</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+ALONE (DEFAULT)</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp; IUNFLD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+P4</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+'UNFOLD'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+ONLY ALLOWED TO UNFOLD</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+ONE VELOCITY FIELD</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+'NO'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+DO NOT UNFOLD</font></font></tt><tt><font color="#000000"><font size=-1></font></font></tt>
+<p><tt><font color="#000000"><font size=-1>&nbsp;&nbsp; THRESH&nbsp;&nbsp;&nbsp;&nbsp;
+THRESHOLD ON THIS FIELD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; P6</font></font></tt><tt><font color="#000000"><font size=-1></font></font></tt>
+<p><tt><font color="#000000"><font size=-1>&nbsp;&nbsp; LLIMIT&nbsp;&nbsp;&nbsp;&nbsp;
+LOWER LIMIT FOR THRESHOLDING&nbsp; P7</font></font></tt><tt><font color="#000000"><font size=-1></font></font></tt>
+<p><tt><font color="#000000"><font size=-1>&nbsp;&nbsp; ULIMIT&nbsp;&nbsp;&nbsp;&nbsp;
+UPPER LIMIT FOR THRESHOLDING&nbsp; P8</font></font></tt><tt><font color="#000000"><font size=-1></font></font></tt>
+<p><tt><font color="#000000"><font size=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+VARIANCE, CORRELATION, AND TIME FIELD CARDS</font></font></tt>
+<br><tt><font color="#000000"><font size=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+--------- ------------ --- ---- ----- -----</font></font></tt><tt><font color="#000000"><font size=-1></font></font></tt>
+<p><tt><font color="#000000"><font size=-1>&nbsp;&nbsp; FLDNAM&nbsp;&nbsp;&nbsp;&nbsp;
+NAME OF FIELD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+P2&nbsp;&nbsp;&nbsp;&nbsp; 4 CHARACTERS LONG</font></font></tt><tt><font color="#000000"><font size=-1></font></font></tt>
+<p><tt><font color="#000000"><font size=-1>&nbsp;&nbsp; THRESH&nbsp;&nbsp;&nbsp;&nbsp;
+THRESHOLD ON THIS FIELD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; P6</font></font></tt><tt><font color="#000000"><font size=-1></font></font></tt>
+<p><tt><font color="#000000"><font size=-1>&nbsp;&nbsp; LLIMIT&nbsp;&nbsp;&nbsp;&nbsp;
+LOWER LIMIT FOR THRESHOLDING&nbsp; P7</font></font></tt><tt><font color="#000000"><font size=-1></font></font></tt>
+<p><tt><font color="#000000"><font size=-1>&nbsp;&nbsp; ULIMIT&nbsp;&nbsp;&nbsp;&nbsp;
+UPPER LIMIT FOR THRESHOLDING&nbsp; P8</font></font></tt>
+<br><tt><font color="#000000"><font size=-1></font></font></tt>&nbsp;
+<br><tt><font color="#000000"></font></tt>&nbsp;
+<br><tt><font color="#000000"></font></tt>&nbsp;<tt><font color="#000000"></font></tt>
+<p>
+<hr>
+<h3>
+<font color="#000080">Output</font></h3>
+Mudras file.
+<h3>
+
+<hr><font color="#000080">Return value</font></h3>
+<b><font color="#B22222">sprint</font> </b>returns 0 for successful completion;
+-1 for failure; -2 for interruption.
+<p>
+<hr>
+<h3>
+<font color="#000080">Author</font></h3>
+Carl Mohr, <i><tt>NCAR</tt></i>
+<br>L. Jay Miller, <i><tt>NCAR</tt></i>
+<br>Bill Anderson, <i><tt>NCAR</tt></i>
+</body>
+</html>

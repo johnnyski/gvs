@@ -1,0 +1,305 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.7 [en] (X11; I; Linux 2.2.12-20 i686) [Netscape]">
+</head>
+<body background="gvs_bg.gif">
+&nbsp;
+<br>&nbsp;
+<table BORDER=2 CELLPADDING=0 >
+<tr>
+<td><img SRC="gvs_logo.gif" height=100 width=256 align=LEFT></td>
+
+<td>
+<h1>
+<font color="#000080">level_1:</font> <font color="#800080">GV Calibrated
+Radar Data and Quality Controlled Radar Reflectivity</font></h1>
+</td>
+</tr>
+</table>
+
+<p>
+<hr WIDTH="100%">
+<hr>
+<h3>
+<font color="#000080">Synopsis</font></h3>
+
+<ul><b><font color="#B22222">To build any or all of the following Level_1
+products:</font></b>
+<br><b><font color="#B22222">1B-51.HDF, 1C-51.HDF, 1C-51.UF, sweep_image.GIFs...</font></b>
+<br><b><font color="#B22222">---------------------------------------------------------</font></b>
+<br><b><font color="#B22222">level_1 [-v] [-P <i>1B-51_product_version</i>]
+[-Q <i>1C-51_product_version</i>][-B] [-b <i>1B-51-HDF_output_dir</i>]</font></b>
+<br><b><font color="#B22222">[-C] [-c <i>1C-51-HDF_output_dir</i>] [-u
+<i>1C-UF_output_dir</i>]</font></b>
+<br><b><font color="#B22222">[-f <i>firstfile</i>] [-m <i>minimum_sweeps</i>]
+[-q <i>qc_params_file</i>]</font></b>
+<br><b><font color="#B22222">[-S] [-t <i>satellite_files_dir</i>]</font></b>
+<br><b><font color="#B22222">[-g <i>Image_output_dir</i>] [-p <i>pgm_image_output_dir</i>]
+[-n <i>Number_sweeps_for_image</i>] [-M]</font></b>
+<br><b><font color="#B22222">[-V <i>{1 or 2}</i>]</font></b>
+<br><b><font color="#B22222">[-0 <i>hThresh1</i>] [-1 <i>hThresh2</i>]
+[-2
+<i>hThresh3</i>]</font></b>
+<br><b><font color="#B22222">[-3 z<i>Thresh0</i>[-4 <i>zThresh1</i>] [-5
+<i>zThresh2</i>]
+[-6 <i>zThresh3</i>]</font></b>
+<br><b><font color="#B22222">[-7 <i>hFreeze</i>] [-8 <i>dbzNoise</i>] [-9
+<i>zCalibr</i>]
+<i>infile</i></font></b></ul>
+
+<hr>
+<h3>
+<b><font color="#000080">Description</font></b></h3>
+<b>level_1 reads all of the radar volume scans contained in one file, and
+produces two level I products by default: GV Calibrated Radar Data (1B-51.HDF)
+and Quality Controlled Radar Reflectivity data (1C-51.HDF). Input file
+format may be HDF, UF, WSR-88D, LASSEN, etc.</b>
+<p><b>1B-51.HDF product consists of radar data in spherical coordinates
+at the spatial resolution collected by the radar. The product contains
+all of the following fields recorded at the radar site: reflectivity, differential
+reflectivity, and radial velocity. Reflectivity units are dBZ. Output volumes
+are range truncated at 230 km.</b>
+<p><b>1C-51.HDF product contains qc'd reflectivity and qc'd differential
+reflectivity (when available). Output volumes are range truncated at 200
+km . The quality control algorithm was developed by Daniel Rosenfeld (The
+Hebrew University of Jerusalem) and David Wolff (NASA/TRMM Office).</b>
+<p><b>For 1B-51, all volume scans are kept. For 1C-51, all volume scans
+are kept when there is a satellite overpass, otherwise only one volume
+scan every 30 minutes is kept. Note: Satellite overpass is defined as the
+times when sub-satellite point is within 700 km from the radar, and overpass
+time is within +/-30 mins.</b>
+<p><b>1C-51.UF and sweep_image.GIF files are optionally produced via command
+line options. (See options -u, -g, -n)</b>
+<p>
+<hr>
+<h3>
+<b><font color="#000080">Options</font></b></h3>
+<b><font color="#B22222">level_1</font> recognizes numerous options:</b>
+<p><b><font color="#B22222">-v</font> Verbose of program execution.</b>
+<br><b><i><font color="#B22222">-P <tt>1B51_product_version&nbsp;</tt>
+</font></i>Use this product version number for 1B-51 product (Default:
+"2")</b>
+<br><b><i><font color="#B22222">-Q <tt>1C51_product_version&nbsp;</tt>
+</font></i>Use this product version number for 1C-51 product (Default:
+"3")</b>
+<br><b><font color="#B22222">-B</font> Do not produce 1B-51 product (Default:
+produce it)</b>
+<br><b><font color="#B22222">-b <i><tt>1B-51-HDF_output_dir</tt></i></font>
+Output directory for 1B-51 product (Default: "<i><tt>./</tt></i>")</b>
+<br><b><font color="#B22222">-C</font> Do not produce 1C-51 product (Default:
+produce it)</b>
+<br><b><font color="#B22222">-c <i><tt>1C-51-HDF_output_dir</tt></i></font>
+Output directory for 1C-51 product (Default: "<i><tt>./</tt></i>")</b>
+<br><b><font color="#B22222">-u <i><tt>1C-UF_output_dir</tt></i></font>
+Produce 1C-51 product in the UF format and place it in the specified output
+directory (Default: Do not produce 1C in the UF format)</b>
+<br><b><font color="#B22222">-f <i><tt>firstfile</tt></i></font> First
+(tape header) file of WSR-88D tape. Required for WSR-88D files.</b>
+<br><b><font color="#B22222">-m <i><tt>minimum_sweeps</tt></i></font></b><i><tt><font color="#B22222">
+</font></tt></i><b><font color="#000000">Specify the minimum number of
+sweeps. Program will only produce 1C-51 product for input file having more
+than the specified number (Default: 4).</font></b>
+<br><b><font color="#B22222">-q <i><tt>qc_params_file</tt></i></font> File
+that contains QC parameters (Default: <i><tt>$GVS_DATA_PATH/qc_params_$site</tt></i>)</b>
+<br><b><font color="#B22222">-S </font>Assume coincident satellite overpass
+- does not perform satellite file check.</b>
+<br><b><font color="#B22222">-t <i><tt>satellite_files_dir</tt></i></font>Dir.
+of daily satellite coincidence tables. (Default: <i><tt>$GVS_DATA_PATH</tt></i>)</b>
+<p><b><font color="#B22222">-g <i><tt>gif_image_output_dir</tt></i></font><i><tt>
+</tt></i><font color="#000000">Produce gif image files and place in the
+specified directory.</font></b>
+<br><b><font color="#B22222">-p <i><tt>pgm_image_output_dir</tt></i></font></b><i><tt>
+</tt></i><b><font color="#000000">Produce gif image files and place in
+the specified directory.</font></b>
+<br><b><font color="#B22222">-n <i><tt>Number_sweeps_for_image</tt></i></font></b><i><tt><font color="#B22222">
+</font></tt></i><b><font color="#000000">Specify the number of sweeps for
+creating image (Default: 1)</font></b>
+<br><b><font color="#B22222">-M</font><font color="#000000"> Send images
+to 'monitorps' via 'send_product'. You must use '-g' for this to work.</font></b>
+<p><b><font color="#B22222">-V <i><tt>{1 or 2}</tt></i></font><i>&nbsp;
+</i>Apply VR mask. <font color="#000000">(Default: No VR masking)</font></b>
+<br><b><font color="#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+1: Mask Z values where VR values are invalid</font></b>
+<br><b><font color="#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+2: Mask Z values where VR values are invalid or zero</font></b>
+<p><b>The following options are applied to quality control processing (1C-51
+product) only:</b>
+<br><b><font color="#B22222">-0 <i><tt>HTHRESH1</tt></i></font> = Cappi
+height (km).</b>
+<br><b><font color="#B22222">-1 <i><tt>HTHRESH2</tt></i></font> = Minimum
+cloud height (km).</b>
+<br><b><font color="#B22222">-2 <i><tt>HTHRESH3</tt></i> </font>= Max height
+QC search (km).</b>
+<br><b><font color="#B22222">-3 z<i><tt>THRESH0</tt></i> </font>= Min Zmax
+@ 1.5 km (dBz).</b>
+<br><b><font color="#B22222">-4 <i><tt>ZTHRESH1</tt></i></font> = Min Zmax
+@ 3.0 km (dBz).</b>
+<br><b><font color="#B22222">-5 <i><tt>ZTHRESH2</tt></i> </font>= Min Z
+@ lowest tilt (dBz).</b>
+<br><b><font color="#B22222">-6 <i><tt>ZTHRESH3</tt></i></font> = Min Zmax
+@ hThresh1 (dBz).</b>
+<br><b><font color="#B22222">-7 <i><tt>HFREEZE</tt></i></font> = Freezing
+height (km).</b>
+<br><b><font color="#B22222">-8 <i><tt>DBZNOISE</tt></i></font> = dBz noise
+level.</b>
+<br><b><font color="#B22222">-9 <i><tt>ZCALIBR</tt></i></font> = Relectivity
+calibration constant.</b>
+<p><b><i>Note:</i> See files: <i><tt>$GVS_DATA_PATH/qc_params_&lt;radar_site>
+</tt></i>for
+the default values of the above qc options, where &lt;<i>radar_site</i>>
+is described in the output section.</b>
+<br>&nbsp;
+<p>
+<hr>
+<h3>
+<b><font color="#000080">Input</font></b></h3>
+<b>One radar data file of format WSR-88D, LASSEN, UF, TOGA, NSIG, RAPIC,
+McGill, or HDF (single or multi VOS).</b>
+<p><b>Note: If the input file is in HDF format, be sure that the input
+directory and the output directori(es) are different (This program will
+append the results, for both 1C-51 and/or 1B-51, to the existing HDF files
+of the same granule).</b>
+<p>
+<hr>
+<h3>
+<b><font color="#000080">Output</font></b></h3>
+<b><font color="#B22222">level_1</font> produces file(s), depending on
+the specified options. Files are named according to the following conventions:</b>
+<ul>
+<li>
+<b>HDF files for 1C-51 and 1B-51: <i><tt>&lt;product>.&lt;YYMMDD>.&lt;granule#>.&lt;radar_site>.&lt;version#>.HDF</tt></i></b></li>
+
+<li>
+<b>UF file containing raw and QC'd reflectivity data: <i><tt>&lt;YYMMDD>.&lt;granule#>.&lt;radar_site>.&lt;version#>.&lt;HHMM>.uf.gz</tt></i></b></li>
+
+<li>
+<b>GIF files containing color images of selected radar sweeps: <i><tt>&lt;radar_site>_&lt;TT>_&lt;YYMMDD>.&lt;HHMM>.&lt;H1H2H3>.&lt;Z1Z2Z3>.&lt;SS>.gif</tt></i></b></li>
+
+<li>
+<b>PGM files containing greyscale images of selected radar sweeps: <i><tt>&lt;radar_site>_&lt;TT>_&lt;YYMMDD>.&lt;HHMM>.&lt;H1H2H3>.&lt;Z1Z2Z3>.&lt;SS>.pgm.gz</tt></i></b></li>
+</ul>
+<b><i>where,</i></b>
+<ul>
+<li>
+<b>product = <i><tt>1B51 | 1C51</tt></i></b></li>
+
+<li>
+<b>YYMMDD = Date of first volume scan in a granule.</b></li>
+
+<li>
+<b>granule# = Granule number starts from 00 to 12.</b></li>
+
+<li>
+<b>radar_site is 4-character TSDIS name listed in <i>$GVS_DATA_PATH/gv_radar_site_info.data</i>.
+<i>gv_radar_site_info.data
+</i>is
+in <a href="http://trmm-fc.gsfc.nasa.gov/trmm_gv/software/gv_utils/gv_utils_index.html">gv_utils</a>
+package.</b></li>
+
+<li>
+<b>version#<i> </i>= Product version #.</b></li>
+
+<li>
+<b>HHMM = Time of volume scan.</b></li>
+
+<li>
+<b>TT = data type: DZ standard reflectivity, CZ (QC'd reflectivity), VR
+(velocity)</b></li>
+
+<li>
+<b>H1H2H3 = hThresh1, hThresh2, hThresh3</b></li>
+
+<li>
+<b>Z1Z2Z3 = zThresh1, zThresh2, zThresh3</b></li>
+
+<li>
+<b>SS = Sweep Number</b></li>
+</ul>
+<b><i>Note</i>: This program will append the results, for both 1C-51 and
+1B-51, to the existing HDF files of the same granule. Therefore, to create
+an hour-granulized HDF file for level I products, run this program for
+all single volume scan radar data files of the same hour using the same
+output directori(es).</b>
+<p>
+<hr>
+<h3>
+<b><font color="#000080">Return value</font></b></h3>
+
+<ul>
+<li>
+<b>0: successful completion with the output(s)</b></li>
+
+<li>
+<b>-2: interrupted</b></li>
+
+<li>
+<b>-1: failure</b></li>
+
+<li>
+<b>-3: when the data file does not meet the requirements for applying the
+QC algorithm,i.e., VOS does not have enough sweeps; input file is bad,
+etc...</b></li>
+
+<li>
+<b>-4 : no satellite coincidence data file.</b></li>
+</ul>
+
+<hr>
+<h3>
+<b><font color="#000080">Known Bugs/Problems</font></b></h3>
+
+<ul>
+<li>
+Level_1 is unable to process Berrimah data that is in RAPIC format. The
+reason is simple to explain but hard to implement. Azimuth angles of one
+field type are shifted in other field types. This makes alignment of a
+field type for a particular ray problematic. Additionally, upper level
+sweeps are similarly misaligned. The current implementation of the TSDIS
+toolkit requires that the rays be properly aligned across all field types
+and all sweeps.</li>
+</ul>
+
+<hr WIDTH="100%">
+<h3>
+<b><font color="#000080">QC Algorithm description</font></b></h3>
+
+<pre><b>QC (i.e., clear bad data, when the following conditions are fulfilled
+within a window of nearly 5x5 km in the polar coordinates.
+&nbsp;(all heights are in km above radar level):
+
+Reject the reflectivity when:
+
+1. Echo top &lt; HT3 [3.0 km], or
+&nbsp;&nbsp; peak Z at 3.0 km &lt;= ZT1 [5 dBZ]), and
+&nbsp;&nbsp; peak Z at HT1 [1.5 km] &lt; ZT3 [30 dBZ]
+
+The height checks are made only when the top of the volume scan
+is higher than the examined volume.
+
+2. Echo top &lt; HT2 [2.5 km]
+
+3. Peak Z at 1.5 km &lt; ZT0 [5 dBZ]
+
+4. Reflectivity > DBZNOISE dBZ is confined to the lowest tilt, and
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; does not exceed ZT2 [18 dBZ]</b>
+
+
+
+
+
+
+
+
+
+
+
+<hr></pre>
+
+<h3>
+<b><font color="#000080">QC algorithm designers</font></b></h3>
+<b>Daniel Rosenfeld, <i><tt>The Hebrew University of Jerusalem</tt></i></b>
+<br><b>David B. Wolff, <i><tt>NASA/TRMM Office</tt></i></b>
+</body>
+</html>

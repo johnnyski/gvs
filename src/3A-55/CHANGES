@@ -1,0 +1,48 @@
+CHANGES for 3A-55
+
+Started 05/05/00
+------------------------------------------------
+1. Added product version option -P to level_3_finalize_metadata.c
+
+
+
+v1.6 ??/??/99  Packaged w/ gvs 4.13.
+-------------------------------------------------
+1. Added software version.
+2. Created 3A55.h
+
+v1.5
+-------------------------------------------------
+* Added more diagnosis messages in '3A-55'.
+* Allows input filename to contain pathname.
+* Fixed interrupt signal checking.
+* Changed 3A-55 to execute in a tmp dir.
+* Requires gv_utils v1.3
+* Hardcoded some of the metadata fields: alg_id, data_id, alg_version, contact.
+* Added the capability for uninstalling the software.
+
+v1.4 (1/26/98) initially packaged w/ GVS v4.5
+-------------------------------------------------
+* Handles and creates empty granule product.
+
+v1.3 (12/08/97) initially packaged w/ GVS v4.4
+-------------------------------------------------
+* Ported to HP-UX.
+* Bug fixes in '3A-55'.
+
+v1.2 (11/13/97) initially packaged w/ GVS v4.2
+-------------------------------------------------
+1. 3A-55 vertical profile TK_DEFAULT == vs = bug fix.
+2. Requires gv_utils.
+
+
+v1.1 (10/24/97) initially packaged w/ GVS v4.1
+-------------------------------------------------
+1. File management in 3A-55 keeps intermediate files
+   and deletes metadata.bin on END.
+2. Removed data center source from '3A55_metadata.txt'.
+3. Fixed bugs related to metadata data. 
+
+v1.0 (10/10/97) initially packaged w/ gvs pre-v4.1
+-------------------------------------------------
+Initially created.

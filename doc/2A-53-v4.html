@@ -1,0 +1,158 @@
+<HTML>
+<HEAD>
+   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+   <META NAME="GENERATOR" CONTENT="Mozilla/4.04 [en] (X11; I; Linux 2.0.28 i686) [Netscape]">
+</HEAD>
+<BODY BACKGROUND="gvs_bg.gif">
+&nbsp;
+<BR>&nbsp;
+<CENTER><TABLE BORDER=2 CELLPADDING=0 WIDTH="100%" >
+<TR ALIGN=CENTER VALIGN=CENTER>
+<TD ALIGN=CENTER VALIGN=CENTER><IMG SRC="gvs_logo.gif" HEIGHT=100 WIDTH=256 ALIGN=LEFT>&nbsp;</TD>
+
+<TD>
+<H1>
+<FONT COLOR="#000080">2A-53-v4:</FONT> <FONT COLOR="#800080">Rain Rate
+Maps&nbsp;</FONT></H1>
+</TD>
+</TR>
+</TABLE></CENTER>
+
+<HR WIDTH="100%">
+<BR><B>Last updated:</B> 8/12/98
+<HR>
+<H3>
+<FONT COLOR="#000080">Synopsis</FONT></H3>
+
+<PRE><B><FONT COLOR="#B22222">2A-53 [-v] [-z <I><TT>ZR_table</TT></I>] [options for <I><TT>singlevos_2A-53-v4</TT></I>]&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2A-53-v4 <TT><I>qc_ghdf_file 2A-54_ghdf_file rrmap_ghdf_file
+
+</I>singlevos_2A-53-v4 [-v] [-r <I>resolution</I>] [-s <I>sprint_input_template</I>] [-m <I>metadata_fname</I>]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; qc_uf_file 2A-54 ZR-table Out.hdf</TT></FONT></B></PRE>
+
+<HR>
+<H3>
+<FONT COLOR="#000080">Description</FONT></H3>
+Normally, if you plan to run this algorithm, you should run <A HREF="2A-53.html">2A-53</A>
+without specifying the 2A-53-v4 string.&nbsp; In this case, the default
+algorithm will be run (2A-53-v4 anyway), and the ZR table will automatically
+be found, by using the 1C-51 dataset time information, in $GVS_DATA_PATH/runtime_2A-53_&lt;site>.txt.
+
+<P>This is the version 4 release of the TRMM GV rain-rate mapping program.
+Four parameters are required: the radar reflectivity map, the 2A-54 product
+containing the convective/stratiform rain classification, the ZR table
+and the name of the output hdf file.
+
+<P>The ZR table contains information regarding the type of rain classification
+to perform.&nbsp; If the ZR table is one for a single ZR, then the rain
+classification is uniform and the 2A-54 is by-passed.&nbsp; If the ZR table
+is a dual ZR, then the 2A-54 convective/stratiform classification is used.&nbsp;
+If the ZR table is a multi ZR, then some other rain classification is performed.
+
+<P>The ZR table contains the site information and, therefore, it is not
+a command line option. In fact, the ZR file should contain all the information,
+except for the rain classification map, to drive the program. Note that everything goes throught the ZR table lookup, including MISSING and NOECHO. Thus, 
+the rain map range is defined by the ZR table. See the ZR table for range information.
+<BR>
+<HR>
+<H3>
+<FONT COLOR="#000080">Options</FONT></H3>
+<B><FONT COLOR="#B22222">2A-53</FONT></B> and <B><FONT COLOR="#B22222">singlevos_2A-53-v4</FONT>
+</B>recognize the following options:
+
+<P><B><FONT COLOR="#B22222">-v</FONT></B> Verbose diagnostics during execution.
+<BR><B><FONT COLOR="#B22222">-z</FONT></B> zr_table (Default: <I>$GVS_DATA_PATH</I>/dual.zr)
+-- Recognized by <B><FONT COLOR="#B22222">2A-53</FONT></B><FONT COLOR="#000000">
+only.</FONT>
+<BR><B><FONT COLOR="#B22222">-r</FONT></B> resolution Resolution in KM.
+If 2km, use 2A-55 product, else run through SPRINT.
+<BR><B><FONT COLOR="#B22222">-s</FONT></B> sprint_input_template Script
+to sprint. Default:$GVS_DATA_PATH/sprint_base_scan.inp
+<BR><B><FONT COLOR="#B22222">-m</FONT></B> Specify filename for metadata
+file. Default:<I>$GVS_DATA_PATH</I>/2A53_metadata.txt
+<BR>
+<HR>
+<H3>
+<FONT COLOR="#000080">Input Files</FONT></H3>
+
+<OL>
+<LI>
+<FONT COLOR="#B22222">qc_uf_file</FONT> - Quality controlled reflectivities
+for a single VOS in Universal Format (1C-51 product). Produced by hdf_to_uf
+which converts granual HDF files into a bunch of single VOS UF files.</LI>
+
+<LI>
+<FONT COLOR="#B22222">qc_ghdf_file</FONT> - Quality controlled reflectivities
+for one hour-granule in Hierarchical Data Format (HDF) (1C-51 products).</LI>
+
+<LI>
+<FONT COLOR="#B22222">2A-54 </FONT>- Convective/stratiform map for a single
+VOS in HDF (2A-54 product).</LI>
+
+<LI>
+<FONT COLOR="#B22222">2A-54_ghdf_file</FONT> - Convective/stratiform maps
+for one hour-granule in HDF (2A-54 products).</LI>
+
+<LI>
+*.zr - Input ZR table: eg. single.zr, dual.zr, darw_multi.zr ... -- Required
+to specify on the command line by <B><FONT COLOR="#B22222">singlevos_2A-53-v4
+</FONT></B><FONT COLOR="#000000">only.</FONT></LI>
+
+<LI>
+<FONT COLOR="#000000"><I>$GVS_DATA_PATH</I>/gv_radar_site_info.data--for
+</FONT><B><FONT COLOR="#B22222">singlevos_2A-53-v4</FONT></B><FONT COLOR="#000000">
+only. This is not specified on the command line.</FONT></LI>
+</OL>
+
+<HR>
+<H3>
+<FONT COLOR="#000080">Temporary Files</FONT></H3>
+The following file(s) are removed upon completion by the program.
+<OL>
+<LI>
+tmp&lt;<I><TT>process_id</TT></I>>/&lt;<I><TT>YYMMDD</TT></I>>.&lt;granule#>.&lt;radar_site>.&lt;version#>.&lt;<I><TT>HHMM</TT></I>>.uf.gz</LI>
+
+<LI>
+tmp&lt;<I><TT>process_id</TT></I>>/&lt;<I><TT>csmap_ghdf_file prefix</TT></I>>.<I><TT>HHMM</TT></I>.hdf</LI>
+
+<LI>
+tmp&lt;<I><TT>process_id</TT></I>>/&lt;<I><TT>uf file prefix</TT></I>>.hdf.2A-53-d</LI>
+
+<LI>
+csmap.ascii.tmp</LI>
+</OL>
+
+<HR width="100%">
+<H3>
+<FONT COLOR="#000080">Output Files</FONT></H3>
+
+<OL>
+<LI>
+<FONT COLOR="#B22222">Out.hdf</FONT> - Rain rate map for a single VOS in
+a HDF file. Map consists of a 151x151 pixel image, with radar located at
+76x76. Resolution is 2 km/pixel, thus data extends 150 km radius from the
+radar.</LI>
+
+<LI>
+<FONT COLOR="#B22222">rrmap_ghdf_file</FONT> - Rain rate maps for one hour-granule
+in a HDF file.</LI>
+</OL>
+
+<H3>
+
+<HR><FONT COLOR="#000080">Return value</FONT></H3>
+<B><FONT COLOR="#B22222">2A-53</FONT></B> returns 0 upon successful completion;
+1 upon successful processing for some VOSs of granule; 2 upon interruption;
+non-zero, otherwise.
+
+<P><B><FONT COLOR="#B22222">singlevos_2A-53-v4</FONT></B> returns 0 upon
+successful completion; -2 upon interruption; -1 upon failure.
+
+<P>
+<HR>
+<H3>
+<FONT COLOR="#000080">Authors</FONT></H3>
+Sandra Yuter, <I><TT>The University of Washington.</TT></I>
+<BR>John Merritt, Applied Research Corp. Landover, MD
+</BODY>
+</HTML>

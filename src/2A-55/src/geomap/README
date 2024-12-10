@@ -1,0 +1,13 @@
+The code in this dir is used to create the binary landseamap files used
+in the analyze-volume code.
+
+mkgeomap.cc -- used to create DARW, HSTN, and MELB files for the AIW
+WichitaMap.cc -- mod of mkgeomap.cc; used to create KICT file for GCIP
+KwajMap.cc -- mod of WichitaMap.cc; used to create Kwaj file (assumes all sea,
+	no land)
+
+NOTE:  All files *_new.map are 201x201 ascii files centered at
+   appropriate radar.  l.cc transforms this data into 151x151 ascii and
+   bin files.
+
+

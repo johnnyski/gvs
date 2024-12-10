@@ -1,0 +1,993 @@
+Changes for GVS:
+
+v4.21 (1/07/08)
+----------------
+1. Changed QC_TABLE_SIZE in level_1.c to 15000 (lines) to allow more lines in
+   qc_parameter files, as requested by D. Marks.
+2. Modified singlevos_2A-55 to correct a problem with saving the mudras file.
+
+v4.20 (9/04/03)
+----------------
+1. Modified setvos.f to handle elevation angle of 0, which causes
+   divide by 0 in computation of maximum range.
+2. Modified gvs_metadata.c to use product version number from metadata file
+   for level 3 HDF.
+3. Modified 2A-54-dc to handle empty 2A-55 granules.
+4. D. Silberstein corrected computation of bounding coordinates in
+   gvs_metadata.c
+5. Removed type specifier 'void' from main program in 2A54.cc and
+   singlevos_2A-54-dc.cc in gvs/src/2A-54/src.  It was causing compile error.
+6. Fixed problem in which libraries could not be built if a library didn't
+   already exist in the target directory.  Brought configure.in up to date
+   with autoconf version 2.53 standards.
+7. Changed rain map accumulation programs to use variables passed as parameters
+   for VOS time gap limits.  Previously, the maximum time gap allowed between
+   VOSes was hard-coded at 75 minutes.  Time gaps within this limit were used
+   as weighting factors for rain accumulation, but if time gap was greater then
+   limit, VOS was rejected.  New scheme accepts two values: the first is a
+   maximum for allowing time gap weighting as before, the second is a constant
+   time gap to be used when actual gap exceeds first value.  VOSes are no
+   longer rejected based on time gap.  New scheme was designed by Dave Marks.
+8. Updated documentation.
+9. Problem with errno in 2A-53/ver4/interpolate.cc and 2A-53/witek/rainest.c
+   when compiling under Red Hat version 9, solved by Dave Augustine.
+
+v4.19 (7/17/01)
+----------------
+1. Change <sys/time.h> to <time.h> in assortutil.cc, for portability.
+2. ZR table indexing problem corrected in zr.c by Dave Marks and
+   Dave Silberstein.
+
+v4.18 (4/17/01)
+----------------
+1. Level II, Added 2A-53-dc (dual-cappi) algorithm.  Calls
+   singlevos_2A-53-dc. (see below)
+2. Level II, Removed singlevos_2A-54 dc algorithm for now due to
+   concerns about algorithm using 3km gridded cappi.
+3. Format conversion, modified 2A-53or2A-55 to support changes in
+   2A-53
+4. Updated documentation
+5. Level I, added cluttermap to level_1_qc.c and level_1.c
+6. Level II, modified procedure getField in mudras.cc to compare 'z' dimension
+   of grid to value of 'NPlanes' from mudras header and return error if latter
+   exceeds former.  Modified 2A54.cc to exit with error if mudras procedures
+   return error.
+   Added ZR tables and runtime files for KAMA and KLSX.
+7. level_1/data Using automatically generated KWAJ cluttermap.
+8. level_1/data updated with production versions of qc_params files, and added
+   qc_params for NOAA and TOGA.
+9. Y2K and other minor bug fixes.
+
+
+v4.17 (6/28/00)
+----------------
+1. Format conversion, Y2K fix in level_1_ghdf_to_singlevos_uf.c
+2. Level II, Initialized metadata structure in write_rrmap2hdf_file.c
+3. Level III, Added product version option -P to level_3_finalize_metadata.c
+4. gvslib, Fixed Y2K bug.
+5. Level I, Modified level_1.c
+   Writes VR data to UF file only if vrMask processing done.
+   Fixed Y2K problem in filenames.
+6  Level I, Modified vosqc.f
+   Added a check for out-of-bounds array indices.
+7. Level II, Added 2A-53/dual-cappi algorithm - singlevos_2A-53-dc
+   a modification of 2A-53/ver4, extracts 2A-55 cappis 
+   (1.5 km and 3 km) instead of calling sprint on 1C-51 to create a
+   pseudo-cappi. The 1.5 km cappi is used for the inner 2A-53 disk 
+   (15 km up to, but not including, 98 km) and the 3 km cappi
+   for the outer 2A-53 disk (98 km through 150 km)
+8. Level II, Added 2A-54/dual-cappi algorithm - singlevos_2A-54-dc
+   similar to 2A-53-dc, uses 1.5 and 3 km cappis from 2A-55 to create 
+   convective-stratiform map.  The 2A-54-dc algorithm is the same as 
+   the Steiner algorithm used in 2A54.cc.
+9. Level III, Fixed bug in acc_rrmaps_granule_hdf in which first VOS of last
+   granule of processing period (period = END) was rejected.
+
+
+v4.16 (2/17/00)
+----------------
+1. Level II, north/south bounding coordinate fixed.  See gvslib.
+2. Level I, separate product version for 1B and 1C, -pgm, etc.
+3. Level 1, takes the time from the first ray of the dataset and
+   writes it to the radar header for filename-by-time tracking.
+   For SIGMET data, Kwajelein data in particular,
+   the first ray is not the earliest time.  The first ray time is
+   around 20 seconds later than some other rays in the sweep.  No
+   reordering of the rays is performed, therefore the first ray
+   time is stored as the dataset time -- a policy decision.
+4. Added intelligence to level_2_single_hdf_to_ghdf when looking for
+   level 1 granules.  It will attempt to find a matching product number,
+   failing that it will find the highest 1C product number.
+5. level_2_singlevos_hdf_to_ghdf adds -m metadata.txt option.
+6. 2A-53or2A-55 now calls level_2_singlevos_hdf_to_ghdf w/ '-m metadata.txt'.
+7. Version numbers in *_metadata.txt are now integers ("1" and not "1.0").
+8. Bug fix in all_tape_level_1n2 where it was setting the version number
+   of all 2A-54 products to 1.
+9. Automatically set the software_version in gvslib/gvs_metadata.h when
+   configuring.
+
+
+v4.15 (12/21/99)
+----------------
+1. Minor porting fixes for Redhat Linux.
+
+v4.14 (12/10/99)
+----------------
+1. Adding configure and automake for portability.
+   Removed all Makefiles replacing them w/ Makefile.am.
+   Added several files for automake and configure support.
+
+   All you need to do for installation is:
+
+        configure --prefix=/whatever/dir/you/want/to/install
+        make install
+
+2. Removed HDF from gvslib.  They are back in RSL.  This solves
+   a circular reference problem that occurs on sgi computers where
+   the linker reports a problem with resolving symbols when there
+   is no problem.
+
+v4.13 (11/30/99)
+----------------
+1. Renamed libgvs_utils.a to libgvs.a.  Similiarly for the .so files.
+   Also, created a gvslib/ and placed the build for libgvs* there.
+
+2. Minor metadata changes for all programs.  Now we save
+   the algorithm version, product version and software version 
+   metadata items.  NOTE: toolkit 4.5r7 cannot store TK_SOFTWARE_VERSION --
+   you must get toolkit 5.4.
+
+3. Placed the RSL hdf routines into gvslib/.  They are removed from
+   RSL.  Currently, rsl version 1.24.* and later versions.
+   This affects the build for level_1.
+
+
+
+v4.12 (9/21/98)
+----------------
+* Changed level_1 (v1.17):
+  1. Modified vosqc.f to fix MIT problem.
+  2. Modified level_1.c to recognize Kwaj 'DR' field.
+
+* Requires rsl v1.19 or later
+
+v4.11 (9/9/98)
+----------------
+* Fixed bug in 2A-52i -- Check TK_DEFAULT instead of -99.0 for 
+  missing/badval. This fix affects the percentage of rain rate map.
+
+
+v4.10 (8/18/98)
+----------------
+* Fixed ZR handling: format_conversion (v1.23)/, script/.
+* Added kwaj_Dec1997Jan1998.zr: src/2A-53/ver4 (v4.10).
+* Modified radar site determination code to handle MIT data files: level_1 (v1.16).
+
+See 'CHANGES' in each component for more details.
+
+v4.9.1 (8/14/98)
+----------------
+* Fixed the top Makefile to compile on tsdis01.
+
+v4.9 (8/13/98)
+----------------
+* format_conversion (v1.22) - Changed level_1_hdf_to_uf to use prod version#
+                            + from the input filename when naming output 
+                            + filename.
+
+* utils (v1.11)             - Incremented P2A53_ALG_VERSION to 2.
+
+* level_1 (v1.15)           - Small bug fix in level_1_qc.c. 
+                            + Moved HDF_FILE_VERSION definition from RSL file 
+                            + into level_1.c.
+                            + Requires rsl v1.18 or later.
+
+* 2A-53-v4 (v4.9)           - Algorithm change regarding MISSING and NOECHO.
+                            + The rain map range is defined by the ZR table.
+                            + Added more zr tables.
+                            + See it's CHANGES for more detail.
+
+* 2A-54 (v2.20)             - Added explaination of noecho
+                            + and missing/bad values to the html page.
+
+* 2A-55 (v2.19)             - Added explaination of vertical
+                            + profile and CFAD to the html page.
+
+
+* Requires rsl v1.18 or later-- This version removes ZDR data from 1C-51 HDF.
+
+See 'CHANGES' in each component for more details.
+
+v4.8.1 (7/27/98)
+----------------
+* level_1 (v1.14)           - Modified level_1_qc.c. No longer QCs ZDR data.
+                              Experimental only.
+
+* 2A-53-w (v3.13)           - Changed the Makefile to compress the data 
+                            + files back after installation.
+
+* Added warning messages in the installation section in README.
+* Fixed the top Makefile, so 'make clean' will clean src/utils.
+
+
+See 'CHANGES' in each component for more details.
+
+v4.8 (6/15/98)
+---------------
+
+* format_conversion (v1.21) + Fixed bug in 'level_1_ghdf_to_singlevos_uf' --
+                            + the product # field in the output filename was
+                            + incorrect.
+
+* level (v1.13)             - Requires gv_utils v1.8.
+                            + Gets radar site information from a central
+                            + radar site data file in gv_utils: 
+                            + $GVS_DATA_PATH/gv_radar_site_info.data.
+                            + Removed file 'radar_sites'.
+
+* 2A-53 (v3.20)             - Compressed carttopol* and poltocart* in 
+                            + witek/data.
+
+* 2A-53-w (v3.12)           - Compressed carttopol* and poltocart*.
+                            + Compressed files reduce the 
+                            + package administrative time ('cvs tag').
+
+* Requires gv_utils v1.8 or higher.
+
+* All three level programs get radar site information from a central radar 
+  site info file: $GVS_DATA_PATH/gv_radar_site_info.data (in package
+  'gv_utils').
+
+* Minor updates to the top html pages.
+
+See 'CHANGES' in each component for more details.
+
+
+** Note: **
+
+   Level_1 is unable to process Berrimah data that is in RAPIC format.
+   The reason is simple to explain but hard to implement.  Azimuth
+   angles of one field type are shifted in other field types.
+   This makes alignment of a field type for a particular ray problematic.
+   Additionally, upper level sweeps are similarly misaligned.  The 
+   current implementation of the TSDIS toolkit requires that the
+   rays be properly aligned across all field types and all sweeps.
+
+
+v4.7 (6/9/98)
+--------------
+* format_conversion (v1.20) - Fixed bug in 'level_2_singlevos_hdf_to_ghdf' 
+                            + w.r.t. option '-r' (This affects 
+                            + all_tape_level_1n2).
+
+* level (v1.12)             - Corrected WSR88D_ID for Miami and Key West in
+                            + radar_sites.
+                            + Added qc_params_DARB, qc_params_TAMP, 
+                            + qc_params_MIAM, qc_params_KEYW,
+                            + qc_params_LKCH, qc_params_NWBR, qc_params_CORC.
+                            + qc_params_JACK, qc_params_TALL, qc_params_BROW, 
+                            + qc_params_GRAN, qc_params_TAMU,
+                            + qc_params_HAWA, qc_params_THPH.
+
+* 2A-53 (v3.19)             - Fixed the pathname for the logo and the 
+                            + background in the HTML page.
+                            
+* 2A-53-v4 (v4.8)           - Fixed the pathname for the logo and the 
+                            + background in the HTML page.
+                            + Added more runtime_2A-53_<site>.txt.
+
+* Changed the doc path in the top Makefile.
+* Moved LDFLAGS from Makefile to Make.<machine>.
+
+See 'CHANGES' in each component for more details.
+
+
+v4.6 (5/29/98)
+--------------
+* format_conversion (v1.19) - Bug fixes in level_2_singlevos_to_ghdf.c -- 
+                            + problem occurs when input files are compressed.
+                            + Changed 2A-53 to execute in a tmp dir.
+                            + Requires gv_utils v1.5
+                            + Uses $GVS_DATA_PATH/gv_radar_site_info.data.
+
+* src/utils (v1.10)         - Ported to HP.
+                            + get_info_from_file accepts compressed HDF file.
+                            + Requires gv_utils v1.5
+
+* src/acc_rrmaps (v1.5)     - Added more diagnostic messages.
+                            + Corrected the multifactor calculation and 
+                            + accumulation of maps in 
+                            + 'acc_rrmaps_granule_hdf'--Note: This affects
+                            + 3A-53 and 3A-54 products.
+
+* level_1 (v1.11)           - Included JCET QC mod.
+                            + Accepts either 'DZ' or 'ZT'.
+                            + Uncommented all site entries in 'radar_sites' 
+                            + and changed Berrimah site name from DARW to DARB.
+
+* 2A-52  (v3.6)             - Minor mod. w.r.t. temp filename.
+                            + Bug fixes w.r.t. handling empty granule input.
+                            + Creates product file even when there is no VOS entry.
+                            + Requires gv_utils v1.5.
+
+* 2A-53-v4 (v4.7)           - Get lat/lon from 
+                            + $GVS_DATA_PATH/gv_radar_site_info.data instead
+                            + of from the input uf file.
+                            + Requires gv_utils v1.5
+                            + Hardcoded some of the metadata fields: alg_id, 
+                            + data_id, alg_version, contact.
+
+* 2A-54 (v2.19)             - Bug fixed for option -D.
+                            + Requires gv_utils v1.5
+                            + Changed 2A-55 to execute in a tmp dir.
+                            + Hardcoded some of the metadata fields: alg_id, 
+                            + data_id, alg_version, contact.
+
+* 2A-55 (v2.18)             - Requires gv_utils v1.5
+                            + Changed 2A-55 to execute in a tmp dir.
+                            + Hardcoded some of the metadata fields: alg_id, 
+                            + data_id, alg_version, contact.
+
+* 2a-56 (v1.4)              + Minor mod in the Makefile.
+
+* 2a-57 (v1.2)              + Minor mod in the Makefile.
+
+* 3A-53 (v1.3)              - Fixed interrupt signal checking.
+                            + Requires gv_utils v1.3
+                            + Changed 3A-53 to execute in a tmp dir.
+                            + Hardcoded some of the metadata fields: alg_id, 
+                            + data_id, alg_version, contact.
+
+* 3A-54 (v1.3)              - Fixed interrupt signal checking.
+                            + Requires gv_utils v1.3
+                            + Changed 3A-54 to execute in a tmp dir.
+                            + Hardcoded some of the metadata fields: alg_id, 
+                            + data_id, alg_version, contact.
+
+* 3A-55 (v1.5)              - Added more diagnosis messages in '3A-55'.
+                            + Allows input filename to contain pathname.
+                            + Requires gv_utils v1.3
+                            + Changed 3A-55 to execute in a tmp dir.
+                            + Hardcoded some of the metadata fields: alg_id, 
+                            + data_id, alg_version, contact.
+
+* Level 2 and 3 programs get radar site information from a centralized radar 
+  site data file: $GVS_DATA_PATH/gv_radar_site_info.data (from package
+  'gv_utils').  Level 1 program will be modified to read site info from that
+  file in the future release -- currently it read from 'radar_sites'.
+
+* Changed the makefiles to allow uninstalling everything (excluding 
+  ./src/2A-53/{pi-c|danny|anton}) and to simplify software installation.
+
+* Ported to HP.
+
+* Requires gv_utils v1.5
+
+See 'CHANGES' in each component for more details.
+
+
+v4.5 (1/26/98)
+--------------
+* format_conversion (v1.18) - Changed Darwin site (use Gunn Point) in 
+                            + 'sprint_radar_sites'.
+                            + 2A-53or2A-55 will create empty granule as
+                            + appropriate.
+                            + Changed length of filename to 256.
+
+* level_1 (1.10)            - Increased char buffer size in 'ImgCreate' to 
+                            + accomodate JCET's request for negative 
+                            + height values. See its CHANGES for more detail.
+
+* 2A-52i (3.5)              - Write %rain to TSDIS' db.
+
+* 2A-53-v4 (4.6)            - Changed metadata min. value to 0.0.
+
+* 2A-54 (v2.18)             - Added lat/lon for Gunn Point, Darwin.
+                            + Corrected lat/lon for some sites
+                            + (CORC, NWBR, THOM, KWAJ).
+                            + 2A-54 will create empty granule as appropriate.
+                            + Requires gv_utils v1.2 or higher.
+
+
+* 2A-55 (v2.17)             - Added lat/lon for Gunn Point, Darwin.
+                            + Corrected lat/lon for some sites 
+                            + (CORC, NWBR, THOM, KWAJ).
+                            + Added land-sea map for Houston and 
+                            + renamed DarMelMaps* to mkgeomap*.
+                            + Requires gv_utils v1.2 or higher.
+
+* 2A-56 (v1.3)              - See src/2A-56/CHANGES.
+
+* 3A-55 (v1.4)              - Handles and creates empty granule product.
+
+* src/utils (1.9)           - Added a new program and minor mods.
+
+* src/acc_rrmaps (1.4)      - Programs handle and create empty granule 
+                            + products.
+
+* Requires gv_utils v1.2 or higher.
+
+* Requires rsl v1.13 or higher.
+
+* Changed the top Makefile to make building and installation easier.
+
+Note: 
+ 1. Level 2&3 programs will create empty granule when appropriate.
+ 2. Level 2's begin/end date/time are consistent with level 1's.
+
+See 'CHANGES' in each component for more details.
+
+
+
+v4.4 (12/08/97)
+--------------
+* src/utils (v1.8)          - Added more routines in hdf_metadata.c.
+
+* level_1 (v1.9)            - See src/level_1/CHANGES.
+
+* 2A-52i (3.4)              - Ported to HP-UX.
+
+* 2A-54 (2.17)              - Added lat/lon for some sites.
+
+* 2A-55 (v2.16)             - Added lat/lon for some sites.
+                            + Changed the min/max range to dBz.
+                            + Added land-sea map for KWAJ.
+
+* 2A-57 (v1.1)              - Print usage to STDERR.
+
+* 3A-55 (v1.3)              - Ported to HP-UX.
+                            + Bug fixes in '3A-55'.
+
+* format_conversion (v1.17) - Changed in 'level_2_ghdf_to_singlevos_ascii' 
+                              so it'll leave the compressed file unchanged 
+                              when uncompressing it.
+* src/acc_rrmaps (v1.3)     - Ported to HP-UX.
+
+* Bug fixes in the top Makefile.
+
+* Tested compiling on HP-UX.
+
+See 'CHANGES' in each component for more details.
+
+
+v4.3 (11/18/97)
+---------------
+* src/utils (v1.7)          -  Fixed bug w.r.t. setting metadata field 
+
+                               (num of vos).
+v4.2 (11/13/97)
+---------------
+* level_1 (1.8)             -- Increased the length of the gif filenames.
+                               Requires gv_utils.
+
+* 2A-52i (v3.3)             -- Bug fixes for option -O.
+                               Requires gv_utils.
+
+* 2A-53-v4 (4.5)            -- Uses latest ZR file format (vertical listing).
+                               Requires gv_utils.
+
+* 2A-54 (2.16)              -- Requires gv_utils.
+
+* 2A-55 (v2.15)             -- Set seconds field for output metadata.
+                               Use TK_DEFAULT for < -15 or > 70 dBZ.
+                               x <==> y dimension swap
+                               Requires gv_utils.
+
+* 2A-56 (v1.2)              -- Bug fixes w.r.t. argument list.
+
+* 3A-53 (v1.2)              -- Requires gv_utils.
+
+* 3A-54 (v1.2)              -- Requires gv_utils.
+
+* 3A-55 (v1.2)              -- Bug fix.
+                               Requires gv_utils.
+
+* src/acc_rrmaps (v1.2)     -- Increased filename's length to 256.
+                               Requires gv_utils.
+
+* src/utils (v1.6)          -- Moved some of the routines outside of this
+                               package. The new package is named, gv_utils.
+                               Renamed some filenames.
+                               Requires gv_utils.
+
+* format_conversion (V1.16) -- Clearified the usage message for '2A-53'.
+                               Requires gv_utils.
+
+* Updated the top Makefile.
+
+* Requires:
+	gv_utils-v1.0.tgz,
+
+See 'CHANGES' in each component for more details.
+
+
+v4.1 (10/24/97)
+-------------------
+* level_1 (v1.7)            -- Added ZDR  image generation. Changed output
+                               filename (not using leading 0 for granule #).
+                               Plus more...
+                               
+* 2A-52i (v3.2)             -- Changed the output (regarding the 'hit' 
+                               and CA fields) to conform with TSDIS' 
+                               specification. Added more option and scripts.
+                               Requires Perl.
+
+* 2A-53-v4 (v4.4)           -- Bug fix w.r.t. scaling of rain rates.
+                               Bug fix -- Convert application's bad value to 
+                               toolkit's bad value before calling TKwriteGrid()
+                               Changed the way it's setting product's 
+                               specific metadata fields
+
+* 2A-54 (2.15)              -- Added 'MELB' to the site list.
+                               Changed the way it's setting product's 
+                               specific metadata field.
+
+* 2A-55 (2.14)              -- Added 'MELB' to the site list.
+                               Bug fixes -- HDF product contains lat, lon info.
+                               Bug fix -- Convert application's bad value to 
+                               toolkit's bad value before calling TKwriteGrid()
+                               Changed the way it's setting product's 
+                               specific metadata fields
+
+* 2A-56 (v1.1)              -- Changed format statement in script 
+                               granulate_gmin_files to printf
+
+* 3A-53 (v1.1)              -- Removed -c from the metadata file.
+
+
+* 3A-54 (v1.1)              -- Removed -c from the metadata file.
+
+
+* 3A-55 (v1.1)              -- File management in 3A-55 keeps intermediate 
+                               files and deletes metadata.bin on END.
+                               Removed -c from the metadata file.
+                               Fixed bugs related to metadata data. 
+
+* src/acc_rrmaps (v1.1)     -- Minor bug fixes on the SGI.
+
+* src/utils (v1.5)          -- Mods w.r.t. get satellite coincident data.
+
+* format_conversion (V1.15) -- Bug fix in 2A-53_hdf2ascii.c, 2A-55_hdf2ascii.c 
+                               Convert toolkit's bad value to application's 
+                               bad value before writing to ascii file.
+
+* Contains level 1, 2, and 3 software.
+
+* Required software:
+    rsl-v1.10 or later,
+    toolkit-v4.5r1 or later,
+    HDF4.0r1p1 or later
+
+* Added copyright notes.
+
+See 'CHANGES' in each component for more details.
+
+
+Pre-v4.1 (10/10/97)
+-------------------
+* src/utils (v1.4)          -- Added new programs and library routines for
+                               processing level 3.
+
+* format_conversion (v1.14) -- Minor modification in 
+	                           level_2_ghdf_to_singlevos_ascii.
+                               Added level_3_rrmap_hdf2ascii.c
+
+* Added src/acc_rrmaps (v1.0) -- For 3A-53 and 3A-54.
+
+* 3A-53 (v1.0)              -- Initially added.
+
+* 3A-54 (v1.0)              -- Initially added.
+
+* 3A-55 (v1.0)              -- Initially added.
+
+Required software:
+  rsl-v1.9 or later,
+  toolkit-v4.5r1 or later,
+  HDF4.0r1p1 or later
+
+See 'CHANGES' in each component for more details.
+
+
+
+v4.0 (8/19/97 -- previous version is 3.7)
+------------------------------
+* level_1 (1.6)             -- Added 'data/qc_params_HSTN' -- for Houston TX.
+                               Added file level_1_null_granule.c
+                               Removed null_granule functionality from level_1.c.
+
+* src/utils (v1.3)          -- Minor mod. in get_radar_name_from_file.c.
+
+* 2A-52i (v3.1)             -- Move some common routines to 'src/utils/'.
+                               Added option, -S, which allow processing 
+                               without satellite coincident data lookup.
+                               Requires libgvs_utils.a.
+
+* 2A-53-v4 (4.3)            -- Changed the Makefile to use libgvs_utils.a
+                               Upgraded to use the new interface of 
+                               'uf2mudras' which can handle multiple sites.
+	                           Uses runtime parameter file.
+
+* 2A-53-w (3.11)            -- Removed option -t; added option -S.
+
+* 2A-54 (v2.14)             -- Changed Makefile; it requires libgvs_utils.a.
+                               New option that allows resolution specification
+                               on the command line.
+                               Can handle other sites besides Melbourne 
+                               and Darwin.
+                               Upgraded 2A-54 to call the new program name.
+
+* 2A-55 (v2.13)             -- Changed Makefile; it requires libgvs_utils.a.
+                               New options that allow resolution specification
+                               on the command line.
+                               Can handle other sites besides Melbourne 
+                               and Darwin.
+
+* format_conversion (v1.13) -- Changed Makefile; it requires libgvs_utils.a.
+                               uf2mudras can handle other sites besides 
+                               Melbourne and Darwin.
+                               Renamed:
+                                 hdf_to_uf to level_1_ghdf_to_singlevos_uf
+                                 ghdf_to_singlevoshdf to level_2_ghdf_to_singlevos_hdf
+                                 singlevoshdf_to_ghdf to level_2_singlevos_hdf_to_ghdf
+
+* 2A-56 (v1.0)   -- No longer generates HDF.  All HDF interface code has been
+                    removed.  Output is ascii.  Granule is one month/gauge.
+                    Initially being build by the top Makefile.
+
+* 2A-57 (v1.0)   -- Not changed from previous versions.  
+                    Initially being build by the top Makefile.
+
+* Contains both level 1 and 2 algorithms.
+* Requires sprint v1.12 or later -- which supports more sites.
+* Requires rsl v1.9 or later.
+* Level 2 programs will determine the site name based on 1C51 product if 
+  it is not being specified on the command line.
+
+See 'src/<prod>/CHANGES' for more details.
+
+
+v3.7 (8/5/97)
+-------------
+* level_1 (v1.5)            -- Minor correction in the document.
+                               Remove memory leak. Changed the temporal windows
+                               for 1C51 HDF processing. 
+                               Requires toolkit_4.5r1.1 and rsl v1.8 or later.
+                               Miscellaneous changes.
+
+* src/utils (v1.2)          -- Added a new program.
+
+* Requires toolkit_4.5r1.1 (Packaged by the TRMM Office which contains 
+  modifications to the official release, toolkit_4.5r1) 
+  and rsl v1.8 or later.
+
+Note: This version contains only the source codes for level_1.
+
+See 'src/<prod>/CHANGES' for more details.
+
+
+v3.6 (7/25/97)
+--------------
+* level_1 (v1.4)            -- Changed Houston callid, 
+                               constructs products based on sat. coincident 
+                               data, requires libgvs_utils.a, 
+                               requires rsl 1.7 or later, etc...
+* src/utils (v1.1)          -- Contains more source files and 
+                               produces libgvs_utils.a. 
+
+Note: This version contains only source codes for level_1.
+
+See 'src/<prod>/CHANGES' for more details.
+
+
+v3.5 (7/2/97)
+------------
+* format_conversion (v1.12) -- Set/write metadata. 
+* level_1 (v1.3)            -- Added file: radar_sites. Changed options.
+                               Program determines site automatically.
+* 2A-52i (v3.0)             -- Displays version # on the usage messages.
+                               New command interface.
+                               Uses satellite coincident data.
+* 2A-53-v4 (v4.2)           -- Set/write metadata. Added new options.
+* 2A-54 (v2.13)             -- Set/write metadata. Added new options.
+* 2A-55 (v2.12)             -- Set/write metadata. Added new options.
+* Added '../../utils'.
+* Algorithms's (excluding 2A-53 from Witek, Danny, and Pi-c) usage 
+  messages contain version number.
+* Requires rsl v1.6, toolkit v4.5r1.
+
+* Note: 2A-53 programs from Witek, Danny, and Pi-c do not set metadata 
+        since they will not be used during operation.
+
+See 'src/<prod>/CHANGES' for more details.
+
+
+v3.4 (4/30/97)
+--------------
+1. Changed LDFLAGS in the top Makefile
+2. level_1 (v1.2)    - Fixed the Makefile w.r.t. install_doc.
+                       Added command option, '-m minimum_sweeps',
+                       '-g Image_output_dir', '-n Number_sweeps_for_image'.
+                       Can accept HDF file (1B-51) or UF file for input.
+3. format_conversion (v1.11) - Fixed the Makefile w.r.t. install_doc
+                     - Changed  '2A-53' and '2A-53or2A-55' to handle
+                       '2A-53-v4' (2A-53 version 4).
+4. 2A-52i (v2.8)     - Fixed the Makefile w.r.t. install_doc and linnking
+5. 2A-53-w (v3.10)   - Fixed the Makefile w.r.t. install_doc and linnking
+6. 2A-53-d (v3.11)   - Fixed the Makefile w.r.t. install_doc and linnking
+7. 2A-53-c (v1.2)    - Fixed the Makefile w.r.t. install_doc and linnking
+8. 2a-53-v4 (4.1)    - First time included in gvs.
+   2A-53 (3.12)
+9. 2A-54 (v2.12)     - Fixed the Makefile w.r.t. install_doc 
+                       Removed warning message related to signal() for SGI 6.2
+10. 2A-55 (v2.11)     - Fixed the Makefile w.r.t. install_doc
+                       Removed warning message related to signal() for SGI 6.2
+11. Minor changes in all of the Makefiles.
+12. Require toolkit v4.0 and rsl-v1.5.
+13. All software call TSDIS toolkit's TKreportWarning(), except level_1,
+    2A-53-c, 2A-53-d, and 2A-53-w -- since these products will not be 
+    processed by TSDIS.
+14. HTML documents use relative pathname when referencing other HTML page.
+ 
+See 'src/<prod>/CHANGES' for more details.
+
+
+v3.3 (1/6/97)
+---------------------
+1. 2A-53-w (v3.9)    - Changed in format_conversion and 2A-53/pi-c w.r.t. 
+                       compiling on the SGI.
+2. 2A-53-d (v3.10)   - Minor mod. in src/2A-53/danny/Makefile.
+3. level_1 (v1.1)    - Changed options, paramter filenams, and output 
+                       filename's format.
+4. format_conversion (v1.9) - Minor mod. w. r. t. compiling. Changed UF 
+                       filename's format.
+5. 2A-54 (v2.11)     - Minor mod. in the makefile.
+6. 2A-55 (v2.10)     - Minor mod. in the makefile.
+7. 2A-52i (v2.7)     - Minor mod. in the makefile.
+8. 2A-53-c (v1.1)    - Added doc. and minor mod. in the makefile.
+
+v3.2 (froze: 12/12/96)
+---------------------
+1. 2A-52i (v2.6) - Program traps signals and abort execution.
+2. 2A-53-d (v3.9) - Program traps signals and abort execution.
+3. 2A-53-w (v3.8) - Program traps signals and abort execution.
+4. 2A-54 (v2.10) - Program traps signals and abort execution.
+5. 2A-55 (v2.9) - Program traps signals and abort execution. Contains 
+                  UW's modifications (10/29/96).
+6. format_conversion (v1.8)- Programs trap signals and abort execution.
+7. Ported 2A-52i, 2A-53-{d,w}, 2A-54, and 2A-55 to SUN.
+8. All subpackages are compatible with toolkit v3.5 with minor modifications.
+9. level_1 (v1.0) - Newly created.
+10.2A-53-c (v1.0) - Newly created.
+
+v3.1.2 (Froze: 10/30/96)
+-----------------------
+1. Patches 2A-53-w see that README and CHANGES.
+
+v3.1.1 (Froze: 7/29/96)
+----------------------
+1. 2A-53-d (v3.8) - Changed Darwin's Ze-R table and rain guage site list for
+					the AIW-II workshop.
+2. 2A-54 (v2.9)   - Changed Lat/Lon for Melbourne site.
+3. 2A-55 (v2.8)   - Changed Lat/Lon for Melbourne and Darwin sites.
+4. format_conversion (v1.7) - Compiling bug fix in hdf_to_uf.c for SGI.
+
+
+v3.1 (froze: 7/10/96)
+---------------------
+1. 2A-52i (v2.5)  - Included. This version has been modified since GVS v2.5.6.
+2. 2A-53-w(v3.7)  - Compiling bug fixed. Added a new exit code.
+                    Creates Out-Of-Bound data flag: -99.
+3  2A-53-d (v3.7) - Creates Out-Of-Bound data flag: -99. Added a new exit code.
+4. 2A-54 (v2.8)   - Added a new exit code.
+5. 2A-55 (v2.7)   - Removed -ansi from CPPFLAG in the Makefile. Added a new
+                    exit code.
+6. format_conversion (v1.6) - Contains bug fixes and minor modifications.
+7. Needs to patch $gvs/IO_INTR_GV.c.diff to $toolkit/src/IO_INTR_GV.c 
+   (toolkit v2.5).
+
+Note: Please see $gvs/src/<product>/CHANGES for more detail.
+
+
+v3.0 (froze: 6/25/96)
+----------------------
+1. 1C-51          - Not included.
+2. 2A-52i         - Not included.
+3. 2A-53-w (v3.6) - Changed program name from '2A-53-a' to '2A-53-w'.
+                    Program expects output filename to be 
+                    specified on the command line.
+					Produces product in HDF file. See src/2A-53/witek/CHANGES
+                    for more details.
+4. 2A-53-d (v3.6) - Produces product in HDF file.
+                    See /src/2A-53/danny/CHANGES for more details.
+5. 2A-54 (v2.7)   - Program expects output filename to be 
+                    specified on the command line.
+                    Produces product in HDF file. See See /src/2A-54/CHANGES
+	                for more details.
+6  2A-55 (v2.6)   - Program expects output filename to be 
+                    specified on the command line.
+                    Produces product in HDF file. See See /src/2A-55/CHANGES
+	                for more details.
+8. Removed all_tape* scripts from this package.
+
+9. format_conversion (v1.5) - Contains new programs for HDF related conversion.
+
+10. Requires HDF4.0r1p1 and toolkit.2.5.tar.Z (Require to patch 
+    $gvs/IO_GV.h.diff to $toolkit/include/IO_GV.h).
+
+
+
+v2.5.6 (froze: 5/1/96)
+----------------------
+1. 1C-51 (v2.7)   - Bug fixes.
+					all_tape_1C-51 determins whether tape header file 
+                    of KMLB is normal and only passes it to 1C-51 if that 
+                    file is normal. File read from tape is named, tapeid.###, 
+                    where ### starts at 0.
+2. 2A-52i (v2.4)  - Name changed.
+3. 2A-53-a (v3.5) - Name changed.
+4. 2A-53-d (v3.5) - Removed unused files.
+5. 2A-54 (v2.6)   - Name changed.
+6  2A-55 (v2.5)   - Name changed. 
+7. all_tape* can read data from disk.
+8. Renamed gts/GTS to gvs/GVS. This has the effect on the environment 
+   variable, 'GTS_DATA_PATH', and directories' name created by 
+   'all_tape_level_1n2' as well.
+
+
+v2.5.5 (froze: 4/1/96)
+----------------------
+1. 1C-51 (v2.6)   - Minor mod. in doc., options' default, all_tape_1C-51. 
+                    Compression of UF file is not done by 1C-51 but by
+                    all_tape_1C-51.
+2. 2A-52i (v2.3)  - Uses 2A-53 product (rain rate map) as input instead of 
+                    1C-51 product. Have new command line syntax.
+3. 2A-53-a (v3.4) - Takes 2A-54 product as input on the command line. However
+                    the actual algorithm program currently doesnot use it.
+4. 2A-53-d (v3.4) - Added -P data_path, changed the default location for the 
+                    data files (i.e., $GVS_DATA_PATH/data_file), and made 
+                    csmapfile a mandatory input.
+5. 2A-54 (v2.5)   - Minor fixes for compiling on the SGI. Minor script changes.
+6  2A-55 (v2.4)   - Minor fixes for compiling on the SGI. Minor script changes.
+7. all_tape supports 2A-53-d. It can determine if data is Lassen and pre-append
+                    '-t L' to the option list for programs that require radar
+                    type be specified; such programs are: 2A-53-a, 2A-54, 2A-55
+8. Top-level Makefile is more robust.
+9. Minor mod. in uf2mudras and all makefiles.
+10. Requires: uiowa_distrib-v2.2.tgz, rsl-v0.44.tgz, and sprint-v1.7.tgz.
+
+v2.5.4 (froze: 3/21/96)
+----------------------
+1. 1C-51(v2.5)    - Minor algo/parameter (runtime) changes.
+2. 2A-52i (v2.2)  - No change.
+3. 2A-53-a (v3.3) - Minor changes. 
+4. 2A-53-d (v3.3) - No change. However, not part of the all_tape... scripts.
+5. 2A-54 (v2.4)   - Minor script changes.  Minor bug fix w.r.t. date handling.
+6. 2A-55 (v2.3)   - Minor script changes.
+7. uiowa_distrib-v2.2.tgz.
+8. rsl-v0.44.tgz.
+9. sprint-v1.6.tgz.
+10. all_tape scripts modified, including uf2mudras script.
+
+Data flow tested: 1C-51, 2A-52i, 2A-53-a, 2A-54, 2A-55.
+                  2A-53-d was not tested via the all_tape scripts, however,
+                  it seems to run fine.  Look for it in a later GVS
+                  release.
+
+Platforms: HP, SGI, LINUX
+
+
+v2.5.3 (froze: 3/15/96)
+----------------------
+-   New 1C-51 and Danny's 2A-53 algorithms. See their CHANGES file for 
+    more detail. 'all_tape_level_1n2' currently doesnot support 
+    Danny's 2A-53 program.
+-   'send_status' echos message to stderr but not to monitorps.
+-   ncar_sprint-v1.5.tgz
+
+v2.5.2 (froze 3/4/96)
+----------------------
+-   See CHANGES file for 1C-51, 2A-52i, 2A-53, 2A-54, and 2A-55 for more 
+    details.
+-   all_tape_level_1n2: contains bug fixes, new option (-l), and other 
+    minor changes.
+-   1C-51 (v2.3)
+-	2A-52i(v2.2)
+-	2A-53 (v3.2)
+-	2A-54 (v2.3)
+-	2A-55 (v2.2)
+-	rsl-v0.43.tgz
+-	ncar_sprint-v1.2.tgz
+-	uiowa_distrib-v2.1.tgz
+
+v2.5.1 (froze 9/11/95)
+-------------------
+
+o   Danny has split the 2A-53 (stacycs) program, which did too much,
+    into two parts: 2A-53 and 3A-53.  The specific programs are stacycs
+    and stacycs3a53, respectively.
+
+o   2A-53 (Anton Kruger's program) uses new U. of Iowa distribution package 
+    -- uf2rle doesnot depend on TRMM radar library.
+
+o   2A-53 Anton program supports MELBOURNE and DARWIN dataset.
+
+o   2A-54 includes auxiliary data files (for MELBOURNE data) and 
+    basescan data files. 
+
+o   2A-53-a and 2A-54 contain new and modified options.
+
+o   'all_tape_level_1n2' produces output with new filename's extension 
+    for '2A-52i' and 2A-55-a'.
+
+o   'all_tape_level_1n2' compresses 1C-51 product (UF file), 
+    uncompresses the compressed file to process level 2 product(s), 
+	and recompresses it again when done processing with that file in order 
+	to save disk space.  In addition, this script changed the block size 
+	of 'dd' to 32K from 64k.
+
+o   Containes GV pre-ops problems fixes.
+
+o	1C-51 (v2.1)
+o	2A-52i(v2.0) 
+o	2A-53 (v3.0) 	
+o	2A-54 (v2.1) 
+o	2A-55 (v2.0)
+o	uiowa_distrib-v2.0.tgz
+o	ncar_sprint-v1.1.tgz
+
+v2.5 (froze 7/19/95)
+-------------------
+o   This release uses the science algorithms instead of the simple simon 
+    algorithms.
+
+o   'all_tape_level_1n2' has changed to due to the new requirements for 
+    running science algorithms.
+
+	'2A-53' product does not require 2A-54 product as input, so it doesnot 
+	have to be run last.  
+
+	The messages print out to stderr might be slightly different from 
+	the previous release.
+
+o	1C-51 (v2.0)
+o	2A-52i(v2.0) 
+o	2A-53 (v2.0) 	
+o	2A-54 (v2.0) 
+o	2A-55 (v2.0)
+o	uiowa_distrib-v1.0.tgz
+o	ncar_sprint-v1.0.tgz
+
+v0.4 (froze 6/22/95)
+-------------------
+o   All products are compatible with the new release of RSL (v0.37).
+o	1C-51 (v1.6)
+o	2A-52i(v1.1) 
+o	2A-53 (v1.2) 	
+o	2A-54 (v1.2) 
+o	2A-55 (v1.2)
+
+v0.3 (started 5/20/95; froze 5/23/95)
+-------------------------------------
+o	'all_tape_level_1n2' (Lassen and WSR-88D data). 
+o	The messages print out to stderr might be slightly different from the 
+	previous release (v0.2). 
+o	1C-51 (v1.5)
+o	2A-52i(v1.1) 
+o	2A-53 (v1.1) 	
+o	2A-54 (v1.1) 
+o	2A-55 (v1.1)
+ 
+v0.2 (started 5/18/95; froze 5/19/95)
+------------------------------------
+2A-53 (v1.0.2) 	
+2A-54 (v1.0.2) 
+Added all_tape_level_1n2 (WSR-88D data only)
+
+v0.1  (started 4/13/95; froze 5/17/95)
+--------------------------------------
+1C-51 (v1.4.1)
+2A-52i(v1.0.1) 
+2A-53 (v1.0.1) 	
+2A-54 (v1.0.1) 
+2A-55 (v1.0.1) 
+

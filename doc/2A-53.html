@@ -1,0 +1,174 @@
+<HTML>
+<HEAD>
+   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+   <META NAME="GENERATOR" CONTENT="Mozilla/4.04 [en] (X11; I; Linux 2.0.28 i686) [Netscape]">
+</HEAD>
+<BODY BACKGROUND="gvs_bg.gif">
+&nbsp;
+<BR>&nbsp;
+<CENTER><TABLE BORDER=2 CELLPADDING=0 WIDTH="100%" >
+<TR ALIGN=CENTER VALIGN=CENTER>
+<TD ALIGN=CENTER VALIGN=CENTER><IMG SRC="gvs_logo.gif" HEIGHT=100 WIDTH=256 ALIGN=LEFT></TD>
+
+<TD>
+<H1>
+<FONT COLOR="#000080">2A-53:</FONT> <FONT COLOR="#800080">Rain Rate Maps&nbsp;</FONT></H1>
+</TD>
+</TR>
+</TABLE></CENTER>
+
+<HR WIDTH="100%">
+<BR><B>Last updated:</B> 8/17/2000
+<BR>
+<HR>
+<H3>
+<FONT COLOR="#000080">Synopsis</FONT></H3>
+
+<PRE><B><FONT COLOR="#B22222">2A-53&nbsp; [-v] [options_list] [True-product-name]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1C-51_ghdf_file 2A-54_ghdf_file 2A-53_ghdf_file</FONT></B></PRE>
+
+<HR>
+<H3>
+<FONT COLOR="#000080">Description</FONT></H3>
+This is the version 4 release of the TRMM GV rain rate mapping program.
+Three parameters are required: the radar reflectivity map, the 2A-54 product
+containing the convective/stratiform rain classification, and the name
+of the output hdf file.
+
+<P>The ZR table containing the information mapping radar reflectivities
+to rainrates is found in a default location.&nbsp; The default location
+for the ZR table is $GVS_DATA_PATH.&nbsp; However, there is a runtime parameter
+file that is used.&nbsp; The runtime parameter file is also loated in $GVS_DATA_PATH.&nbsp;&nbsp;
+Typical filenames are 'runtime_2A-53_<B><I>&lt;site></I></B>.txt, where
+<B><I>&lt;site></I></B>&nbsp; can be MELB, DARW, GUAM, HSTN, ISBN, KWAJ,
+SAOP, THOM, and&nbsp; TWWF.&nbsp; Contained in that 'runtime' file is a
+list of time specifications, much the same way the Unix crontab files are
+done, and the right hand string for the matching time is added to the runtime
+parameters to execute the default <A HREF="2A-53-v4.html">2A-53-v4</A>
+algorithm.&nbsp;&nbsp; The time within this runtime file are the dataset
+times.&nbsp;&nbsp; The runtime parameters for the last matching time are
+used.&nbsp; This means that entries occurring further down the file supercede
+previous entries.
+
+<P>Normally, the only entry on the right hand side of a time specification
+is the simple runtime parameter <B>-z dual.zr </B>where dual.zr is located
+in $GVS_DATA_PATH.&nbsp;&nbsp; An example of the <B>runtime_2A-53_MELB.txt</B>
+is:
+<PRE># The program that parses this file is called 'grep_qc_parm.pl'
+#
+# Output the entry for the time.&nbsp; I.e., if this were a crontab,
+# then this would output the command.
+#
+# NOTE: THE LAST TIME MATCH IS OUTPUTTED!
+#
+# The format of each line is:
+# MIN HOUR DAY MONTH YEAR PARAMETERS
+#
+# where:
+# MIN&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; : 0 - 59
+# HOUR&nbsp;&nbsp;&nbsp;&nbsp; : 0 - 23
+# DAY&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; : 1 - 31
+# MONTH&nbsp;&nbsp;&nbsp; : 1 - 12
+# YEAR&nbsp;&nbsp;&nbsp;&nbsp; : 1997...
+#&nbsp;
+# You can specify:
+#&nbsp;&nbsp;&nbsp; *&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; --&nbsp; Wild match.&nbsp; This matches all possibilities.
+#&nbsp;&nbsp;&nbsp; n-m&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; --&nbsp; Range.&nbsp; n=begin, m=end, inclusive.
+#&nbsp;&nbsp;&nbsp; Exact values&nbsp;&nbsp; --&nbsp; Exact time specification.
+#
+# Examples:
+# #at 6:10 a.m. every day
+#&nbsp; 10 6 * * * parm1
+# #
+# #at 11:00-11:59 a.m. on the 4th for 1997 and 1998.&nbsp;
+#&nbsp; * 11 4 * 1997-1998 parm2
+#
+# #Hour 4 on january 1st
+#&nbsp; * 4 1 1 * parm3
+
+* * * * * -z dual.zr</PRE>
+The runtime filename is automatically constructed from executing 2A-53
+in a default mannor.&nbsp; The default runtime parameters, ie those found
+in the 'runtime_2A-53_&lt;site>.txt' file, can be overridden by specifying
+them on the command line for 2A-53.&nbsp; Algorithm 2A-53-v4 is the only
+algorithm that uses the 'runtime_2A-53_&lt;site>.txt' file.
+
+<P>There are 4 other algorithms that may be run.&nbsp; The first is <A
+HREF="2A-53-dc.html">2A-53-dc</A>.&nbsp; The following algorithms will
+not be run by TSDIS:&nbsp; <A
+HREF="2A-53-c.html">2A-53-c</A>, <A HREF="2A-53-d.html">2A-53-d</A>,
+and <A HREF="2A-53-w.html">2A-53-w</A>.&nbsp;&nbsp; Specify 2A-53-v4,
+2A-53-dc, 2A-53-c, 2A-53-d, or 2A-53-w as the <B>True_product-name</B>, when not
+running the default 2A-53-v4 algorithm.
+
+<P>
+<HR>
+<H3>
+<FONT COLOR="#000080">Options</FONT></H3>
+<B><FONT COLOR="#B22222">2A-53</FONT></B> calls one of the following program.&nbsp;
+See each of them for a list of options.
+
+<P><B><FONT COLOR="#B22222"><A HREF="2A-53-v4.html">singlevos_2A-53-v4</A></FONT>
+(the default, Merritt and Yuter)</B>
+<BR><B><FONT COLOR="#B22222"><A HREF="2A-53-dc.html">singlevos_2A-53-dc</A></FONT></B>
+(Merritt and Yuter, modified by Wilkerson)
+<BR><B><FONT COLOR="#B22222"><A HREF="2A-53-c.html">singlevos_2A-53-c</A></FONT></B>
+(Merritt)
+<BR><B><FONT COLOR="#B22222"><A HREF="2A-53-d.html">singlevos_2A-53-d</A></FONT></B>&nbsp;
+(Rosenfeld et al.)
+<BR><B><FONT COLOR="#B22222"><A HREF="2A-53-w.html">singlevos_2A-53-w</A></FONT></B>&nbsp;
+(Krajewski et al.)
+<BR>
+<HR>
+<H3>
+<FONT COLOR="#000080">Input Files</FONT></H3>
+
+<OL>
+<LI>
+<FONT COLOR="#B22222">1C-51_ghdf_file</FONT> - Quality controlled reflectivities
+for one hour-granule in Hierarchical Data Format (HDF) (1C-51 products).</LI>
+
+<LI>
+<FONT COLOR="#B22222">2A-54_ghdf_file</FONT> - Convective/stratiform maps
+for one hour-granule in HDF (2A-54 products).</LI>
+
+<LI>
+<FONT COLOR="#B22222">$GVS_DATA_PATH/runtime_2A-53_&lt;site>.txt </FONT><FONT COLOR="#000000">-
+Automatically determined when the default 2A-53-v4 algorithm is run.</FONT></LI>
+</OL>
+
+<HR>
+<H3>
+<FONT COLOR="#000080">Temporary Files</FONT></H3>
+The following file(s) are removed upon completion by the program.
+<UL>2A-53_&lt;<I>process_id</I>>/</UL>
+
+<HR width="100%">
+<H3>
+<FONT COLOR="#000080">Output Files</FONT></H3>
+
+<OL>
+<LI>
+<FONT COLOR="#B22222">2A-53_ghdf_file</FONT> - Rain rate maps for one hour-granule
+in a HDF file.</LI>
+</OL>
+
+<H3>
+
+<HR><FONT COLOR="#000080">Return value</FONT></H3>
+<B><FONT COLOR="#B22222">2A-53</FONT></B> returns 0 upon successful completion;
+1 upon successful processing for some VOSs of granule; 2 upon interruption;
+non-zero, otherwise.
+
+<P><B><FONT COLOR="#B22222">singlevos_2A-53-v4 and
+singlevos_2A-53-dc</FONT></B> return 0 upon successful completion; -2
+upon interruption; -1 upon failure.
+
+<P>
+<HR>
+<H3>
+<FONT COLOR="#000080">Authors</FONT></H3>
+Sandra Yuter, <I><TT>The University of Washington.</TT></I>
+<BR>John Merritt, Applied Research Corp. Landover, MD
+</BODY>
+</HTML>

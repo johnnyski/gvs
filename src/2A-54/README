@@ -1,0 +1,84 @@
+README for 2A-54: (12/10/99) Packaged w/ GVS v4.14.
+
+
+2A-54 has the following executable files and documentation:
+    * 2A-54 - The perl script, the front end to actual algorithm program.
+	          This produces product for one hour-granule.
+	* singlevos_2A-54 - an end-user interface for Matthias Steiner's
+		      algorithm, 2A54, that produces 2A-54 product.  This 
+	          produces product for a single VOS.
+	* 2A54 - the actual program (built by the makefile).
+	* 2A-54.html - documentation.
+
+              ------------------------------------------
+
+(a) Documentation is located in *.html and can be viewed with netscape 
+    or mosaic.
+
+(b) The directories which you have installed the executable files for 
+    this product and 'ncar_sprint' should be in your search path.
+
+
+
+
+EXECUTION NOTES:
+================
+
+*  This product uses a format conversion program called, 'uf2mudras' along 
+   with sprint input template called, 'sprint_base_scan.inp' to interpolate
+   the base scan of the UF file.  They are located in
+   'GVS_ROOT/format_conversion'.  You may create your own template as 
+   long as the following rules are applied:
+		-   Specify '10' for Fortran logical unit number of the input file 
+			in 'input' command.
+   		- 	Specify '11' for Fortran logical unit number of the output file 
+			in 'output' command.  
+        -   Fill in 'YYMMDD' for field 2 of the 'PROCESS' command.
+            This script will substitude 'YYMMDD' with the actual 
+            date of radar data. 
+        -   Fill in 'RADAR_NUM'for field 6 of the 'INPUT' command. This 
+			script will substitude 'RADAR_NUM' with either 23 or 21 for 
+			Lassen or Melbourne data, respectively.
+
+   See NCAR SPRINT documentation for command syntax.
+
+*  Only one execution of this product is allowed in a particular directory if 
+   the provided sprint input template is used.
+
+Requirements:
+
+*  Have access to the executable files located in $GVS/format_conversion,
+   sprint, and in ./src.
+ 
+
+*  Have 'sprint_base_scan.inp', located in 'GVS_ROOT/format_conversion',
+   installed under $GVS_DATA_PATH if you don't want to specify 
+   '-s sprint_input_template'.
+
+* Set enviroment variables: $GVS_DATA_PATH and $TSDISTK
+
+* Install gv_utils' data under $GVS_DATA_PATH.
+
+* Check and modify DARW entry appropriately in 
+  '$GVS_DATA_PATH/gv_radar_site_info.data if running Darwin data.
+
+QUESTIONS:
+=========
+
+Please contact TRMM Office help via e-mail at help@trmm.gsfc.nasa.gov.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

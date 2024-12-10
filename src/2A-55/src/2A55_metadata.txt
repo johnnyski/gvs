@@ -1,0 +1,48 @@
+# The program that parses this file is called 'grep_runtime_parm.pl'
+#
+# Output the entry for the time.  I.e., if this were a crontab,
+# then this would output the command.
+#
+# NOTE: THE LAST TIME MATCH IS OUTPUTTED!
+#
+# The format of each line is:
+# MIN HOUR DAY MONTH YEAR PARAMETERS
+#
+# where:
+# MIN      : 0 - 59
+# HOUR     : 0 - 23
+# DAY      : 1 - 31
+# MONTH    : 1 - 12
+# YEAR     : yyyy
+# PARAMETERS :     
+#                   {-Q qa_param_value}
+#                   {-R reprocess_status}
+#                   [-c data_center_source]
+#                   [-P product_version_number]
+# where:
+#   qa_param_value:     Specify the quality indicator, e.g.,
+#                       "NOT BEING INVESTIGATED" | "BEING INVESTIGATED" |
+#                       "FAILED" | "PASSED"
+#   reprocess_status:   Specify the intent to reprocess the data, e.g.,
+#                       "YES" | "NO"
+#   data_center_source: Specify the data center generated the input files, 
+#                       e.g., "TSDIS" | "NMC"
+#   product_version_number: Specify the data product number as an
+#                           integer: "1", "2", etc.
+# You can specify:
+#    *              --  Wild match.  This matches all possibilities.
+#    n-m            --  Range.  n=begin, m=end, inclusive.
+#    Exact values   --  Exact time specification.
+#
+# Examples:
+# #at 6:10 a.m. every day
+#  10 6 * * * parm1
+# #
+# #at 11:00-11:59 a.m. on the 4th for 1997 and 1998. 
+#  * 11 4 * 1997-1998 parm2
+#
+# #Hour 4 on january 1st
+#  * 4 1 1 * parm3
+#
+* * * * 1990-1998 -R "Yes" -c "TSDIS" -Q "NOT BEING INVESTIGATED" -P "3"
+* * * * 1999-3000 -R "Yes" -c "TSDIS" -Q "NOT BEING INVESTIGATED" -P "4"

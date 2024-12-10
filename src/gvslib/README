@@ -1,0 +1,52 @@
+README for library gvs: v1.12 (12/10/99) packaged w/ GVS v4.14.
+
+
+This package makes the library libgvs.a used by gvs packages. 
+
+The library file:
+	libgvs.a
+    libgvs.so
+
+              ------------------------------------------
+
+(a) The directories which you have installed the executable files for 
+     this product should be in your search path.
+
+
+LINKING APPLICATIONS:
+=====================
+
+If you want HDF and TSDIS toolkit libraries (the link line looks messy),
+you will need to have -lgvs too.  This library is part of gvs.  The
+HDF routines are specific for gvs level_1 processing.  Additionally,
+RSL may be installed to support additional formats and -letor -limplode
+may be required.
+
+   setenv TSDISTK /usr/local/toolkit  (or your top-level directory name)
+
+   -L/usr/local/trmm/GVBOX/lib \
+   -lrsl -lgvs -L/usr/local/hdf/lib  -L/usr/local/toolkit/lib \
+   -ltsdistk -lmfhdf -ldf -ljpeg -lz -lm
+
+   Be sure to substitute the appropriate -L specification for the HDF
+   and the TSDISTK library paths on your system.
+
+QUESTIONS:
+=========
+
+Please contact TRMM Office help via e-mail at help@trmm.gsfc.nasa.gov.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

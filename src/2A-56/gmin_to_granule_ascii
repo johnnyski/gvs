@@ -1,0 +1,41 @@
+#! /usr/bin/perl
+#
+# Master script to:
+#
+#    1. Granulate the gmin files.
+#
+# Input:
+#    Compressed or uncompressed ascii GMIN files for ALL gauge
+#    networks and ALL gauges from one radar site for the time period
+#    of interest.
+#    I reiterate: ALL such gauge data must be included as input,
+#    since there exists no capability to append data into a 2A-56
+#    HDF file.
+#
+# Output:
+#    One or several ascii files having the name:
+#      2A56_<site>_<network>_<gaugeid>_YYYYMM_<ver#>.ascii
+#    where:
+#         <site>    - MELB, DARW, KWAJ, HSTN, ...
+#         <network> - KSC, STJ, ...
+#         <gaugeid> - #### (4 digit number)
+#         YYYY      - Year (4 digit number)
+#         MM        - Month(2 digit number)
+#         <ver#>    - version (1)
+#
+$PROG_VERSION = "gvs-v4.21";
+if ($#ARGV == -1) {
+	print STDERR "Usage ($PROG_VERSION):\n";
+	print STDERR "\t$0 gmin1 [gmin2 [gmin3 ...]]\n";
+	exit(-1);
+}
+
+
+# Split up each of the given gmin files into daily files.
+#
+system("granulate_gmin_files @ARGV");
+$status = $? >> 8;			
+if ($status != 0) {
+	exit(-1);
+}
+exit(0);

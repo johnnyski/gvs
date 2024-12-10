@@ -1,0 +1,35 @@
+README for utils: v1.12 (12/10/99) packaged w/ GVS v4.14.
+
+
+This package contains several utility programs for the GVS package.
+
+The executable file(s):
+	
+    get_radar_name_from_file  - Get radar name from either non-HDF (recognized
+                                by the rsl ingest routine) or HDF file.
+    get_info_from_file        - Get info from either non-HDF (recognized
+                                by the rsl ingest routine) or HDF file.
+    date2pentad_number        - Compute pentad number from date.
+	pentad_number2begin_date  - Get begin date for the specified pentad.
+    level_2_create_empty_granule_hdf - Create level 2 empty granule product.
+
+              ------------------------------------------
+
+(a) The directories which you have installed the executable files for 
+     this product should be in your search path.
+
+
+
+
+EXECUTION NOTES:
+================
+
+* level_2_create_empty_granule_hdf will read data from 
+  $GVS_DATA_PATH/gv_radar_site_info.data
+
+
+
+QUESTIONS:
+=========
+
+Please contact TRMM Office help via e-mail at help@trmm.gsfc.nasa.gov.

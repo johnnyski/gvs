@@ -1,0 +1,195 @@
+#! /usr/bin/perl
+#-*-Perl-*-
+#
+# This is the user interface to the rain rate algorithm developed by 
+# Witek Krajewski, University of Iowa.
+# This script does the following:
+#   1. Takes 1C-51 product (UF file) and 2A-54 product (1 VOS--HDF file), 
+#   2. Calls the real algorithm to creates an HDF file, containing rain 
+#      rate map.
+#
+# Script returns 0 upon successful completion; -2 upon interruption;
+# non-zero, otherwise.
+#
+# 
+# REQUIREMENTS:
+#   - Specify pathname for the lookup tables if they are not installed under
+#     $GVS_DATA_PATH or '/usr/local/trmm/data'. The lookup tables are: 
+#     carttopol.FL, poltocart.FL  (for MELBOURNE data)
+#     carttopol.DR, poltocart.DR  (for DARWIN data)
+#
+#
+#
+# By:    Thuy Nguyen
+#        NASA/TRMM Office
+#        Thuy.Nguyen@gsfc.nasa.gov
+#        June 9, 1995
+#
+#############################################################################
+@path = split(/\//, $0);
+$this_prog = $path[$#path];
+$SIG{'INT'} = 'doexit_handler';
+$SIG{'KILL'} = 'doexit_handler';
+$SIG{'STOP'} = 'doexit_handler';
+$SIG{'SEGV'} = 'doexit_handler';
+$SIG{'ILL'} = 'doexit_handler';
+$SIG{'FPE'} = 'doexit_handler';
+
+$product = $this_prog;
+sub usage {
+	print STDERR "Usage:\n";
+	print STDERR "  $product [-v]\n";
+	print STDERR "\t[-S site_name] \n";
+	print STDERR "\t[-P pathname_of_lookup_tables]\n";
+	print STDERR "\t[-p parameters_file]\n";
+	print STDERR "\tqc_uf_file csmap_shdf_file rrmap_shdf_file\n";
+	exit (-1);
+}
+$site = "";
+
+if ($#ARGV < 1){
+	do usage();
+}
+#set default values
+$data_path = $ENV{'GVS_DATA_PATH'};  # default 
+if ($data_path eq "") { # Pick a nice default.
+    $data_path = "/usr/local/trmm/data";
+}							
+
+$tsdistk_path = $ENV{'TSDISTK'};  # default 
+if ($tsdistk_path eq "") { # Pick a nice default.
+    $tsdistk_path = "/usr/local/toolkit";
+	$ENV{'TSDISTK'} = $tsdistk_path;
+}
+
+$verbose = 0;
+$param_file = "";
+
+# process arguments
+$end_options = 0;
+
+while (@ARGV && $end_options == 0) {
+	$str = shift;
+
+	if ($str eq "-v") {
+		$verbose = 1; 
+		$verbose_flag = "-v";
+	}
+	elsif ($str eq "-S") {
+		$site = shift;
+	}
+
+	elsif ($str eq "-P") {
+		$data_path = shift;
+	}
+	elsif ($str eq "-p") {
+		$param_file = shift;
+	}
+	else {
+		$end_options = 1;
+	}
+}
+
+if ($#ARGV != 1  || $str =~ /^\-/){
+	do usage();
+}
+
+#extract input filenames
+$qc_uf_file = $str;
+$csmap_hdf_file = shift;
+$rrmap_file = shift;      # outfile
+
+$site = &get_site_name_from_uf_file($qc_uf_file) if ($site eq "");
+$site =~ y/A-Z/a-z/;    # Convert to lowercase.
+if ($site eq "melb") {# WSR88D (Melbourne data)
+	$TBL_EXT = "FL";
+    # raingages have a 0 minutes time shift from radar for Florida
+	$radar_id = 20;
+    if ($param_file eq "") {
+		$param_file = "melb_rainest.par";
+	}
+}								
+elsif ($site eq "darw") {	#  Ber., Darwin
+	$TBL_EXT = "DR";
+	$radar_id = 20;
+    if ($param_file eq "") {
+		$param_file = "darw_rainest.par";
+	}
+}
+else {
+	print STDERR "$product:ERROR:Only support Melbourne and Lassen data.\n";
+	exit(-1);
+}
+
+$param_file = "$data_path/$param_file";
+if ($verbose == 1) {
+	print STDERR "$product:Which program: $0\n"; 
+	print STDERR "$product:site = $site\n";
+    print STDERR "$product:data_path = $data_path\n";
+	print STDERR "$product:param_file = $param_file\n";
+	print STDERR "$product:1C-51_product = $qc_uf_file\n";
+	print STDERR "$product:2A-54_product = $csmap_hdf_file\n";
+	print STDERR "$product:2A-53-a_product = $rrmap_file\n";
+}
+
+
+# execute the real program 'rainest'.
+
+
+# call the algorithm
+$prog = "rainest";
+$cmd = "$prog $verbose_flag -P $data_path $param_file $qc_uf_file $rrmap_file";
+if ($verbose){
+	print STDERR "$product:Executing: $cmd\n";
+}
+
+system ("$cmd");
+$stat = $? >> 8;
+local($sig) = $? & 255;
+do doexit_handler($sig) if ($sig != 0);
+
+unlink($opt_file);
+
+if ($stat != 0) {
+
+	do doexit_handler('INT') if ($stat == -2 || $stata == 254);
+
+	print STDERR "$product: Error:Failed executing $cmd. Bye.\n";
+	exit (-1);
+}
+
+
+if ($verbose) {
+	print STDERR "$product: Successful.\n";
+}
+exit (0);
+
+############################## Sub routines ##############################
+
+sub cleanup {
+	unlink($opt_file);
+}
+
+sub doexit_handler {
+	# This routine was called when interrupt occurred.
+	# Clean up and exit.
+	local($signal) = @_;
+
+	# Restore STDERR and STDOUT.  This is required since both stderr and stdout
+    # were redirected in the calling program, all_tape_level_1n2.
+	close(1);
+	close(2);
+	open(STDOUT, ">/dev/tty");
+	open(STDERR, ">/dev/tty");
+	$| = 1;
+	do cleanup();
+	print STDERR "$product: Interrupted. Got signal <$signal>. Abort execution. \n";
+#	kill $signal, 0;
+	exit(-2) if ($signal == 'KILL' || $signal == 'STOP' || $signal == 'INT');
+	exit(-1);
+}
+
+
+
+
+

@@ -1,0 +1,238 @@
+v4.21 (1/07/08)
+
+This is the README file for the Ground Validation Software (GVS). GVS 
+contains software to produce the following products:
+
+1.  level_1 -   GV calibrated radar data (1B-51) and 
+                quality controlled radar reflectivity (1C-51)
+2.  2A-52i  -   Rain existence
+3.  2A-53   -   Rain rate
+4.  2A-54   -   Convective/Stratiform map
+5.  2A-55   -   3-D reflectivity map 
+6.  2A-56   -   Rain gauge
+7.  2A-57   -   Disdrometer
+8.  3A-53   -   5-Day Rainfall Map
+9.  3A-54   -   Site Rainfall Map
+10. 3A-55   -   Monthly 3-D Structure
+
+See src/$product/README for more information on the specific product.
+
+NOTE: Version numbers are set in two places in the gvs package.
+      One file is $GVS_DATA_PATH/product_version_numbers and the other
+      is a product specific $GVS_DATA_PATH/????_metadata.txt files.
+
+      I.  Filenames, ie. the output *.HDF or *.hdf files, have a product
+          version number that is obtained by reading the
+          '$GVS_DATA_PATH/product_version_numbers' file.
+
+      II. Internal metadata, ie. ProductVersion, for each HDF or hdf file
+          is obtained by reading the '$GVS_DATA_PATH/????_metadata.txt'.
+          
+      This means that the product version number that is part of the
+      filename can be different from the internal metadata 'ProductVersion'.
+      At some point this scheme should be merged in favor of the more
+      flexible ????_metadata.txt solution.
+
+REQUIREMENTS:
+-------------
+1.  The required libraries are:
+    Note:  GVS products are compatible with the current or future versions
+    of the software below unless specified otherwise; it is best to use the
+    highest version. Please contact the owner of those software for any 
+    update with bug fixes.
+
+    - HDF4.1* -- Obtain via anonymous ftp to ftp.ncsa.uiuc.edu in HDF.
+                 This is guarenteed to install on newer op/sys --
+                 especially Linux Redhat.  HDF4.0* works too, if you
+                 can install it on your system or if it is already installed.
+
+    - toolkit-v5.4 -- Available at 
+        http://tsdis.gsfc.nasa.gov/tsdis/tsdistk.html.
+      
+	- rsl-v1.27.tgz, 
+
+    - sprint-v1.13.tgz,
+
+	- gv_utils-v1.15.tgz, and
+
+    - pbmplus.tgz (Optional. This is needed to create image only.) 
+        -- Obtain via anonymous ftp to trmm.gsfc.nasa.gov in pub/software or
+        -- http://trmm.gsfc.nasa.gov/trmm_office/index.html.
+
+
+2. The required GNU package(s) are available via ftp to ftp.uu.net.
+   The package(s) are:
+
+	make and perl
+
+3. Compilers:  C++, C, and Fortran. Configure will check for these.
+   
+4. Platform:  HP, SGI, or Linux (Tested for SGI & Linux)
+
+
+INSTALLATION INSTRUCTIONS:
+-------------------------
+1. Make sure the required software packages are built and installed.
+   Then, YOU MUST BUILD GVSLIB AND INSTALL IT FIRST.  Then, you can
+   build the remaining package.
+
+   configure --prefix=/some/dir/for/install
+   make install       -- Installs libgvs.* first, then continues to
+                         install all the other software.
+
+   -- OR --
+
+   cd src/gvslib
+   make install       -- To only install libgvs.
+
+   cd ../..           -- As a separate step you can install the rest of
+   make install          the package.
+
+   Note: if errors occur during installation of libgvs, try the
+   following command from the gvs directory:
+
+   ltconfig ltmain.sh
+
+   Then run 'make install' again.
+
+2. Type 'make clean' to free up space (optional).
+
+3. Set the shell environment variable, GVS_DATA_PATH, to be the same
+   as the --prefix above.  $(prefix)/data is where things are installed.
+   $(prefix) is not a defined variable, I use it for illustration.
+
+4. Add the $(prefix)/bin  to your path.
+
+5. Set the shell environment variable, TSDISTK, to where you installed TSDIS 
+   toolkit package.  Typically this will be $(prefix)/toolkit.
+
+6. MAKE SURE $TSDISTK/config is world writable, or writeable by everyone
+   in the group (unix group).  Basically, anyone using this software must
+   be able to write to $TSDISTK/config.
+
+7. As root, create '/dev/null' with 'rw' permission for all users, if it 
+   does not exist.  It is very rare that /dev/null is not defined.  But,
+   I wouldn't mention it, if I hadn't seen it.
+
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+(a) Documentation is located in doc/gvs_index.html and can be viewed with 
+    netscape or mosaic.
+
+(b) The directories which you have installed the executable files for 
+     'gvs', 'pbmplus', and 'sprint' packages should be in your search path.
+
+
+
+EXECUTION NOTES:
+----------------
+1. Set enviroment variables: $GVS_DATA_PATH and $TSDISTK.
+
+2. Read 'EXECUTION NOTES' from the README file and doc/gvs_index.html
+   for product's specific execution requirements and 
+   options.  *.html can be viewed with Mosaic or netscape.
+
+3. Check $GVS_DATA_PATH/gv_radar_site_info.data and make sure it contains 
+   information for your data site.
+
+
+KNOWN BUGS/PROBLEMS:
+====================
+
+1. Level_1 is unable to process Berrimah data that is in RAPIC format.
+   The reason is simple to explain but hard to implement.  Azimuth
+   angles of one field type are shifted in other field types.
+   This makes alignment of a field type for a particular ray problematic.
+   Additionally, upper level sweeps are similarly misaligned.  The 
+   current implementation of the TSDIS toolkit requires that the
+   rays be properly aligned across all field types and all sweeps.
+
+2. The software may not work for radar sites other than the following known 
+   GV sites: Darwin, Melbourne, Kwajalein, Houston, Corpus CHristi, Guam, 
+   Israel, Key West, Lake Charles, Miami, New Braunfel, Sao Paulo, Tampa Bay, 
+   Omkoi, and Taiwan.
+
+
+
+
+CONTRIBUTORS/COMPONENTS:
+------------------------
+
+Level_1:
+  * Mike Kolander, Space Applications Corporation, NASA/GSFC/TRMM Office
+  * Daniel Rosenfeld, The Hebrew University of Jerusalem
+  * David B. Wolff, NASA/GSFC/TRMM Office
+
+2A-52i:
+  * Thuy Nguyen, Science Systems and Applications Inc., NASA/GSFC/TRMM Office
+  * David B. Wolff, NASA/GSFC/TRMM Office
+
+2A-53-c:
+  * John H. Merritt, Space Applications Corporation, NASA/GSFC/TRMM Office
+
+2A-53-d:
+  * Daniel Rosenfeld, The Hebrew University of Jerusalem
+
+2A-53-w:
+  * E.N. Anagnostou, Iowa Institute of Hydraulic Research
+  * Witold Krajewski, University of Iowa. 
+
+2A-53-v4:
+  * John H. Merritt, Space Applications Corporation, NASA/GSFC/TRMM Office
+  * Sandra Yuter, The University of Washington. 
+
+2A-54:
+  * Stacy Brodzik, University of Washington
+  * Matthias Steiner, University of Washington. 
+
+2A-55:
+  * Stacy Brodzik, University of Washington
+  * Matthias Steiner, University of Washington. 
+
+2A-56:
+  * John H. Merritt, Space Applications Corporation, NASA/GSFC/TRMM Office
+
+2A-57:
+  * John H. Merritt, Space Applications Corporation, NASA/GSFC/TRMM Office
+
+3A-53:
+  * Stacy Brodzik, University of Washington
+  * SEY, University of Washington
+
+3A-54:
+  * Stacy Brodzik, University of Washington
+  * SEY, University of Washington
+
+3A-55:
+  * John H. Merritt, Space Applications Corporation, NASA/GSFC/TRMM Office
+
+Documentation, Software Integration, Commands Interface, and 
+  Software Packaging:
+  * John H. Merritt, Space Applications Corporation, NASA/GSFC/TRMM Office
+  * Thuy Nguyen, Science Systems and Applications Inc., NASA/GSFC/TRMM Office
+
+
+QUESTIONS:
+----------
+
+Please contact TRMM Office help via e-mail at help@trmm.gsfc.nasa.gov.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

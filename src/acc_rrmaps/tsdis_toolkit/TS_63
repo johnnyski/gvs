@@ -1,0 +1,8 @@
+TSDIS,ACC_RRMAP,63
+63000,W_ACC_RRMAP_BAD_USAGE,NULL,ACC_RRMAP: Improper usage.
+63001,W_ACC_RRMAP_GET_METADATA_FAILED,NULL,ACC_RRMAP: Get metadata failed.
+63002,W_ACC_RRMAP_CREATE_HDF_FAILED,NULL,ACC_RRMAP: Failed to construct hdf product.
+63003,W_ACC_RRMAP_CREATE_TIME_FILE_FAILED,NULL,ACC_RRMAP: Failed to create vos times file.
+63004,W_ACC_RRMAP_INVALID_PROG,NULL,ACC_RRMAP: Program only recognizes 3A-53 and 3A-54.
+63005,W_ACC_RRMAP_ABORT_EXEC,NULL,ACC_RRMAP: Abort execution -- interrupted signal received.
+63006,W_ACC_RRMAP_STOP_ON_ERROR,NULL,ACC_RRMAP: Stop execution -- non-interrupted signal received.

@@ -1,0 +1,37 @@
+Check list for 2A-54 distribution:
+
+o cvs update
+
+o cvs commit
+
+o make clean
+
+o make
+
+o make clean
+
+	o cvs tag v1_0
+
+    o cd ~/builds
+
+	o cvs export -d gvs-v1.0 -r v1_0 gvs
+
+	o cd gvs-v1.0/src/2A-54
+
+	o make 
+
+	o 2A-54 -v ~/trmm/gvs/src/2A-54/ref_melb_070193_1957.uf 
+
+	o ls -l (check files' size)
+
+	If everything still looks okay, then
+
+	o make clean
+
+	o rm out.f
+
+	o cd ..
+
+	o gtar zcf 2A-54-v1.0.tgz 2A-54
+
+	o rcp 2A-54-v1.0.tgz trmm:/PUBLIC/ftp/pub/software

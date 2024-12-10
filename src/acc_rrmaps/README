@@ -1,0 +1,54 @@
+README for acc_rrmaps: v1.5 (12/10/99) packaged w/ GVS v4.14
+
+
+acc_rrmaps has the following executable files and documentation:
+    * acc_rrmaps_granule_hdf- The perl script, the front end to actual 
+              algorithm program, 'acc_rrmaps_single_vos_ascii'.
+	          This produces either monthly or 5-day rainfall map (3A-54 
+	          or 3A-53, respectively). 
+              This program will be called by '3A-53' and '3A-54'.
+
+    * acc_rrmaps_single_vos_ascii - The actual accumulation program that 
+              will be built by the Makefile.
+
+    * create_level_3_rrmap_hdf - Program that creates either 3A-53 or 3A-54
+             in HDF format from the intermediate files produced by either
+             'acc_rrmaps_granule_hdf', '3A-53', or '3A-54'.
+             It will be built by the Makefile.
+
+              ------------------------------------------
+
+(a) The directories which you have installed the executable files for 
+     this product and the required software should be in your search path.
+
+
+
+
+EXECUTION NOTES:
+================
+
+'acc_rrmaps_granule_hdf' will exit if the specified year or month is not 
+correspondent to the date from the input filename.
+
+
+
+QUESTIONS:
+=========
+
+Please contact the TRMM Office help via e-mail at help@trmm.gsfc.nasa.gov.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

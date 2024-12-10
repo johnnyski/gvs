@@ -1,0 +1,11 @@
+TSDIS,2A52,60
+60000,W_2A52_BAD_USAGE,NULL,2A-52: Improper usage.
+60001,W_2A52_ABORT_EXEC,NULL,2A-52: Abort execution--interrupted signal received..
+60002,W_2A52_STOP_ON_ERROR,NULL,2A-52: Stop execution--non-interrupted signal received.
+60003,W_2A52_OPEN_OUTFILE_FAILED,NULL,2A-52: Unable to open outfile.
+60004,W_2A52_OPEN_2A53_FILE_FAILED,NULL,2A-52: TKopen failed on 2A-53 file.
+60005,W_2A52_READ_2A53_FILE_FAILED,NULL,2A-52: TKreadGrid failed on 2A-53 file.
+60006,W_2A52_CLOSE_2A53_FILE_FAILED,NULL,2A-52: TKclose failed on 2A-53 file.
+60007,W_2A52_GET_COIN_INFO_FAILED,NULL,2A-52: Failed to get sat. coinc. info.
+60008,W_2A52_GET_INFO_FROM_INFILE_FAILED,NULL,2A-52: Failed to get info from infile or filename.
+60009,W_2A52_FAILED_TO_WRITE_RAIN_TO_DB, 2A-52: Failed to write rain percent to TSDIS' DB.

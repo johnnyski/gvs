@@ -1,0 +1,41 @@
+README for ver4: (12/10/99) initially packaged w/ GVS v4.14
+
+
+The program built is called 'singlevos_2A-53-v4'.
+
+  Executable files:
+  ----------------
+  * singlevos_2A-53-v4 - Actual algorithm program.
+
+  Documentation:
+  -------------
+  * 2A-53-v4.html - Documentation for 2A-53 version 4.
+
+  Data files:
+  ----------
+  * single.zr   - Produced from executing build_single_zr
+  * dual.zr     - Produced from executing build_dual_zr
+  * runtime_2A-53_<site>.txt - Runtime parameter files for all sites.
+  * 2A53_metadata.txt - Metadata fields specific to product.
+  * <site>_*.zr - ZR lookup tables for site.
+
+
+EXECUTION NOTES:
+================
+
+1. Set enviroment variables: $GVS_DATA_PATH and $TSDISTK.
+
+2. Have the data files installed under $GVS_DATA_PATH in order to use the
+   default options.
+
+3. Have all the runtime_*.txt files in $GVS_DATA_PATH.
+
+4. Have access to the executable files located in $GVS/format_conversion.
+   These files can be installed in any bin/ directory.
+
+
+
+QUESTIONS:
+=========
+
+Please contact TRMM Office help via e-mail at help@trmm.gsfc.nasa.gov.

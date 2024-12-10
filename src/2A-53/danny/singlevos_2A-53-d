@@ -1,0 +1,210 @@
+#! /usr/bin/perl
+#-*-Perl-*-
+#
+# This is the user interface to the rain rate algorithm program '2A53d', 
+# developed by Danny Rosenfeld, The Hebrew University of Jerusalem.
+# 
+# This script does the following:
+#   1. Takes 1C-51 product (UF file) and 2A-54 product 
+#      (HDF file--contains 1 VOS), 
+#   2. Calls the real algorithm program.  This step creates an
+#      HDF file containing rain rate map
+#
+# Script returns 0 upon successful completion; 2 upon interruption;
+# non-zero, otherwise.
+#
+#
+# By:    Thuy Nguyen
+#        NASA/TRMM Office
+#        International Database Systems
+#        Thuy.Nguyen@gsfc.nasa.gov
+#        June 10, 1996
+#
+##############################################################################
+$SIG{'INT'} = 'doexit_handler';
+$SIG{'KILL'} = 'doexit_handler';
+$SIG{'STOP'} = 'doexit_handler';
+$SIG{'SEGV'} = 'doexit_handler';
+$SIG{'ILL'} = 'doexit_handler';
+$SIG{'FPE'} = 'doexit_handler';
+@path = split(/\//, $0);
+$product = $path[$#path];
+
+$real_prog = "2A53d";
+if ($#ARGV < 1) {
+	do usage();
+}
+
+# set defaults
+@options = "";
+$uf_file = "";
+$infile_hdf2A54 = "";
+$outfile = "";
+
+do process_argv(@ARGV);
+
+# Convert csmap in hdf file to ascii file
+$prog = "2A-54_hdf2ascii";
+$csmap_ascii_file = "csmap.ascii.tmp";
+$cmd = "$prog $infile_hdf2A54 $csmap_ascii_file";
+if ($verbose == 1) {
+	print STDERR "$product: Executing $prog ...\n";
+}
+system($cmd);
+$status = $? >>8;								# 
+local($sig) = $? & 255;
+do doexit_handler($sig) if ($sig != 0);
+
+if ($status != 0) {
+	do doexit_handler('INT') if ($status == 2);
+	print STDERR "$product: ERROR: Failed executing $prog. Bye.\n";
+	exit(-1);
+}
+
+# call the real program
+$cmd = "$real_prog @options $uf_file $csmap_ascii_file $outfile";
+if ($verbose) {
+	print STDERR "$product: Executing...$cmd\n";
+}
+system($cmd);
+$status = $? >> 8;
+local($sig) = $? & 255;
+do doexit_handler($sig) if ($sig != 0);
+
+unlink ($csmap_ascii_file);
+
+print STDERR "$0: status: $status, sig: $sig\n";
+if ($status != 0) {
+	do doexit_handler('INT') if ($status == 2);
+
+	print STDERR "$product: Failed creating rrmap $outfile \n";	# 
+	exit(-1);
+}
+
+if ($verbose) {
+	print STDERR "$product: Successful\n";
+}
+
+exit(0);
+
+
+########################### Sub routines section #############################
+
+
+sub usage {
+  print STDERR "Usage: $product [-v] [-s {firstfile|site}]\
+      [-b HBASE] [-f HFREEZE] [-n DBZNOISE]\
+      [-p PRADAR] [-t TRADAR] [-d DEWPOINT]\
+      [-P DATAPATH] [-z ZRFILE] [-g GAGFILE] [-w GWINFILE] \
+      [-k XKMP] [-a ALPHA] [-m MPONLY]\
+      qc_uf_file csmap_shdf_file rrmap_shdf_file\n";
+
+  print STDERR "\nWhere:\
+      HBASE     =  Altitude for reflectivity map, to be used for rainfall.\
+                   (Default: 2.0)\
+      HFREEZE   =  Altitude of 0 C isotherm.\
+                   (Default: 5.0)\
+      DBZNOISE  =  Minimum reflectivity to process [dBZ].\
+                   (Default: 0.0)\
+      PRADAR    =  Surface pressure at the radar [mb].\
+                   (Default: 1000.0)\
+      TRADAR    =  Surface temperature at the radar [degrees kelvin].\
+                   (Default: 303.0)\
+      DEWPOINT  =  Surface dew point at the radar [degrees kelvin].\
+                   (Default: 295.0)\
+      DATAPATH  =  Path name where ZRFILE AND GAGFILE are located.\
+                   (Default: \$GVS_DATA_PATH)\
+      ZRFILE    =  String with the Ze-R input file name.\
+                   (Default: zr_mlb.out (Melbourne) or zr_drw.out(Darwine))\
+      GAGFILE   =  String with the Gauge coordinates file name.\
+                   (Default: sitelist_cscale)\
+      GWINFILE  =  String with the gauge windows output file name.\
+                   (Default: gwin.out)\
+      XKMP      =  Optional K for a power law Z-R.\
+                   (Default: 0.0)\
+      ALPHA     =  Optional ALPHA for a power law Z-R.\
+                   (Default: 0.0)\
+      MPONLY    =  Flag for WPMM (0), or a power-law Z-R (1).\
+                   (Default: 0.0)\n";
+  exit(-1);
+}
+
+
+sub process_argv{
+	local(@argv_list) = @_;
+
+	local($end_options) = 0;
+	while (@argv_list && $end_options == 0) {
+		$str = shift @argv_list;
+		
+		if ($str =~ /^\-/) {
+			# 
+			push(@options, $str);  # save to list -- will pass to real prog
+			if ($str eq "-v") {
+				$verbose = 1;
+			}					# 
+			else {
+				$str = shift @argv_list;   # get option's value
+				push(@options, $str);  # save to list -- will pass to real prog
+			}
+		}
+		else {
+			$end_options = 1;
+		}
+	}					
+
+	if ($#argv_list != 1 || $str =~ /^\-/) {
+		do usage();
+	}
+	
+	# get in/out filenames
+	$uf_file = $str;
+	$infile_hdf2A54 = shift @argv_list;
+	$outfile = shift @argv_list;
+
+	if ($verbose) {
+		print STDERR "$product: Which program: $0\n"; 
+		print STDERR "$product: qc infile    = $uf_file\n";
+		print STDERR "$product: csmap infile = $infile_hdf2A54\n";
+		print STDERR "$product: outfile      = $outfile\n";
+	}
+}
+
+
+sub cleanup {
+
+	unlink ($csmap_ascii_file) if -e $csmap_ascii_file;
+}
+
+sub doexit_handler {
+	# This routine was called when interrupt occurred.
+	# Clean up and exit.
+	local($signal) = @_;
+
+	# Restore STDERR and STDOUT.  This is required since both stderr and stdout
+    # were redirected in the calling program, all_tape_level_1n2.
+	close(1);
+	close(2);
+	open(STDOUT, ">/dev/tty");
+	open(STDERR, ">/dev/tty");
+	$| = 1;
+    do cleanup();
+	print STDERR "$product: Interrupted. Got signal <$signal>. Abort execution. \n";
+	kill $signal, 0;
+	exit(-2) if ($signal == 'STOP' || $signal == 'KILL' || $signal == 'INT');
+	exit(-1);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,38 @@
+CHANGES for 2A-56
+
+
+v1.4 (5/29/98) initially packaged w/ GVS v4.6
+------------------------------------------------
+* Added the capability for uninstalling the software.
+
+v1.3 (1/26/98) initially packaged w/ GVS v4.5
+------------------------------------------------
+* Modified granulate_gmin_files to insert TSDIS 4 char symbol for gv_site in
+  place of NWS radar symbol. Removed some hardwiring, relating to unknown radar
+  sites.  This code did not provide any utility because files created with UNKN
+  for radar cannot be distributed or used in analysis.  There needs to be a
+  better convention for flagging such cases
+
+
+v1.2 (11/13/97) initially packaged w/ GVS v4.2
+------------------------------------------------
+* Bug fixes w.r.t. argument list.
+
+00000000000000000000000000000000000000000000000000000000000000000000000
+v1.1 (10/24/97) initially packaged w/ GVS v4.1
+
+1. Changed format statement in script granulate_gmin_files to printf
+	This change effectively right justified all fields associated with
+	data records.  No modifications were made to header record format.
+
+
+
+0000000000000000000000000000000000000000000000000000000000000000000000
+v1.0 8/12/97 for GVS 4.0
+
+  1.  Format change to the input GMIN file.
+  2.  Format change for the output ascii file.  There will be no
+      hdf file produced.
+  3.  Removed the HDF routines -- stuff in Makefile too.
+
+0000000000000000000000000000000000000000000000000000000000000000000000

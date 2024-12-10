@@ -1,0 +1,17 @@
+CHANGES for pi-c:
+-----------------
+
+v1.2 (Froze: 4/30/97)
+----------------------
+1. Fixed the Makefile w.r.t. install_doc and linking.
+2. Changed 'change_perl_path' to 'install_scripts' in the Makefile.
+
+
+v1.1 (Frozen: 1/6/97)
+----------------------
+1. Fixed compile warning message.
+2. Added documentation.
+
+v1.0 (Frozen: 12/12/96)
+----------------------
+1. Initially created.

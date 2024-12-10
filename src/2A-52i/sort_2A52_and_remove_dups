@@ -1,0 +1,60 @@
+#! /usr/bin/perl
+#-+-Perl-+-
+#
+#  sort_2A52_and_remove_dups - Sort 2A52 product based on vos' date and time
+#       in ascending order and remove any duplicated entry.
+#       It will write the results to stdout.
+#
+# Exit code:
+#      0:  successful
+#     -1:  Error
+#     -2:  Interrupted
+#
+#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+# By: Thuy Nguyen
+#     Science Systems and Applications, Inc. (SSAI)
+#     NASA/TRMM Office
+#     nguyen@trmm.gsfc.nasa.gov
+#     October 17, 1997
+#
+############################################################################
+############################################################################
+
+$PROG_VERSION = "gvs-v4.21";
+unshift (@INC, ".", "/usr/local/trmm/GVBOX/bin");
+do 'gv_utilities.pl';
+$verbose = 0;
+do process_argvs(*ARGV, *infile);
+
+# Sort this file based on VOS' date/time and remove duplicates.
+
+$cmd = "head -3 $infile";
+system($cmd);
+$cmd = "egrep \"^[0-9]+.+\" $infile|sort|uniq -w 26";
+system($cmd);
+exit($SUCCESS_CODE);
+
+
+sub doexit_handler {
+	local($sig) = @_;
+	$rc = $SEVERE_ERROR_CODE;
+	$rc = $INTER_CODE if ($signal eq 'INT' || $signal eq 'KILL' || $signal eq 'STOP');
+	exit($rc);
+}
+
+
+sub process_argvs {
+	local(*argvs, *infile) = @_;
+	if ($#argvs < 0) {
+	  USAGE:
+		print STDERR "Usage ($PROG_VERSION):\n";
+		print STDERR " $this_prog 2A-52_product\n";
+		print STDERR " Will print the results to stdout.\n";
+		exit($SEVERE_ERROR_CODE);
+	}
+	$infile = shift @argvs;
+
+}
+

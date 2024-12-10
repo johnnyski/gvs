@@ -1,0 +1,162 @@
+#! /usr/bin/perl
+#-*-Perl-*-
+#
+# level_2_ghdf_to_singlevos_ascii:
+#
+# Convert the granuled HDF file for (2A-53, 2A-54, and 2A-55) to ASCII file(s).
+# The HDF file can either be compressed or uncompressed.
+# The ASCII filename(s) are printed to STDOUT.
+#
+#
+# By:
+#     Thuy Nguyen
+#     Science Systems and Applications, Inc. (SSAI)
+#     NASA/TRMM Office
+#     nguyen@trmm.gsfc.nasa.gov
+#     August 30, 1997
+#
+######################################################################
+unshift (@INC, ".", "/usr/local/trmm/GVBOX/bin");
+do 'gv_utilities.pl';
+$PROG_VERSION = "gvs-v4.21";
+
+$outdir = "./";
+$verbose = 0;
+do process_argvs(*ARGV, *verbose, *type, *hdf_file, *outdir);
+$compress_back = 0;
+@shdf_files =();
+local($tmp_file) = "";
+# Uncompress if it is required--create a new uncompressed file in the working
+# dir so leave the origional file unchanged.
+if ($hdf_file =~ /(\.Z)|(\.gz)$/) {
+	local(@fpath) = split(/\//, $hdf_file);
+	$tmp_file = $fpath[$#fpath];
+    $tmp_file =~ s/(\.Z)|(\.gz)$//;
+	print STDERR "$this_prog: Uncompressing $hdf_file...\n" if ($verbose);	
+	&do_system_call("gunzip -fc $hdf_file > $tmp_file");
+	$hdf_file = $tmp_file;     # Set to the uncompressed filename.
+}
+	
+if ($type eq "3") {
+	$ascii_prog = "2A-53_hdf2ascii";
+}
+elsif ($type eq "4") {
+	$ascii_prog = "2A-54_hdf2ascii";
+}
+elsif ($type eq "5") {
+	$ascii_prog = "2A-55_hdf2ascii";
+}
+else {
+	print STDERR "$this_prog: Unknown type: $type\n";
+	goto USAGE;
+}
+
+print STDERR "$this_prog: Converting $hdf_file... to single VOS hdf files...\n"  if ($verbose);
+open(SHDF_FILES, "level_2_ghdf_to_singlevos_hdf $type $hdf_file|");
+@shdf_files = <SHDF_FILES>;
+print STDERR "$this_prog: shdf: @shdf_files\n" if ($verbose);
+close(SHDF_FILES);
+
+while(@shdf_files) {
+	$f = shift @shdf_files;
+	chop $f;
+	local(@outfile_tokens) = split('/', $f);
+	$outfile = "$outdir/$outfile_tokens[$#outfile_tokens]";
+	$outfile  =~ s/...$/ascii/;
+	local($cmd);
+	# Create a dir and store data files there for 2A-55 only.
+	if ($type eq "5") {
+		$cmd = "mkdir -p $outfile";
+		do do_system_call($cmd);
+		$returndir = `pwd`;
+		chop $returndir;
+		$cmd = "cd $outfile; $ascii_prog $returndir/$f; cd $returndir";
+	}
+	else {
+		# Non 2A-55
+		$cmd = "$ascii_prog $f $outfile";
+	}
+	do do_system_call($cmd);
+	print STDOUT "$outfile\n"; # dir name for 2A-55, filename for others.
+	unlink $f;
+}
+do clean_up();
+exit(0);
+
+
+sub do_system_call {
+	local($cmd) = @_;
+	# clean up and exit if failure occurs.
+	#
+	# Calls doexit_handler upon interrupt
+	local($rc) = 0;
+#print STDERR "CMD::::::<$cmd>\n\n";
+	system($cmd);
+	$status = $? >> 8;
+	local($signal) = $? & 255;
+
+	do doexit_handler($signal) if ($signal != 0);
+	do doexit_handler('INT') if (&interrupted($status));
+
+	if (&is_severe_error($status)) {
+		print STDERR "System command returned error.\n";
+		do clean_up();
+		exit($SEVERE_ERROR_CODE);
+	}
+
+} # do_system_call
+
+
+sub doexit_handler {
+	local($signal) = @_;
+	do clean_up();
+	$rc = $SEVERE_ERROR_CODE;
+	$rc = $INTER_CODE if ($signal eq 'INT' || $signal eq 'KILL' || $signal eq 'STOP');
+	exit($rc);
+}
+
+sub clean_up {
+
+	unlink @shdf_files	if ($#shdf_files > 0);
+	unlink $tmp_file if ($tmp_file ne "");
+}
+
+
+sub process_argvs {
+	local(*argvs, *verbose, *type, *hdf_file, *outdir) = @_;	
+	if ($#argvs < 1) {
+	  USAGE:
+		print STDERR "Convert 2A-53, 2A-54, or 2A-55 Granule HDF Product to Single VOS ASCII products.\n";
+		print STDERR "Usage ($PROG_VERSION): \n";
+		print STDERR "   $this_prog [-d outdir] 3|4|5 ghdf_file[.gz|.Z] \n";
+		print STDERR "     where: \n",
+		             "     -d  Specify the directory for output files.\n",
+		             "     3 = 2A-53, 4 = 2A-54, 5 = 2A-55\n";
+		print STDERR "            ghdf_file: Granule HDF file. Compressed file is allowed.\n";
+		print STDERR "            The ASCII filename(s) will be printed to STDOUT.\n";
+		exit ($SEVERE_ERROR_CODE);					# 
+	}								# 
+
+	while (@argvs) {
+		local($str) = shift @argvs;
+		if ($str =~ /^\-/) {
+			if ($str eq "-d") {
+				$outdir = shift @argvs;
+				goto USAGE if ($outdir =~ /^\-/);
+			}
+			elsif ($str eq "-v") {
+				$verbose = 1;
+			}
+		}
+
+		else {
+			unshift(argvs, $str);
+			last;
+		}
+	}
+	goto USAGE if ($#argvs != 1);
+	# must have 2 params
+	$type = shift @argvs;
+	$hdf_file = shift @argvs;
+}
+

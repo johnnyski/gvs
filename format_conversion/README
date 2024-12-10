@@ -1,0 +1,49 @@
+README for format_conversion: Packaged w/ GVS v4.14
+
+
+This directory contains format conversion programs plus their data files and 
+documentation.
+
+The executable program(s) are:
+
+  uf2mudras - Interpolate UF file to MUDRAS file.
+  2A-54_hdf2ascii - Converts HDF to ASCII for 2A-54.
+  2A-53_hdf2ascii -- Convert file from HDF to ASCII for 2A-53. 
+  2A-55_hdf2ascii -- Convert file from HDF to ASCII for 2A-55.
+  2A-53  - Process 2A-53-{w|d|c|v4} at hourly granuled level.
+  2A-53or2A-55	- Process 2A-53-{w|c|v4|d} or 2A-55 at hourly granuled level.
+  level_2_singlevos_hdf_to_ghdf - Implode single VOS HDF file(s) to an hourly 
+                  granuled HDF file  for 2A-53, 2A-54, or 2A-55.
+  level_2_ghdf_to_singlevos_hdf - Explode an hourly granuled HDF file to 
+                  single VOS HDF file(s).
+  level_1_ghdf_to_singlevos_uf - Explode an hourly granuled HDF file and 
+                  convert single VOS HDF file(s) to UF file(s).
+  level_2_ghdf_to_singlevos_ascii - Convert 2A-53, 2A-54, or 2A-55 granule HDF
+                  product to single VOS ASCII products.
+
+
+The data files are:
+  sprint_entire_volume.inp 
+  sprint_base_scan.inp 
+
+The documentation files are:
+  uf2mudras.html
+
+              ------------------------------------------
+
+Execution Notes:
+----------------
+1. Read the documentation located in '*.html'.
+
+2. The directories which you have installed the executable files for this
+   package, gv_utils, and 'sprint' packages should be in your search path.
+
+
+
+
+Questions:
+----------
+
+Please contact the TRMM Office help e-mail at help@trmm.gsfc.nasa.gov.
+
+

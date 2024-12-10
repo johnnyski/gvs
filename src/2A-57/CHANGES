@@ -1,0 +1,13 @@
+CHANGES for 2A-57
+
+v1.2 (5/29/98) initially packaged w/ GVS v4.6
+------------------------------------------------
+* Added the capability for uninstalling the software.
+
+v1.1 (12/08/97) initially packaged w/ GVS v4.4
+----------------------------
+*  Print usage to STDERR.
+
+v1.0 (8/19/97) for GVS v4.0
+----------------------------
+Produces ascii file(s).

@@ -1,0 +1,404 @@
+#! /usr/bin/perl
+#-*-perl-*-
+#
+#   3A-55: Perl script, front end interface, calls 'accu_2A55' and '???'
+#          to process 3A-55 product.
+#
+
+#     Accumulate site 2A-55 using granule HDF 2A-55 file as input. 
+#     The flag [BEGIN|MIDDLE|END] indicates whether to create the product in
+#     HDF format and/or to store the intermediate product in ascii files.
+#
+#     If the specified flag is END, it will create the HDF file and the 
+#     ascii file that contains the dates and times of all VOSes included in the
+#     calculation.  When creating the HDF product, it will use some of the 
+#     metadata values from the input granule HDF file. Note: If either flag
+#     BEGIN or MIDDLE is specified, no HDF file nor vos_times_ASCII_oufile
+#     will be created.
+#
+#     If the specified flag is BEGIN, it will create the three intermediate 
+#     ascii files: one file contains the list of times for all VOSes included 
+#     in the accumulation, the second file contains a list of the accumulated
+#     CFADs, and the third file contains the accumulated vertical profile.
+#
+#     If the specified flag if either MIDDLE or END, the three intermediate 
+#     ascii files will be modified.
+#
+#
+#  Program's exit code:
+#          -1 Failed.
+#           0 Successful.
+#           1 Warning occured -- accumulation of at least one map failed.
+#          -2 Program was aborted by SIGINT (^C).
+#     
+# Requires:
+#      
+#      'accu_2A-55'
+#      '3A-55_ascii2hdf'
+#
+#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+# By: Thuy Nguyen
+#     Science Systems and Applications, Inc. (SSAI)
+#     NASA/TRMM Office
+#     nguyen@trmm.gsfc.nasa.gov
+#     October 1, 1997
+#
+#         -and-
+#
+#     John H. Merritt
+#     Space Applications Corporation
+#     NASA/TRMM Code 910.1
+#     John.H.Merritt@gsfc.nasa.gov
+#
+##############################################################################
+############################################################################
+
+############################# Main Routine #################################
+$PROG_VERSION = "gvs-v4.21";
+
+unshift (@INC, ".", "/usr/local/trmm/GVBOX/bin");
+do 'gv_utilities.pl';
+$rc = $SUCCESS_CODE;
+
+$verbose = 0;
+$data_path =  $ENV{'GVS_DATA_PATH'};
+if ($data_path eq "") {
+	$data_path = "/usr/local/trmm/GVBOX/data";  # Default
+}
+$metadata_file = "$data_path/3A55_metadata.txt";
+
+do process_args(*ARGV, *infile, *inter_vos_times_file, *metadata_file, 
+				 *hdf_outfile, *inter_acc_cfad_file, *inter_vprof_file,
+				 *period_flag, *year, *month);
+
+# Work in a tmp dir to allow parallel processing in the same dir.
+$top_tmp_working_dir = "3A-55_$$/";
+do do_system_call("mkdir -p $top_tmp_working_dir");
+# Remember to go to the curr dir when exit.
+print STDERR "$this_prog: Will work in dir: $top_tmp_working_dir\n" if ($verbose);
+chdir($top_tmp_working_dir);
+
+if ($verbose) {
+	print STDERR "$this_prog: infile:                $infile\n";
+	print STDERR "$this_prog: vos_times_file:        $inter_vos_times_file\n";
+	print STDERR "$this_prog: hdf_outfile:           $hdf_outfile\n";
+	print STDERR "$this_prog: inter_acc_map_file:    $inter_acc_cfad_file\n";
+	print STDERR "$this_prog: inter_acc_vprof_file:  $inter_acc_vprofile_file\n";
+	print STDERR "$this_prog: metadata_file:         $metadata_file\n";
+	print STDERR "$this_prog: period_flag:           $period_flag\n";
+	print STDERR "$this_prog: year:                  $year\n";
+	print STDERR "$this_prog: month:                 $month\n";
+}
+
+# Validate input files, flag, year, and month. Exit if error occurs.
+do validate_user_inputs();
+
+#---------------------
+# Granule loop
+#---------------------
+
+# Programs:
+#            level_2_dump_metadata in_granule.hdf > metadata.bin
+#            level_3_accu_2A-55 in_singlevos.hdf out_intermediate_cfad.ascii out_intermediate_vprof.bin 
+#            level_3_accu_cfad  in.ascii inout_intermediate_cfad.ascii
+#            level_3_accu_vprof in.ascii inout_intermediate_vprof.bin
+#            level_3_mean_vprof in_intermediate_vprof.bin > vprof.ascii
+#            3A-55_ascii2hdf in_cfad.ascii in_vprof.ascii in_metadata.bin out.gHDF
+#            level_3_finalize_metadata (options) metadata.bin > metadata.bin
+
+# Determine if the file is compressed. If so, decompress it to the local dir.
+@unzipped_infile = split("/", $infile);
+$unzipped_infile = $unzipped_infile[$#unzipped_infile];
+$in_and_unzipped_are_the_same = 1;
+if ($unzipped_infile =~ /(\.Z)|(\.gz)$/) {
+	$unzipped_infile =~ s/(\.Z)|(\.gz)$//;
+	$in_and_unzipped_are_the_same = 0;
+}
+
+
+unless ($in_and_unzipped_are_the_same) {
+	print STDERR "Uncompressing $infile\n" if ($verbose);
+	&do_system_call("gunzip -fc $infile > $unzipped_infile");
+	$infile = $unzipped_infile;
+}
+
+
+
+# Degranularize the file.
+print STDERR "Degranulizing $infile\n" if ($verbose);
+open(DEGRANULARIZE, "level_2_ghdf_to_singlevos_hdf 5 $infile|");
+@singlevos_list = <DEGRANULARIZE>;
+close(DEGRANULARIZE);
+
+if ($period_flag eq "END") { # Hey, maybe we need some metadata info.
+	print STDERR "Calling level_2_dump_metadata\n" if ($verbose);
+	&do_system_call("level_2_dump_metadata $infile > metadata.bin");
+}
+
+unless ($in_and_unzipped_are_the_same) {
+	unlink $unzipped_infile;
+}
+
+open(VOS_TIMES, ">> $inter_vos_times_file"); # Who cares if we have duplicates?
+print VOS_TIMES @singlevos_list;
+close(VOS_TIMES);
+
+print STDERR "Accumulating maps...\n" if ($verbose);
+# For each single vos hdf file, perform accumulations.
+for (@singlevos_list) { # $_ is set to each.
+	chop;
+	print STDERR "$this_prog: Accumulating file <$_>...\n" if ($verbose);
+	&do_system_call("level_3_accu_2A-55 $_ $inter_acc_cfad_file $inter_acc_vprofile_file");
+	unlink $_;
+}
+
+#-----------------------
+# END Granule loop
+#-----------------------
+
+# Create HDF product if flag is END
+if ($period_flag eq "END") {
+	print STDERR "$this_prog: Creating HDF product...\n" if ($verbose);
+#
+# The intermediate file for CFAD is ready as is.
+# The intermediate file for vertical profiles needs to be
+# converted to ascii via a mean calculation.
+
+	&do_system_call("level_3_mean_vprof $inter_acc_vprofile_file > vprofile.ascii") if (-e $inter_acc_vprofile_file);
+
+
+# Fix the metadata information by including additional metadata items from
+# product specific metadata file (.../GVBOX/data/3A55_metadata.txt) and
+# fix the begin/end time information.
+	$additional_metadata = `grep_runtime_parm.pl "$month/1/$year" < $metadata_file`;
+	chop($additional_metadata);
+	$end_month = $month % 12 + 1;
+	$end_year  = $year;
+	if ($end_month == 1) {
+		$end_year ++;
+	}
+	# Can't use metadata.bin as both input and output into the program.
+	# It seems that the system clears out the file for output before
+    # the program reads that file.
+	&do_system_call("level_3_finalize_metadata $additional_metadata -B $month/1/$year -b 0:0:0 -E $end_month/1/$end_year -e 0:0:0 metadata.bin > metadata.bin.new;mv -f metadata.bin.new metadata.bin");
+
+	&do_system_call("3A-55_ascii2hdf $inter_acc_cfad_file vprofile.ascii metadata.bin $hdf_outfile");
+	unlink "vprofile.ascii" if (-e "vprofile.ascii");
+	unlink "metadata.bin" if (-e "metadata.bin");
+# Keep $inter_acc_cfad_file and $inter_acc_vprofile_file.  These should be
+# managed from a higher level program (one who calls this program).
+}
+
+do clean_up();
+print STDERR "$this_prog: Successful.\n" if ($verbose);
+exit(0);
+
+############################ Sub Routines ###################################
+
+
+######################################################################
+#                                                                    #
+#                            usage                                   #
+#                                                                    #
+######################################################################
+sub usage {
+	print STDERR "Site Monthly 3-D Structure.\n";
+	print STDERR "Usage ($PROG_VERSION):\n";
+	print STDERR "$this_prog [-v] [-m metadata_file]\n",
+	        
+               "      2A-55_HDF_infile HDF_outfile vos_times_ASCII_InOut\n",
+               "      inter_acc_CFAD_ASCII_InOut inter_acc_vprofile_binary_InOut \n",
+               "      {BEGIN | MIDDLE | END} year month\n";
+  print STDERR "  where,\n",
+           	   "    -v: Print diagnostic messages.\n",
+	           "    -m:  Specify filename for metadata.\n",
+               "          Default: \"\$GVS_DATA_PATH/3A55_metadata.txt\"\n",
+               "    2A-55_HDF_infile: Granule 2A-55 HDF file. Compression is allowed.\n",
+               "    HDF_outfile:      Filename for 3A-55 product in HDF format. This file \n",
+               "                      will only be created when the END flag is specified.\n",
+               "    vos_times_ASCII_InOut: Filename that will contain a list of dates and\n",
+               "                      times of all VOSes included in the product.\n",
+               "    inter_acc_CFAd_ASCII_InOut: Filename for intermediate accumulated CFADs, \n",
+               "                      concatenation of 12 categories, in ASCII format.\n",
+               "                      If the BEGIN flag is specified, this file will be created.\n",
+               "                      If either the MIDDLE or END flag is specified, this file\n",
+               "                      will be used in the accumulation calculation and will be\n",
+               "                      updated with the new result. \n",
+               "    inter_acc_vprofile_binary_InOut: Filename for intermediate accumulated\n",
+               "                      vertical profile in binary format. If the BEGIN flag is\n",
+               "                      specified, this file will be created.  If either the\n",
+               "                      MIDDLE or END flag is specified, this file will be used\n",
+               "                      in the accumulation calculation and will be updated.\n",
+               "    BEGIN|MIDDLE|END: Flag indicates whether this is the beginning, middle,\n",
+               "                      or end of the monthly period. HDF output file\n",
+               "                      will be created if the flag is END.\n",
+               "    year:             Four digit year.\n",
+               "    month:            The number of the current month being processed.\n",
+               "                      Number starts at 1.\n",
+               "\n";
+                
+  exit($SEVERE_ERROR_CODE);
+		  
+} 
+
+
+######################################################################
+#                                                                    #
+#                           process_args                             #
+#                                                                    #
+######################################################################
+sub process_args {
+	local(*argvs, *infile, *inter_vos_times_file, *metadata_file,
+		  *hdf_outfile, *inter_acc_cfad_file, *inter_vprof_file,
+		  *period_flag, *year, *month) = @_;
+
+	if ($#argvs < 7) {
+		do usage();
+	}
+
+	while (@argvs) {
+		local($str) = shift @argvs;
+		if ($str =~ /^\-/) {
+			if ($str eq "-v") {
+				$verbose = 1; 
+				$verbose_opt = "-v";
+			}
+			elsif ($str eq "-m") {
+				$metadata_file = shift @argvs;
+				do usage() if ($metadata_file =~ /^\-/);
+			}
+			else {
+				print STDERR "option $str is undefined\n";
+				do usage();
+			}
+		}
+		else {
+			unshift(argvs, $str);
+			last;
+		}
+    }
+	# must have 8 params listed 
+	do usage() if ($#argvs != 7);
+
+	$infile = &change2absolute_filename($curr_dir, shift @argvs);
+	$hdf_outfile = &change2absolute_filename($curr_dir, shift @argvs);
+	$inter_vos_times_file = &change2absolute_filename($curr_dir, shift @argvs);
+	$inter_acc_cfad_file = &change2absolute_filename($curr_dir, shift @argvs);
+	$inter_acc_vprofile_file = &change2absolute_filename($curr_dir, shift @argvs);
+	$period_flag = shift @argvs;
+	$year = shift @argvs;
+	$month = shift @argvs;
+	
+} # process_argvs 
+
+
+######################################################################
+#                                                                    #
+#                            doexit_handler                          #
+#                                                                    #
+######################################################################
+sub doexit_handler {
+	local($sig) = @_;
+	do clean_up();
+	$rc = $SEVERE_ERROR_CODE;
+	$rc = $INTER_CODE if ($signal eq 'INT' || $signal eq 'KILL' || $signal eq 'STOP');
+	if ($verbose) {
+		print STDERR "Received signal <$sig>\n";
+	}
+	exit($rc);
+}
+
+
+
+######################################################################
+#                                                                    #
+#                            validate_user_inputs                    #
+#                                                                    #
+######################################################################
+sub validate_user_inputs {
+	# Validate input files, flag, year, and pentad or month. Exit if error
+	# occurs.
+
+	# Files validation checking.
+	#
+	if ($period_flag eq "BEGIN") {
+		# Give error message and exit if intermediate files exist.
+		if (-e $inter_acc_cfad_file) {
+			print STDERR "$this_prog:Error:Period flag is BEGIN and inter. acc. cfad file exist.\n";
+			exit($SEVERE_ERROR_CODE);
+		}
+		if (-e $inter_acc_vprofile_file) {
+			print STDERR "$this_prog:Error:Period flag is BEGIN and inter. acc. vprofile file exist.\n";
+			exit($SEVERE_ERROR_CODE);
+		}
+		if (-e $inter_vos_times_file) {
+			print STDERR "$this_prog:Error:Period flag is BEGIN and vos times file exist.\n";
+			exit($SEVERE_ERROR_CODE);
+		}
+
+	}
+	# Give error message if  the hdf outfile 
+	#  exists and exit.
+	if (-e $hdf_outfile) {
+		print STDERR "$this_prog:Error:Period flag is END and HDF outfile <$hdf_outfile> exists.\n";
+		exit($SEVERE_ERROR_CODE);
+	}
+
+
+    # Check if the input file belongs to the specified year and month 
+    # Use date from the input filename, i.e., 2A55.yymmdd.*HDF*
+	
+	$infile_mon = 0;
+	$infile_day = 0;
+	$infile_yr = 0;
+	do get_date_from_granule_product_filename($infile, *infile_mon, 
+											  *infile_day, *infile_yr);
+	if ($year != $infile_yr) {
+		print STDERR "$this_prog:Error: The input file's year <$infile_yr> is not correspondent to the specified year <$year>.\n";
+		exit($SEVERE_ERROR_CODE);
+	}
+	if ($infile_mon != $month) {
+		print STDERR "$this_prog:Error: The input file's month <$infile_mon> is not correspondent to the specified month <$month>.\n";
+		exit($SEVERE_ERROR_CODE);
+	}
+} # validate_user_inputs
+
+
+######################################################################
+#                                                                    #
+#                            do_system_call                          #
+#                                                                    #
+######################################################################
+sub do_system_call {
+	local($cmd) = @_;
+	# Return 1 for success; -1, otherwise.
+	return -1 if ($cmd eq "");
+	local($rc) = 1;
+#print STDERR "CMD: <$cmd>\n";
+	system($cmd);
+
+	$status = $? >> 8;
+	local($signal) = $? & 255;
+
+	do doexit_handler('INT') 
+		if (&interrupted($status) || 
+			$signal eq 'INT' || $signal eq 'KILL' || $signal eq 'STOP');
+
+	if (&is_severe_error($status) || $signal != 0) {
+		$rc = -1; # failed
+	}
+	return $rc;
+}
+
+
+######################################################################
+#                                                                    #
+#                            clean_up                                #
+#                                                                    #
+######################################################################
+sub clean_up {
+	chdir ($curr_dir) if ($curr_dir ne "" && -d $curr_dir);  # Go back to the original dir.
+	do do_system_call("rm -r $top_tmp_working_dir") if (-d $top_tmp_working_dir);
+}

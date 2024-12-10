@@ -1,0 +1,38 @@
+README for dual-cappi: (12/10/99) initially packaged w/ GVS v4.17
+
+
+The program built is called 'singlevos_2A-53-dc'.
+
+  Executable files:
+  ----------------
+  * singlevos_2A-53-dc - Actual algorithm program.
+
+  Documentation:
+  -------------
+  * 2A-53-dc.html - Documentation for 2A-53 dual-cappi.
+
+  Data files:
+  ----------
+  * Uses .zr tables runtime_*.txt and metadata.txt files same as ver4 algorithm
+    (see ver4/README )  You must install ver4 algorithm.
+
+
+EXECUTION NOTES:
+================
+
+1. Set enviroment variables: $GVS_DATA_PATH and $TSDISTK.
+
+2. Have the data files installed under $GVS_DATA_PATH in order to use the
+   default options.
+
+3. Have all the runtime_*.txt files in $GVS_DATA_PATH.
+
+4. Have access to the executable files located in $GVS/format_conversion.
+   These files can be installed in any bin/ directory.
+
+
+
+QUESTIONS:
+=========
+
+Please contact TRMM Office help via e-mail at help@trmm.gsfc.nasa.gov.

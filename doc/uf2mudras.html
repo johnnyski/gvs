@@ -1,0 +1,106 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.5 [en] (X11; U; Linux 2.0.32 i686) [Netscape]">
+</head>
+<body background="gvs_bg.gif">
+&nbsp;
+<table BORDER=2 CELLSPACING=2 CELLPADDING=2 >
+<tr>
+<td><img SRC="gvs_logo.gif" height=100 width=256></td>
+
+<td>
+<h1>
+<font color="#000080">uf2mudras: </font><font color="#800080">Convert UF
+to MUDRAS</font></h1>
+</td>
+</tr>
+</table>
+
+<p>
+<hr WIDTH="100%">
+<hr>
+<h3>
+<font color="#000080">Synopsis</font></h3>
+
+<pre><b><font color="#B22222">uf2mudras [-v] [-S <i><tt>site_name</tt></i>] [-d <i><tt>YYMMDD</tt></i>] [-s <i><tt>sprint_input_template</tt></i>]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [-V <i>vertical_resolution</i>] [-H <i>horizontal_resolution</i>]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; uffile outfile</font></b></pre>
+
+<hr>
+<h3>
+<font color="#000080">Description</font></h3>
+This program calls <a href="sprint.html">NCAR SPRINT</a> interpolator to
+convert QCed UF file to pure MUDRAS file. Note: It removes files created
+by this script (e.g. "<i><tt>fort</tt></i>*", "<i><tt>fnt</tt></i>*", and
+"<i><tt>sprint.inp</tt></i>.&lt;process id>") after it finished processing.
+<p>
+<hr>
+<h3>
+<font color="#000080">Options</font></h3>
+<b><font color="#B22222">uf2mudras</font></b> recognizes the following
+options:
+<p><b><font color="#B22222">-v</font></b>: Prints arguments and status
+of the program execution.
+<br><b><font color="#B22222">-S</font></b>: Specify TSDIS site name. See
+file, <i><tt>$GVS_DATA_PATH/gv_radar_site_info.data</tt></i> for a list
+of sites. Default: <i><tt>Will obtain from the UF file.</tt></i>.
+<br><b><font color="#B22222">-d</font></b>:<b> </b>Date of radar data to
+be processed. For default, the date string from input filename (*&lt;<i><tt>YYMMDD</tt></i>>.*)
+is used.
+<br><b><font color="#B22222">-s <i><tt>sprint_input_template</tt></i></font></b>:
+File contains SPRINT commands. This package provided two templates: '<i><tt><a href="sprint.html">sprint_entire_volume.inp</a></tt></i>'
+and '<i><tt><a href="sprint.html">sprint_base_scan.inp</a></tt></i>'. These
+templates are for interpolating the entire volume or just the base scan
+of the QCed UF file. For information on SPRINT commands' syntax, see NCAR
+SPRINT interpolator's documentation. Note: When creating your own template,
+you must do the following:
+<ul>
+<li>
+Use '10' for the Fortran logical unit number of the input file (P2 of 'INPUT'
+command) and '11' for the Fortran logical unit number of the output file
+(P2 of 'OUTPUT' command).</li>
+
+<li>
+Fill P2 of the 'PROCESS' command with 'YYMMDD'.</li>
+
+<li>
+Fill P6 of the 'INPUT' command with 'RADAR_NUM'.</li>
+
+<li>
+Fill P6 of the 'GRID' command with 'HORIZONTAL_RES'.</li>
+
+<li>
+Fill P9 of the 'GRID' command with 'VERTICAL_RES' if applicable.</li>
+</ul>
+This program will substitude those strings with the appropriate values.
+Default template = '<i><tt>$GVS_DATA_PATH/<a href="sprint.html">sprint_base_scan.inp</a></tt></i>'
+or '<i><tt>/usr/local/trmm/data/<a href="sprint.html">sprint_base_scan.inp</a></tt></i>'
+when <i><tt>$GVS_DATA_PATH</tt></i> = "").
+<p><b><font color="#B22222">-V</font></b>: Specify vertical resolution
+in km. Default: 1.5.
+<br><b><font color="#B22222">-H</font></b>: Specify horizontal resolution
+in km. Default: 2.0.&nbsp;
+<hr>
+<h3>
+<font color="#000080">Input</font></h3>
+Quality controlled Universal Format (UF) file.&nbsp;
+<hr>
+<h3>
+<font color="#000080">Output</font></h3>
+Mudras file.
+<h3>
+
+<hr><font color="#000080">Return value</font></h3>
+<b><font color="#B22222">uf2mudras</font> </b>returns 0 for successful
+completion; -1 for failure; -2 for interruption.
+<p>
+<hr>
+<h3>
+<font color="#000080">Author</font></h3>
+Carl Mohr, <i><tt>NCAR</tt></i>
+<br>L. Jay Miller, <i><tt>NCAR</tt></i>
+<br>Bill Anderson, <i><tt>NCAR</tt></i>
+</body>
+</html>

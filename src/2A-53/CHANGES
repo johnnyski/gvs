@@ -1,0 +1,149 @@
+CHANGES for 2A-53:
+
+v4.17 (6/28/00)
+---------------------------------------------
+* Added dual-cappi directory and algorithm (singlevos_2A-53-dc dual-cappi
+  algorithm).
+  A modification of 2A-53/ver4, extracts 2A-55 cappis (1.5 km and 3 km) instead
+  of calling sprint on 1C-51 to create a pseudo-cappi. The 1.5 km cappi is used
+  when range is from 15 km to 98 km, and the 3 km cappi for ranges of 98 km
+  through 150 km.
+  Minor change to Makefile.am.
+
+v3.23 (8/18/98) initially packaged w/ GVS v4.10
+---------------------------------------------
+* Change in ver4.
+
+v3.22 (8/13/98) initially packaged w/ GVS v4.9
+----------------------------------------------
+* Algorithm change in ver4.
+
+v3.21 (7/27/98) initially packaged w/ GVS v4.8.1
+----------------------------------------------
+* Minor mod in witek.
+
+v3.20 (6/15/98) initially packaged w/ GVS v4.8
+----------------------------------------------
+* Compressed carttopol* and poltocart* in witek/data.
+
+v3.19 (6/9/98) initially packaged w/ GVS v4.7
+----------------------------------------------
+* Fixed the pathname for the logo and the background in the HTML page for ver4.
+
+v3.18 (5/29/98) initially packaged w/ GVS v4.6
+----------------------------------------------
+Minor change in ver4
+Added to the html page a link to build_zr_table page.
+
+v3.17 (1/26/98) initially packaged w/ GVS v4.5
+---------------------------------
+Minor change in ver4
+
+v3.16 (11/13/97) initially packaged w/ GVS v4.2
+---------------------------------
+Changes in ver4
+
+v3.15 (10/24/97) initially packaged w/ GVS v4.1
+-----------------------------
+Changes in ver4
+
+v3.14  8/19/97 (Packaged with GVS 4.0) 
+-----------------------------
+Changes in ver4 and witek. See their CHANGES files.
+
+v3.13 (7/2/97)
+--------------
+Changes in ver4. See its CHANGES file.
+
+
+v3.12 (Froze: 4/30/97)
+-----------------------
+1. Fixed the Makefile(s) w.r.t. install_doc and linking.
+2. Added ver4 (2A-53 version 4 algorithm).
+
+v3.11  (Froze: 1/6/97)
+----------------------
+1. Fixed compile warning message and added doc. for pi-c.
+2. Minor mod in Danny's Makefile.
+3. Minor mod in Witek's Makefile.
+
+v3.10  (Froze: 12/12/96)
+----------------------
+1. Both Danny's and Witek's packages are modified. See their CHANGES for 
+   detail.
+
+
+v3.9  (Froze: 7/29/96)
+-----------------------
+1. Danny's package contains changes in Darwin's Ze-R table and rain 
+   guage site list for the AIW-II workshop.
+
+
+v3.8  (Froze: 7/10/96)
+----------------------
+1. Both Danny's and Witek's packages are modified. See their CHANGES for 
+   detail.
+
+v3.7  (Froze: 6/25/96)
+----------------------
+1.  New version from The University of Iowa and from The Hebrew 
+    University of Jerusalem.
+2.  Both Witek's and Danny's packages produce product in HDF file. 
+3.  See witek/CHANGES and danny/CHANGES for more details.
+
+v3.6  (Froze: 5/1//96)
+----------------------
+1. Removed unused files for Danny's distribution.
+2. Changed gts to gvs.
+
+v3.5  (Froze: 4/1//96)
+----------------------
+1. Minor mod. in both Danny's and Anton's pakage. See anton/CHANGES and 
+   danny/CHANGES for details.
+
+v3.4  (Froze: 3/21/96)
+----------------------
+* Minor changes in Anton's package.
+
+v3.3  (Froze: 3/15/96)
+---------------------
+* New version of Danny Rosenfeld' algorithm.
+
+v3.2  (Froze 3/4/96)
+--------------------
+* Bug fixes.
+
+v3.1  (11/15/95)
+--------------------
+* Anton's version: v3.1. See anton/CHANGES for more details.
+
+v3.0  (Froze 9/11/95)
+---------------------
+o Anton's algorithm program supports Melbourne data. 
+o Danny's algorithm programs split into 2A-53 and 3A-53 products.
+o Contains bug fixes.
+
+v2.0 (7/19/95)
+--------------
+o Use Danny Rosenfeld's and Anton Kruger's algorithms.
+
+
+
+v1.0.2 (5/19/95)
+---------------
+o Changed rsph.c. Print out messages if -v (verbose) is specified
+
+
+
+v1.0 (??)
+---------
+o Changed rsph.c & rain_map.c to have program be able to run on 
+  sgi machine.
+
+o Changed rain_map.c to let program flow messages print out only
+  when -v is specified.
+
+o Added code to check for data existence before access it for preventing
+  segmentation violation.
+
+o Set default value for img_height, img_width, altitude, and pix_res.

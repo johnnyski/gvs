@@ -1,0 +1,122 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+   <TITLE></TITLE>
+   <META NAME="GENERATOR" CONTENT="Mozilla/3.01Gold (X11; I; Linux 2.0.28 i686) [Netscape]">
+</HEAD>
+<BODY BACKGROUND="gvs_bg.gif">
+
+<CENTER><TABLE BORDER=2 CELLPADDING=0 WIDTH="100%" >
+<TR ALIGN=CENTER VALIGN=CENTER>
+<TD ALIGN=CENTER VALIGN=CENTER><IMG SRC="gvs_logo.gif" HEIGHT=100 WIDTH=256 ALIGN=LEFT></TD>
+
+<TD>
+<H1><FONT COLOR="#000080">2A-53-c:</FONT> <FONT COLOR="#800080">Rain Rate
+Maps</FONT></H1>
+</TD>
+</TR>
+</TABLE></CENTER>
+
+<P>
+<HR WIDTH="100%">
+<HR></P>
+
+<H3><FONT COLOR="#000080">Synopsis</FONT></H3>
+
+<PRE><B><FONT COLOR="#B22222">2A-53 [-v] [<I><TT>options_list</TT></I>] 2A-53-c <I><TT>qc_ghdf_file csmap_ghdf_file rrmap_ghdf_file</TT></I></FONT></B></PRE>
+
+<PRE><B><FONT COLOR="#B22222">singlevos_2A-53-c [-v] <I><TT>qc_uf_file csmap_shdf_file rrmap_shdf_file</TT></I></FONT></B>
+</PRE>
+
+<P>
+<HR></P>
+
+<H3><FONT COLOR="#000080">Description</FONT></H3>
+
+<P>Radar site rain rate map. <B><FONT COLOR="#B22222">2A-53 </FONT></B><FONT COLOR="#000000">calls<B>
+</B></FONT><B><FONT COLOR="#B22222">singlevos_2A-53-c</FONT></B> which
+converts reflectivities of a single VOS for 1C-51 product to rain rates.
+It produces a 2 km x 2 km CARPI (Constant Altitude Rectangular Position
+Image) to 200 km from radar. <B><FONT COLOR="#B22222">2A-53</FONT></B>
+produces rain rate maps for one hour-granule.</P>
+
+<P>
+<HR WIDTH="100%"></P>
+
+<H3><FONT COLOR="#000080">Options</FONT></H3>
+
+<P><B><FONT COLOR="#B22222">2A-53</FONT></B> and <B><FONT COLOR="#B22222">singlevos_2A-53-</FONT></B>
+recognize the following options: </P>
+
+<P><B><FONT COLOR="#B22222">-v</FONT></B> Prints arguments and status of
+the program execution. </P>
+
+<P>
+<HR></P>
+
+<H3><FONT COLOR="#000080">Input Files</FONT></H3>
+
+<OL>
+<LI><FONT COLOR="#B22222">qc_uf_file</FONT> - Quality controlled reflectivity
+for a single VOS in Universal Format (1C-51 product). </LI>
+
+<LI><FONT COLOR="#B22222">qc_ghdf_file</FONT> - Quality controlled reflectivity
+for one hour-granule in Hierarchical Data Format (HDF) (1C-51 products).
+</LI>
+
+<LI><FONT COLOR="#B22222">csmap_shdf_file</FONT><B> </B>- Convective/stratiform
+map for a single VOS in HDF (2A-54 product). </LI>
+
+<LI><FONT COLOR="#B22222">csmap_ghdf_file</FONT><B> </B>- Convective/stratiform
+map for one hour-granule in HDF (2A-54 products).</LI>
+</OL>
+
+<P>
+<HR></P>
+
+<H3><FONT COLOR="#000080">Temporary Files</FONT></H3>
+
+<P>The following files are created and removed upon completion. </P>
+
+<OL>
+<LI>tmp&lt;<I><TT>process_id</TT></I>&gt;/&lt;<I><TT>YYMMDD&gt;.&lt;granule#&gt;.&lt;radar_site&gt;.&lt;version#&gt;.&lt;HHMM&gt;</TT></I>.uf.gz</LI>
+
+<LI>tmp&lt;<I><TT>process_id</TT></I>&gt;/&lt;<I><TT>csmap_ghdf_file prefix</TT></I>&gt;.&lt;<I><TT>HHMM&gt;</TT></I>.hdf</LI>
+
+<LI>tmp&lt;<I><TT>process_id</TT></I>&gt;/&lt;uf_file prefix&gt;..<I><TT>hdf</TT></I>.2A-53-c</LI>
+</OL>
+
+<P>
+<HR width="100%"></P>
+
+<H3><FONT COLOR="#000080">Output Files</FONT></H3>
+
+<OL>
+<LI><FONT COLOR="#B22222">rrmap_shdf_file</FONT><B> </B>-<B> </B>Rain rate
+map for a single VOS in HDF file. Map consists of a 151x151 pixel image,
+with radar located at 76x76. Resolution is 2 km/pixel, thus data extends
+150 km radius from the radar.</LI>
+
+<LI><FONT COLOR="#B22222">rrmap_ghdf_file</FONT><B> </B>-<B> </B>Rain rate
+maps for one hour-granule in HDF file.</LI>
+</OL>
+
+<H3>
+<HR><FONT COLOR="#000080">Return value</FONT></H3>
+
+<P><B><FONT COLOR="#B22222">2A-53</FONT> </B>returns 0 upon successful
+completion; 1 upon successful processing for some VOSs of granule; 2 upon
+interruption; non-zero, otherwise. </P>
+
+<P><B><FONT COLOR="#B22222">singlevos_2A-53-c</FONT></B> returns 0 upon
+successful completion; -2 upon interruption; -1 upon failure. </P>
+
+<P>
+<HR></P>
+
+<H3><FONT COLOR="#000080">Author</FONT></H3>
+
+<P>John Merritt, <I><TT>NASA/TRMM Office</TT></I></P>
+
+</BODY>
+</HTML>

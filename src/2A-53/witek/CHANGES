@@ -1,0 +1,179 @@
+CHANGES in Witek Krajewski's program:
+----------------------------------
+
+v4.20 (9/02/03)
+---------------------------------------------
+1. When compiling interpolate.cc under Red Hat version 9, the following error
+   message was received:
+
+     In function `system_call(char*)':
+     /home/dmarks/trmm/gvs-v4.20/src/2A-53/ver4/interpolate.cc:293: undefined
+     reference to `__errno_location()'
+
+   This was fixed by adding "#include <errno.h>" and commenting out an "extern"
+   declaration for errno.  Thanks to Dave Augustine for this solution.
+
+v3.13 (7/27/98) initially packaged w/ GVS v4.8.1
+----------------------------------------------
+1. Changed the Makefile to compress the data files back after installation.
+
+v3.12 (6/15/98) initially packaged w/ GVS v4.8
+-----------------------------------------
+1. Compressed carttopol* and poltocart*.
+
+v3.11 (8/19/97) (Packaged with GVS 4.0) 
+-----------------------------------------
+1. Removed option -t; added option -S.
+2. singlevos_2A-53-w can determine site name from the uf file if it is not
+   specified on the command line.
+
+v3.10 (4/30/97)
+----------------
+1. Fixed the Makefile w.r.t. install_doc and linking.
+2. Changed 'change_perl_path' to 'install_scripts' in the Makefile.
+
+v3.9 (1/6/97)
+--------------
+1. Changed 'install_doc' in Makefile
+
+v3.8 (12/12/96)
+---------------
+1. Traps signals (SIGINT, SIGFPE, SIGKILL, SIGILL, SIGSEGV)
+   and abort execution for 'rainest', 'out.x', and 'prep_proc'.
+2. Ported to Sun.
+3. Added a new exit code, -2, for interruption.
+4. Check if prep_proc produced no output file, then exit with code = -1.
+5. Removed 2A-53-w.
+
+v3.7.2 (10/30/96)
+----------------
+1. Fixes problem of a NULL string radar name wherein the intermediate
+   rle file placed "" in the file and the 'out.x' program could
+   not 'scanf' it.
+
+2. This version requires toolkit 3.0 as TKwriteGrid will bomb with
+   2.5.
+
+v3.7.1 (9/6/96)
+---------------
+1. Removed 'exit' when encountering bad header info.  This includes
+   checks for invalid date information.  This is a patch release for
+   processing for the AIW-II.
+
+
+v3.7 (7/10/96)
+--------------
+1. Fixed compiling bug for SGI in prep_proc.c.
+2. Includes the latest update of the algorithm (6/28/96).  This version
+   uses -99 for out-of-boundary data.
+3. Default parameters files are changed.
+4. Added [-v] in prep_proc.c; modified rainest.c to reflect this change.
+5. Changed in prep_proc.c, w.r.t. using RSL internal storage to floating 
+   point conversion function.
+6. Added a new return code, 1, in 2A-53-w for failure occurred during
+   processing for some VOS but could continue for other VOSs.
+7. Modified in product.c so program will produce rain rate map for input
+   data file having less than eight sweeps.
+8. Need to patch $gvs/IO_INTR_GV.c.diff to $toolkit/src/IO_INTR_GV.c 
+   (toolkit v2.5).
+
+v3.6 (6/25/96)
+--------------
+1. Uses new source code obtained from the University of Iowa.  This version
+   does not require uiowa_distrib package.
+2. Output filename is required on the command line.
+3. Lookup tables are not copied to the working directory by the script--
+   'rainest' uses data path to access them.
+4. Produces product in HDF file.
+5. Added singlevos_2A-53-w.
+6. Changed the program name to '2A-53-w'.
+7. Re-incorporated mods made in uiowa_distrib v2.2.  RLE files are still
+   being produced.  The program 'prep_proc' does it.
+   a. Reading UF (compressed, uncompressed)
+   b. Conversion functions HMLF and aiw_invf.  Rounding error for Lassen.
+   c. Check for NOECHO on rle read.
+8. Relies on having RSL.  At the time of this writing, version 0.45.
+9. Requires TSDIS Toolkit and HDF libraries.
+10. Requires programs in $GVS/format_conversion
+
+v3.5 (5/1/96)
+--------------
+1. Changed gts to gvs.
+
+
+v3.4 (4/1/96)
+--------------
+1. Requires 2A-54 product for input (This just provides the interface. The 
+   algorithm does not use it now).
+2. Changed the makefile.
+
+v3.3 (3/21/96)
+--------------
+* Minor mod. to the script.
+* Bug fixes.
+* Uses uiowa_distrib version 2.2.  This means it is using RSL 0.43 or higher
+  which  includes code for transparently reading gzip-ed files.
+
+
+v3.2 (3/4/96)
+-------------
+* Bug fixes.
+* Changed default value for wflag, ars, arc, htopc, and htops.
+* rainest.c: 
+	- use "height.DR","carttopol.DR", "poltocart.DR" if radar_index != 1.
+* The following files have been modified to handle bad data: 
+    rainest.h, instfield.c, product.c, readray.c
+* Requires uiowa_distrib-v2.1.tgz
+
+v3.1 (12/12/95)
+--------------
+*  Removed rsl from the software requirement section (this was not needed). 
+*  Added gvs.gif
+-From Manos:
+>>The subroutines that have been modified are:
+>>rainest.c : I included a new parameter "shiftmin" which represents
+>>            the time shift between gage and radar data.
+>>products.c: The "yearp/monp/dayp/hourp/minp" are assigned in products.c
+>>            subroutine at the lowest sweep (sweep.number = 0).
+>>accumulation.c: The "yearp/monp/dayp/hourp/minp" are not assigned in this
+>>                subroutine any more.
+>>The year constrain has been removed from all subroutines.
+
+v3.0 (9/11/95)
+-------------
+*  'rainest' supports Melbourne data in addition to Darwin data.
+*  When running 2A-53-a, the default of data_type is Melbourne instead
+   of Darwin.
+
+v2.0 (7/19/95):
+--------------
+The changes are necessary to integrate into NASA TRMM GVS and to run
+on HP and SGI machines.
+
+*  Changes in 'rainest.h':
+	from
+
+	#define CLASSES_PATH  "/usr/local/data/hml_data/trmm/aiw/products/BER/1994/jan/rain/instantaneous/classes"
+	#define PRODUCT_PATH1 "/usr/local/data/hml_data/trmm/aiw/products/BER/1994/jan/rain/accumulations/advection"
+	#define PRODUCT_PATH2 "/usr/local/data/hml_data/trmm/aiw/products/BER/1994/jan/rain/instantaneous/advection"
+
+   to 
+
+	#define CLASSES_PATH  "."
+	#define PRODUCT_PATH1 "."
+	#define PRODUCT_PATH2 "."
+
+
+*  Don't use index table. So scan every sweep from the input file.
+
+*  Output file (from writeminute() is not compressed).
+
+*  Commented out printf()'s.
+
+*  Search for poltocart.tbl and carttopol.tbl from the current directory.
+
+*  Call writeminute() for any day.
+
+*  Defined global variables in 'rainest.c' instead of 'rainest.h' and 
+   reference to them using 'extern'.  This is so to compile on the
+   SGI machine.

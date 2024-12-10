@@ -1,0 +1,189 @@
+	SUBROUTINE GWIN(IYEAR,IDAY,IHOUR,IMINUTE,ISECOND,ZMDS,MAPCSP,
+     +	IZ_OVERHEAD)
+
+	INCLUDE 'voswin.par'
+        DIMENSION ZMDS(kms)
+
+	INTEGER gages
+	PARAMETER (gages = 100)
+	BYTE GNAME(80,gages)
+	COMMON/CGWIN/GNAME,GLAT(gages),GLONG(gages),
+     +	INGAZ(gages),INGRANGE(gages),IGAZ(gages),IGRANGE(gages),
+     +	NGAGES,IFIRST
+
+	BYTE BLINE(80)
+	CHARACTER*80 LINE
+	EQUIVALENCE(LINE,BLINE)
+
+	INTEGER wrays,wbins,morewbins
+	PARAMETER (wrays=11, wbins=7, morewbins=5)
+	INTEGER*2 WINDZ(wbins+morewbins,wrays,steps)
+	INTEGER*2 ZMAX,ZZ,I2MDS(kms)
+	BYTE MAPCSP(rays,kms),WINDCS(wbins+morewbins,wrays)
+
+	DATA IFIRST/0/
+
+	  WRITE(6,*)'RADLAT=',RADLAT
+	  WRITE(6,*)'RADLON=',RADLON
+	IF(IFIRST.EQ.0)THEN
+	  IFIRST=1
+	  IF(VERBOSE.EQ.1)WRITE(6,*)
+	  IF(VERBOSE.EQ.1)WRITE(6,*)'Read gauge list from ',GAGFILE
+	  OPEN(UNIT=2,FILE=GAGFILE,STATUS='OLD',ERR=1002)
+	  READ(2,*)
+	  READ(2,*)
+	  IF(VERBOSE.EQ.1)WRITE(6,*)
+     +	  'Write gauge gage windows to ',GWINFILE
+	  OPEN(UNIT=3,FILE=GWINFILE,FORM='UNFORMATTED',ACCESS='APPEND',
+     +	  ERR=1003)
+
+C  Write REAL variables
+	  BINLENGTH=1
+	  WRITE(3)RADLAT,RADLON,RADELEV,RAYWIDTH,RANGE,BINLENGTH,
+     +	  RNGDLY,DELTAZ,CBASE
+
+C  Write INTEGER variables
+	  WRITE(3)kms,rays,NSTEPS,wrays,wbins,morewbins
+
+
+C  Write INTEGER*2 variables
+	  WRITE(3)NOISDBZ
+
+C  Read the gauge coordinates
+
+C The rain gauge coordinates format:
+C0001 TR01Maxwells_Ck        DAR TIP -11.55083 130.58500 107 340
+C0015 TR15Humpty_Doo         DAR TIP -12.61139 131.28806 043 114
+C0016 TR16Woolner            DAR TIP -12.36694 131.46750 060 080
+
+	  NG=0
+ 10	  NG=NG+1
+	  READ(2,'(70A1)',END=20)(GNAME(I,NG),I=1,68)
+	  DO I=1,68
+	  BLINE(I)=GNAME(I,NG)
+	  ENDDO
+	  DO I=69,80
+	  BLINE(I)=0
+	  ENDDO
+	  IF(VERBOSE.EQ.1)WRITE(6,*)LINE
+	  READ(LINE,101)GLAT(NG),GLONG(NG),INGRANGE(NG),INGAZ(NG)
+ 101	  FORMAT(35X,2F10.5,2I4)
+c	  write(6,*)NG,GLAT(NG),GLONG(NG),INGRANGE(NG),INGAZ(NG)
+	  CALL DISTANCE(RADLAT,RADLON,GLAT(NG),GLONG(NG),RANGE,AZ)
+c	write(6,*)'DIST: RADLAT,RADLON,GLAT(NG),GLONG(NG),RANGE,AZ=',
+c	write(6,*)RADLAT,RADLON,GLAT(NG),GLONG(NG),RANGE,AZ
+	  IGRANGE(NG)=RANGE+0.5
+	  IGAZ(NG)=AZ+0.5
+	  IF(IGAZ(NG).EQ.0)IGAZ(NG)=360
+	  IF(IGAZ(NG).GT.360)IGAZ(NG)=IGAZ(NG)-360
+c	  WRITE(6,*)IGRANGE(NG),IGAZ(NG)
+	  IF(VERBOSE.EQ.1)WRITE(6,102)IGRANGE(NG),IGAZ(NG)
+ 102	  FORMAT(31X,'Calculated range,azimuth=',2I4)
+	  IF(VERBOSE.EQ.1)WRITE(6,*)
+	  IF(INGRANGE(NG).EQ.0)NG=NG-1
+	  GOTO 10
+ 20	  NGAGES=NG-1
+	  IF(VERBOSE.EQ.1)WRITE(6,*)'Read',NGAGES,'  gages.'
+	  ENDIF
+
+	WRITE(3)IYEAR,IDAY,IHOUR,IMINUTE,ISECOND,NGAGES,IZ_OVERHEAD
+	WRITE(3)(ISTEP2EL(I),I=1,NSTEPS),HBBF,HBBF1,PRADAR,TRADAR,
+     +	DEWPOINT
+	IF(VERBOSE.EQ.1)WRITE(6,*)' Write out windows around gauges:'
+
+	DO I=1,kms
+	I2MDS(I)=ZMDS(I)*10
+	ENDDO
+	WRITE(3)(I2MDS(I),I=1,kms)
+
+C  create the windows
+C Loop on the gages that are window centers:
+	DO 510 IG=1,NGAGES
+C  Create the gage window
+	IBING=IGRANGE(IG)
+	IRAYG=IGAZ(IG)
+	ZMAX=-999
+	ISTEPMAX=0
+	IBIN0=IBING-(wbins+1)/2
+	IRAY0=IRAYG-(wrays+1)/2
+	IF(IRAY0.LT.1)IRAY0=IRAY0+rays
+	   DO IBINW=1,wbins+morewbins
+	   IBIN=IBIN0+IBINW-1
+	      DO JRAYW=1,wrays
+	      IRAY=JRAYW+IRAY0-1
+	      IF(IRAY.GT.rays)IRAY=IRAY-rays
+	      WINDCS(IBINW,JRAYW)=MAPCSP(IRAY,IBIN)
+		DO ISTEP=1,NSTEPS
+		ZZ=Z(IBIN,IRAY,ISTEP)
+	        WINDZ(IBINW,JRAYW,ISTEP)=ZZ
+	 	IF(ZMAX.LT.ZZ)THEN
+		   ZMAX=ZZ
+		   ISTEPMAX=ISTEP
+		   ENDIF
+		ENDDO
+	      ENDDO
+	   ENDDO
+
+	IF(VERBOSE.EQ.1)WRITE(6,103)IG,IGRANGE(IG),IGAZ(IG),ZMAX,ISTEPMAX
+ 103	FORMAT(' IG,AZ,RANGE,ZMAX,ISTEPMAX=',3I5,3X,2I5)
+	WRITE(3)(GNAME(I,IG),I=1,68)
+	WRITE(3)GLAT(IG),GLONG(IG),IGRANGE(IG),IGAZ(IG)
+	IF(ZMAX.GT.150)THEN
+	   WRITE(3)ZMAX,ISTEPMAX
+	   WRITE(3)(((WINDZ(IBINW,JRAYW,ISTEP),IBINW=1,wbins+morewbins),
+     +	   JRAYW=1,wrays),ISTEP=1,NSTEPS)
+	   WRITE(3)((WINDCS(IBINW,JRAYW),IBINW=1,wbins+morewbins),
+     +	   JRAYW=1,wrays)
+	ELSE
+	   ZMAX=-999
+	   ISTEPMAX=-999
+	   WRITE(3)ZMAX,ISTEPMAX
+	   ENDIF
+
+ 510	CONTINUE
+
+	IG=-999
+	WRITE(3)IG
+
+	RETURN
+ 1002	WRITE(6,*)'Cant open input GAGFILE ',GAGFILE
+	STOP
+ 1003	WRITE(6,*)'Cant open output GWINFILE ',GWINFILE
+	STOP
+	END
+
+      SUBROUTINE DISTANCE(LAT1,LONG1,LAT2,LONG2,RANGE,AZ)
+
+      REAL   LAT1,LAT2,LONG1,LONG2
+      REAL*8 LA1,LA2,LON1,LON2,S
+      
+      LA1=LAT1/57.296
+      LA2=LAT2/57.296
+      LON1=LONG1/57.296
+      LON2=LONG2/57.296
+       
+      S=DSIN(LA1)*DSIN(LA2)+DCOS(LA1)*DCOS(LA2)*DCOS(LON2-LON1) 
+c	if(s.lt.-1.or.s.gt.1)write(6,*)'la1,la2,lon2,lon1,s=',
+c     +la1,la2,lon2,lon1,s
+	if(s.ge.1.)s=0.99999
+	if(s.le.-1.)s=-0.99999
+      RANGE=6370*DACOS(S)           
+
+   	  IF(LA2.EQ.LA1)THEN
+    	    IF(LON2-LON1.GE.0)THEN
+              AZ=90
+            ELSE 
+              AZ=270
+            ENDIF
+          ELSE
+            AZ=57.296*DATAN((DCOS((LA1+LA2)/2)*(LON2-LON1))/(LA2-LA1))
+          ENDIF
+          IF(LA2-LA1.LT.0)THEN
+            AZ=AZ+180
+          ELSE
+            IF(LON2-LON1.LT.0 .AND. LA2.NE.LA1) AZ=AZ+360
+          ENDIF   
+
+      RETURN
+      END	           		   
+

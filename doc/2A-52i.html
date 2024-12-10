@@ -1,0 +1,118 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+   <TITLE></TITLE>
+   <META NAME="GENERATOR" CONTENT="Mozilla/3.01Gold (X11; I; Linux 2.0.28 i686) [Netscape]">
+</HEAD>
+<BODY BACKGROUND="gvs_bg.gif">
+
+<CENTER><TABLE BORDER=2 CELLPADDING=0 WIDTH="100%" >
+<TR ALIGN=CENTER VALIGN=CENTER>
+<TD><IMG SRC="gvs_logo.gif" HEIGHT=100 WIDTH=256 ALIGN=LEFT></TD>
+
+<TD ALIGN=CENTER VALIGN=CENTER>
+<H1><FONT COLOR="#000080">2A-52i:</FONT> <FONT COLOR="#800080">Rain Existence</FONT></H1>
+</TD>
+</TR>
+</TABLE></CENTER>
+
+<P>
+<HR>
+<HR width="100%"></P>
+
+<H3><FONT COLOR="#000080">Synopsis</FONT></H3>
+
+<PRE><B><TT><FONT COLOR="#B22222">2A-52i [-v] [-O] [-S] [-a [-s satellite_coinc_dir] ] <I>rrmap_hdf_file re_ascii_file</I></FONT><I> 
+</I></TT><FONT COLOR="#B22222">       BEGIN/MIDDLE/END </FONT></B></PRE>
+
+<P>
+<HR></P>
+
+<H3><FONT COLOR="#000080">Description</FONT></H3>
+
+<P>Rain existence. <B><FONT COLOR="#B22222">2A-52i</FONT></B> produces
+rain percentage for each VOS from one granule. In addition, it specifies
+which VOS was obtained when the satellite was the closest to the radar
+during coincidence. </P>
+
+<P>This program will create a new output file and will write header and
+rain existence information to it if the specified flag is BEGIN; it will
+append the rain existence information to the existing product file if the
+specified flag is MIDDLE/END.</P>
+
+<P>
+<HR></P>
+
+<H3><FONT COLOR="#000080">Input Files</FONT></H3>
+
+<OL>
+<LI>rrmap_hdf_file - Hierarchical Data Format (HDF) file containing rain
+rate maps for one granule (2A-53 products). </LI>
+
+<LI>$GVS_DATA_PATH/sat_coinc_data/CT.yymmdd. See option <B><FONT COLOR="#B22222">-s</FONT></B>
+below.</LI>
+</OL>
+
+<P>
+<HR></P>
+
+<H3><FONT COLOR="#000080">Temporary File </FONT></H3>
+
+<P>[<I>/tmp/</I>]<I>2A52_</I>[<I>unsorted_file</I> | <B>*</B>]</P>
+
+<P>where, '<B>*</B>', is a widecard.</P>
+
+<P>
+<HR width="100%"></P>
+
+<H3><FONT COLOR="#000080">Output File</FONT></H3>
+
+<P>re_ascii_file - Ascii file containing rain percentage for each VOS from
+one granule; file may contain no VOS entry because of empty granule. The
+product may contain existence data of one site for one month. (This is
+the result of calling this program many times using the same output filename).
+
+<HR></P>
+
+<H3><FONT COLOR="#000080">Options</FONT></H3>
+
+<P><B><FONT COLOR="#B22222">2A-52i</FONT></B> recognizes the following
+options: </P>
+
+<P><B><FONT COLOR="#B22222">-v</FONT>:</B> Output steps of program execution.
+</P>
+
+<P><B><FONT COLOR="#B22222">-O</FONT></B>: Order the product file by VOS'
+date and time and remove duplicated entries before appending. Default:
+Do nothing.</P>
+
+<P><B><FONT COLOR="#B22222">-S</FONT></B>: Processing without satellite
+coincident information lookup.</P>
+
+<P><B><FONT COLOR="#B22222">-a:</FONT></B> Use ASCII satellite coincident
+file(s). Specify this for running in non-TSDIS environment. Default: Use
+TSDIS' database. Since satellite coincidence file contains data for one
+day, two satelliet coincidence files may be required for VOS having time
++ 30 minutes occurs on the next day. of time - 30 minutes.</P>
+
+<P><B><FONT COLOR="#B22222">-s</FONT></B>: Specify directory that contains
+satellite coincidence files (CT.yymmdd). Default: $GVS_DATA_PATH/sat_coinc_data
+or /usr/local/trmm/data/sat_coinc_data if $GVS_DATA_PATH is not set. &nbsp;This
+options only applies when <B><FONT COLOR="#B22222">-a</FONT></B> is specified.</P>
+
+<P><BR>
+
+<HR></P>
+
+<H3><FONT COLOR="#000080">Return value</FONT></H3>
+
+<P><B><FONT COLOR="#B22222">2A-52i</FONT></B> returns zero for successful
+completion; -1 for failure; and -2 for interruption. 
+<HR></P>
+
+<H3><FONT COLOR="#000080">Author</FONT></H3>
+
+<P>David Wolff et al, <I><TT>NASA/TRMM Office</TT></I> </P>
+
+</BODY>
+</HTML>

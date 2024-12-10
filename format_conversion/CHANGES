@@ -1,0 +1,204 @@
+CHANGES for format_conversion:
+-----------------------------
+
+Began 05/08/00
+--------------------------------------------------
+1. Y2K fix in level_1_ghdf_to_singlevos_uf.c
+2. 2A-53  added 2A-53-dc algorithm
+3. 2A-53or2A-55 modified to support changes in 2A-53
+4. Changed elevation angle tolerance (P7 of PROCESS command) in SPRINT input
+   files sprint_base_scan.inp and sprint_entire_volume.inp.
+5. Fixed bug in uf2mudras: corrected typo in references to "cleanup".
+6. Modified 2A-53or2A-55 to support dual-cappi products.
+
+v1.23 (8/18/98) initially packaged w/ GVS v4.10
+---------------------------------------------------
+* Fixed ZR handler for 2A-53or2A-55.
+
+v1.22 (8/13/98) initially packaged w/ GVS v4.9
+---------------------------------------------------
+* Changed level_1_hdf_to_uf to use prod version# from the input filename 
+  when naming output filename.
+
+v1.21 (6/15/98) initially packaged w/ GVS v4.8
+---------------------------------------------------
+* Fixed bug in 'level_1_ghdf_to_singlevos_uf'--the product # field in the
+  output filename was incorrect.
+
+
+v1.20 (6/9/98) initially packaged w/ GVS v4.7
+---------------------------------------------------
+* Fixed bug in 'level_2_singlevos_hdf_to_ghdf' w.r.t. option '-r'.
+* Added version # to programs' usage messages.
+
+
+v1.19 (5/29/98) initially packaged w/ GVS v4.6
+---------------------------------------------------
+* Bug fixes in level_2_singlevos_to_ghdf.c -- problem occurs when
+  input files are compressed.
+
+* Ported to the HP.
+
+* Fixed signal handling in 'level_2_ghdf_to_singlevos_ascii' and 'uf2mudras'.
+
+* Bug fixes in '2A-53or2A-55' -- program selects the wrong csmap for some
+  of the uf files because of the time pattern matching was incorrect.
+
+* 2A-53_hdf2ascii, level_3_rrmap_hdf2ascii, and 2A-55_hdf2ascii catch signals.
+
+* uf2mudrass allows parallel executions in the same directory.
+
+* Requires gv_utils v1.5
+
+* Changed 2A-53 to execute in a tmp dir.
+* Doesnot read lat/lon info from  $GVS_DATA_PATH/gv_radar_lat_lon.data --
+  but from $GVS_DATA_PATH/gv_radar_site_info.data instead.
+* Read radar number from $GVS_DATA_PATH/gv_radar_site_info.data instead of
+  from $GVS_DATA_PATH/sprint_radar_sites.
+* Removed sprint_radar_sites.
+* Added the capability for uninstalling the software.
+
+
+v1.18 (1/26/98) initially packaged w/ GVS v4.5
+---------------------------------------------------
+* Changed Darwin site (use Gunn Point) in 'sprint_radar_sites'.
+* 2A-53or2A-55 will create empty granule as appropriate.
+* Requiers gv_utils v1.2
+* Changed the way level_2_singlevos_to_ghdf uncompresses infile (leave the
+  compressed file unmodified).
+* Increased filename length to 256 in level_2_ghdf_to_singlevos_hdf.c,
+	level_1_ghdf_to_singlevos_uf.c.
+
+
+v1.17 (12/08/97) initially packaged w/ GVS v4.4
+---------------------------------------------------
+* Changed in 'level_2_ghdf_to_singlevos_ascii' so it'll let the compressed
+  file unchanged when uncompressing it.
+
+v1.16 (11/13/97) initially packaged w/ GVS v4.2
+---------------------------------------------------
+* Clearified the usage message for '2A-53'.
+* Requires gv_utils package.
+
+v1.15 (10/24/97) initially packaged w/ GVS v4.1
+---------------------------------------------------
+* Bug fix in 2A-53_hdf2ascii.c, 2A-55_hdf2ascii.c -- 
+  Convert toolkit's bad value to application's bad value before 
+  writing to ascii file.
+* Fixed the exit code for 2A-53or2A-55.
+
+v1.14 (10/10/97)  initially packaged w/ gvs pre-v4.1
+---------------------------------------------------
+* Minor modification in level_2_ghdf_to_singlevos_ascii.
+* Added level_3_rrmap_hdf2ascii.c.
+* Moved 2A-53_hdf2ascii.c and 2A-55_hdf2ascii.c from 'gvs_utils' to here.
+* Modified level_1_ghdf_to_singlevos_uf.c for HDF filename format change.
+* Added 'KMLB' in 'sprint_radar_sites'.
+* Changed 'uf2mudras' so it understand *yymmdd[.|_]*
+* Bug fixes in 2A-53or2A-55 so it doesnot uses the zr table when running
+  2A-55.
+
+v1.13 (8/19/97) initially packaged w/ gvs v4.0
+---------------------------------------------
+* Changed Makefile; it requires libgvs_utils.a.
+* uf2mudras can handle other sites besides Melbourne and Darwin. 
+* Added a new file: sprint_radar_sites.
+* Requires sprint v1.12 or later.
+* Changed option, -t to -S.
+* Renamed:
+     hdf_to_uf            to level_1_ghdf_to_singlevos_uf
+     ghdf_to_singlevoshdf to level_2_ghdf_to_singlevos_hdf
+     singlevoshdf_to_ghdf to level_2_singlevos_hdf_to_ghdf
+* Changed 2A-53 and 2A-53or2A-55 to call the new program name(s).
+* Upgraded 2A-53or2A-55 to make compatible with the new interface of 
+  'level_1_ghdf_to_singlevos_uf'.
+* Added 'level_2_ghdf_to_singlevos_ascii'.
+* Modified 2A-53 to set the default zr table to 'dual.zr'
+* Modified 2A-53or2A-55 to process the 2A-53 runtime files so
+   time dependant zr files can be selected.  See all_tape_level_1n2 also.
+   Also, see .../gvs/src/2A-53/ver4.
+
+v1.12 (7/2/97)
+--------------
+1. Set and write metadata (singlevoshdf_to_ghdf and ghdf_to_singlevoshdf).
+2. Requires '../src/utils'.
+3. 2A-53's usage messages contain version number.
+4. 'uf2mudras' contains new options: 
+     [-V vertical_resolution] [-H horizontal_resolution]
+5. 'sprint_base_scan.inp' and 'sprint_entire_volume.inp' are modified.
+6. Requires toolkit v4.5r1 or later.
+
+v1.11 (4/30/97)
+---------------------
+1. Fixed the Makefile w.r.t. linking.
+2. Changed '2A-53or2A-55' w. r. t. passing '-v' option to the calling programs.
+3. Uses TSDIS toolkit's TKreportWarning().
+4. Added 'tsdis_toolkit' dir.
+5. Changed 'change_perl_path' to 'install_scripts' in the Makefile.
+
+v1.10 (Froze: 3/7/97)
+----------------------
+1. Fixed the Makefile w.r.t. install_doc and linking.
+2. Changed '2A-53' and '2A-53or2A-55' to handle '2A-53-v4' (2A-53 version 4).
+
+v1.9: (Froze: 1/6/97)
+----------------------
+1. Fixed compiling error on the SGI.
+2. Changed output filename's format for hdf_to_uf.
+3. Changed 'install_doc' in Makefile.
+
+v1.8: (Froze: 12/12/96)
+----------------------
+1. Programs trap signals (SIGINT, SIGFPE, SIGKILL, SIGILL, SIGSEGV)
+   and abort execution of programs.
+2. Contains new hdf_to_uf.c that requires the toolkit version modified by the 
+   TRMM Office (toolkit_x.x) and uses dynamic structure allocation.
+3. Changed the command interface of hdf_to_uf. Added '-u' option to hdf_to_uf.
+4. Minor mod. in uf2mudras w.r.t. parsing date information from the input
+   filename.
+5. Added 2A-53
+
+v1.7: (Froze: 7/29/96)
+----------------------
+1. Minor compiling bug fixed in hdf_to_uf.c for SGI.
+
+
+v1.6: (Froze: 7/10/96)
+----------------------
+1. hdf_to_uf produces compressed file.
+2. Bug fixes in shdf_to_ghdf.c w. r. t. definition of MAX_VOS_NUM.
+3. Added a new return code, 1, in 2A-53or2A55 for failure occurred during
+   processing for some VOS but could continue for other VOSs.
+4. Needs to patch $gvs/IO_INTR_GV.c.diff to $toolkit/src/IO_INTR_GV.c
+   (toolkit v2.5)
+5. Bug fixes in ghdf_to_shdf.c w.r.t. output filename.
+
+v1.5: (Froze: 6/25/96)
+---------------------
+1. Added new programs: 2A-54_hdf2ascii, ghdf_to_singlevoshdf, 2A-53or2A-55, 
+   hdf_to_uf, and singlevoshdf_to_ghdf.
+2. Requires TSDIS Toolkit and HDF libraries.
+
+v1.4: (Froze: 5/1/96)
+---------------------
+1. Changed gts to gvs -- this include environment variable name as well.
+
+v1.3: (Froze: 4/1/96)
+---------------------
+1. Minor mod in uf2mudras (exit with a warning code when no mudras file was 
+   created).
+2. Minor mod. in Makefile.
+
+
+v1.2: (Froze: 3/21/96)
+---------------------
+- Minor mod in uf2mudras and uf2mudras.html.
+
+v1.1: (Froze: 3/15/96)
+----------------------
+- Modified uf2mudras
+
+
+v1.0: (Froze: 3/4/96)
+------------------------
+- Initially created.

@@ -1,0 +1,153 @@
+<HTML>
+<HEAD>
+   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+   <META NAME="GENERATOR" CONTENT="Mozilla/4.04 [en] (X11; I; Linux 2.0.28 i686) [Netscape]">
+</HEAD>
+<BODY BACKGROUND="gvs_bg.gif">
+&nbsp;
+<CENTER><TABLE BORDER=2 CELLPADDING=0 WIDTH="100%" >
+<TR ALIGN=CENTER VALIGN=CENTER>
+<TD ALIGN=CENTER VALIGN=CENTER><IMG SRC="gvs_logo.gif" HEIGHT=100 WIDTH=256 ALIGN=LEFT></TD>
+
+<TD>
+<H1>
+<FONT COLOR="#000080">2A-54:</FONT> <FONT COLOR="#800080">Stratiform/Convective
+Map</FONT>&nbsp;</H1>
+</TD>
+</TR>
+</TABLE></CENTER>
+
+<HR WIDTH="100%"><B>Last updated:</B> 8/12/98
+<HR>
+<H3>
+<FONT COLOR="#000080">Synopsis</FONT></H3>
+
+<PRE><B><TT><FONT COLOR="#B22222">2A-54 [-v] [<I>options_list</I>] <I>qc_ghdf_file csmap_ghdf_file
+</I></FONT></TT></B></PRE>
+
+<PRE><B><TT><FONT COLOR="#B22222">singlevos_2A-54 [-v] [<I>options_list</I>] <I>qc_uf_file csmap_shdf_file</I></FONT></TT></B></PRE>
+
+<PRE><B>where:
+
+<FONT COLOR="#B22222">options_list</FONT> := <FONT COLOR="#B22222">[-S<I><TT> site_name</TT></I>] [-d <I><TT>YYMMDD</TT></I>] [-H <I>horizontal_resolution</I>] [-s <I><TT>sprint_input_template</TT></I>]&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [-l <I><TT>result_log_file</TT></I>] [-D <I><TT>output_dir</TT></I>] <TT>[-m <I>metadata_fname</I>]</TT></FONT></B></PRE>
+
+<HR>
+<H3>
+<FONT COLOR="#000080">Description</FONT></H3>
+Radar site convective/stratiform map. <B><FONT COLOR="#B22222">2A-54</FONT></B>
+calls <B><FONT COLOR="#B22222">singlevos_2A-54</FONT></B> which interpolates
+the base scan for a single VOS of 1C-51 product from polar to cartesian
+coordinate. The algorithm determines whether a given pixel is associated
+with convective rain, stratiform rain, no rain, or missing/bad data, for
+each point in the interpolated base scan and produces a convective/stratiform
+map. <B><FONT COLOR="#B22222">2A-54</FONT></B> produces csmaps for one
+hour-granule.
+
+<P>
+<HR>
+<H3>
+<FONT COLOR="#000080">Options</FONT></H3>
+<B><FONT COLOR="#B22222">2A-54</FONT></B> and <B><FONT COLOR="#B22222">singlevos_2A-54
+</FONT></B>recognize the following options:
+
+<P><B><FONT COLOR="#B22222">-v</FONT> </B>Prints arguments and status of
+the program execution.
+
+<P><B><FONT COLOR="#B22222">-S</FONT> </B>Specify TSDIS site name. It is
+case insensitive. See file, <I><TT>$GVS_DATA_PATH/gv_radar_site_info.data</TT></I>,
+for a list of sites. Default: Will obtain from the UF file.
+
+<P><B><FONT COLOR="#B22222">-d <I><TT>YYMMDD</TT></I></FONT>: </B>Date
+of radar data. Default is the date string from 1C-51_product (<I><TT>*&lt;YYMMDD>*</TT></I>).
+
+<P><B><FONT COLOR="#B22222">-H</FONT></B> Specify horizontal resolution
+in km (2.0 or 4.0). Default: 2.0.
+
+<P><B><FONT COLOR="#B22222">-s <I><TT>sprint_input_template</TT></I></FONT>:
+</B>File contains SPRINT commands. Default is set to '<I><TT>$GVS_DATA_PATH/sprint_base_scan.inp</TT></I>'
+or '<I><TT>/usr/local/trmm/data/sprint_base_scan.inp</TT></I>' when <I><TT>$GVS_DATA_PATH</TT></I>
+= ""). See option <I><TT>-s</TT></I> of <B><A HREF="uf2mudras.html">uf2mudras</A></B>
+for detail on creating your own template.
+
+<P><B><FONT COLOR="#B22222">-l <I><TT>result_log_filename</TT></I></FONT>:</B>
+Log file produced by 2A54 (default = "<I><TT>logfile</TT></I>").
+
+<P><B><FONT COLOR="#B22222">-D <I><TT>output_dir</TT></I></FONT>:</B> Directory
+for the result file(s) (default = "<I><TT>./</TT></I>"). Note: If 2A-54_product
+name includes path, then output_dir will not be used.
+
+<P><B><FONT COLOR="#B22222">-m</FONT></B> Specify filename for metadata
+file. Default: <I>$GVS_DATA_PATH</I>/2A54_metadata.txt.
+<H3>
+
+<HR></H3>
+
+<H3>
+<FONT COLOR="#000080">Input Files</FONT></H3>
+
+<OL>
+<LI>
+<FONT COLOR="#B22222">qc_uf_file</FONT> - Quality controlled reflectivity
+for a single VOS in Universal Format (1C-51 product). It must follows the
+following naming convention in order to use default date value: <I><TT>*&lt;yymmdd>*</TT></I>.</LI>
+
+<LI>
+<FONT COLOR="#B22222">qc_ghdf_file</FONT> - Quality controlled reflectivity
+for one hour-granule in Hierarchical Data Format (HDF) (1C-51 products).
+It must follows the following naming convention in order to use default
+date value: <I><TT>*&lt;yymmdd>*</TT></I>.</LI>
+
+<LI>
+<FONT COLOR="#B22222">sprint_base_scan.inp</FONT> (default for sprint_input_template).</LI>
+
+<LI>
+<FONT COLOR="#000000"><I>$GVS_DATA_PATH</I>/gv_radar_site_info.data -This
+is not specified on the command line (Note: Check and modify the DARW entry
+if necessary when data is from Darwin).</FONT></LI>
+</OL>
+
+<HR>
+<H3>
+<FONT COLOR="#000080">Temporary Files</FONT></H3>
+The following files are created and removed upon completion.
+<UL>2A-54_&lt;<I>process_id</I>>/</UL>
+
+<HR>
+<H3>
+<FONT COLOR="#000080">Output Files</FONT></H3>
+
+<OL>
+<LI>
+<FONT COLOR="#B22222">csmap_shdf_file</FONT> - Convective/stratiform map
+for a single VOS in HDF file. Map is 151x151 cartesian grid with the radar
+located at center of grid box at location (76,76). The entries are unitless
+as followed: 0 -> no echo; 1 -> stratiform; 2 -> convective; -99 -> missing/bad
+data.&nbsp; No echo means the pixel from the basescan has missing value.
+Missing/bad means the distance of the pixel is less than 13 or greater
+150.</LI>
+
+<LI>
+logfile (if '<I><TT>-l</TT></I>' was specified).</LI>
+
+<LI>
+<FONT COLOR="#B22222">csmap_ghdf_file</FONT> - Convective/stratiform map
+for one hour-granule in HDF file.</LI>
+</OL>
+
+<H3>
+
+<HR><FONT COLOR="#000080">Return value</FONT></H3>
+<B><FONT COLOR="#B22222">2A-54</FONT></B> returns 0 upon successful completion;
+1 upon successful processing for some VOSs of granule; non-zero, otherwise.
+
+<P><B><FONT COLOR="#B22222">singlevos_2A-54</FONT></B> returns 0 upon successful
+completion; -2 upon interruption; -1 upon failure.
+
+<P>
+<HR>
+<H3>
+<FONT COLOR="#000080">Author</FONT></H3>
+Matthias Steiner et al., <I><TT>University of Washington</TT></I>.
+</BODY>
+</HTML>

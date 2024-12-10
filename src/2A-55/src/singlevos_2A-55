@@ -1,0 +1,371 @@
+#! /usr/bin/perl
+#-*-Perl-*-
+#
+# This script is the front end of Matthias Steiner's algorithm program,
+# '2A55'.  It produces 2A-55 product in HDF.  The HDF file format
+# is specified in ICS Volume 4 (A TSDIS document).  The HDF file includes
+# the three-Dementional reflectivity (Cube), Vertical profile,
+# and CFAD's.  
+#
+# This script takes in 1C-51 product (in Universal Format) with options, if
+# any.  It calls 'uf2mudras' to interpolate the entire volume and calls
+# '2A-54_hdf2ascii' to convert csmap hdf file to ascii file before it 
+# executes '2A55'.
+#
+# Note: if 2A-55_product_prefix includes path, then output_dir will not be used
+#
+# It returns 0 upon successful completion; -2 upon interruption;
+# non-zero, otherwise.
+#
+# Requirement:
+#   - Have access to 'sprint', '2A55', '2A-54_hdf2ascii', and 'uf2mudras'.
+#
+#   - Have sprint input template, 'sprint_entire_volume.inp', installed under 
+#     $GVS_DATA_PATH if you  don't want to specify '-s sprint_input_template'.
+#
+#   - Install the provided data files from './data' in $GVS_DATA_PATH or
+#     specify a different data pathname using option -p
+#
+#   Note: If $GVS_DATA_PATH = "", it is set to '/usr/local/trmm/data'.
+#
+# See 2A-55.html via netscape or Mosaic for more information.
+#
+#
+# By:    Thuy Nguyen
+#        NASA/TRMM Office
+#        Thuy.Nguyen@gsfc.nasa.gov
+#        January 31, 1996
+#
+###########################################################################
+$PROG_VERSION = "gvs-v4.21";
+unshift (@INC, ".", "/usr/local/trmm/GVBOX/bin");
+
+do 'gv_utilities.pl';
+$product = $this_prog;
+
+sub usage {
+	print STDERR "Usage ($PROG_VERSION): \n";
+	print STDERR "   $product \n";
+	print STDERR "\t[-v] \n";
+	print STDERR "\t[-S site_name] [-s sprint_cmd_script]\n ";
+	print STDERR "\t[-g geographical_mask_filename]\n";
+	print STDERR "\t[-H horizontal_resolution] [-V vertical_resolution]\n";
+	print STDERR "\t[-d YYMMDD] [-l result_log_file] [-p data_path]\n";
+	print STDERR "\t[-D output_dir] [-M save_mudras_fname]\n";
+	print STDERR "\t[-m metadata_fname]\n";
+	print STDERR "\tuffile [csmap_shdf_file] output_shdf\n";
+
+    print STDERR "  where,\n";
+	print STDERR "   -v  Print verbose message of program execution.\n";
+	print STDERR "   -S  Specify TSDIS site name. It is case insensitive. See file,\n",
+                 "       '\$GVS_DATA_PATH/gv_radar_site_info.data', for a \n",
+	             "       list of sites.  Default:  Will obtain from the UF file.\n";
+
+	print STDERR "   -s  Specify sprint script file. See uf2mudras.html for detail. \n",
+	"       Default: \$GVS_DATA_PATH/sprint_entire_volume.inp.\n";
+	print STDERR "   -g  Specify geographical mask filename. Default: \n";
+    print STDERR "       \$GVS_DATA_PATH/\<GV_site\>_landsea_new.map.bin\n",
+	             "       \$GVS_DATA_PATH/melb_landsea_new.map.bin (for other sites).\n";
+	print STDERR "   -H  Specify horizontal resolution in km. Default: 2.0.\n";
+	print STDERR "   -V  Specify vertical resolution in km. Default: 1.5.\n";
+	print STDERR "   -d  Specify date of the uf file. Default: date from uf filename (*.yymmdd.*) \n";
+	print STDERR "   -l  Specify result log filename to be saved (Default: logfile).\n";
+	print STDERR "   -p  Specify pathname of the data files. Default: \$GVS_DATA_PATH \n",
+                 "       or '/usr/local/trmm/data' when \$GVS_DATA_PATH = \"\"\n";
+	print STDERR "   -D  Specify directory to keep the result file(s). (Default=\"./\"). \n";
+	print STDERR "   -M  Specify filename for the mudras file if you want to keep it. \n",
+	             "       By default, the mudras file will be removed upon completion. \n";
+
+	print STDERR "   -m  Specify filename for metadata file. Default: \$GVS_DATA_PATH/2A55_metadata.txt\n";
+	print STDERR "   Note: if [csmap_shdf_file] is not passed as a command-line argument\n";
+        print STDERR "   a 2A55_shdf file is created containing only 3d reflectivity \n";
+	print STDERR "   and no CFAD or VPROF\n"; 
+ 	exit (-1);
+}
+
+if ($#ARGV < 1) {
+	do usage();
+}
+# set default values 
+$verbose = 0;
+$output_dir = "./";
+$options_end = 0;
+$result_log = 0;
+$site = ""; # 
+
+$sprint_options = "";
+$date_str = "";
+$keep_mudras_file = 0;
+$prog_options = "";
+$vertical_res = "1.5";    # resolution in km
+$horizontal_res = "2.0";  # resolution in km
+$geo_mask_file = "";
+
+# default datapath is $GVS_DATA_PATH
+$data_path = $ENV{'GVS_DATA_PATH'};
+if ($data_path eq "") { # Pick a nice default.
+    $data_path = "/usr/local/trmm/data";
+	$ENV{'GVS_DATA_PATH'} = $data_path;
+}							# 
+
+# default TSDISTK is /usr/local/toolkit_2.5
+$tsdistk_path = $ENV{'TSDISTK'};
+if ($tsdistk_path eq "") { # Pick a nice default.
+    $tsdistk_path = "/usr/local/toolkit";
+	$ENV{'TSDISTK'} = $tsdistk_path;
+}
+
+$sprint_input = "$data_path/sprint_entire_volume.inp";
+
+# process arguments
+while (@ARGV && $options_end == 0) {
+	$str = shift ARGV;
+
+	if ($str eq "-S") {
+		$site = shift;
+		if ($site =~ /^\-/) {
+			do usage();
+		}
+	}
+	elsif ($str eq "-l") {
+		$result_log_file = shift;
+		if ($result_log_file =~ /^\-/) {
+			do usage();
+		}
+		$result_log = 1;
+	}
+	elsif ($str eq "-v") {
+		$verbose = 1;
+		$sprint_options = $sprint_options." -v";
+		$prog_options = "$prog_options $str";	
+	}
+	elsif ($str eq "-s") {
+		$str = shift;
+		if ($str =~ /^\-/) {
+			do usage();
+		}
+		$sprint_input = $str;
+	}
+	elsif ($str eq "-D") {
+		$output_dir = shift;
+		if ($output_dir =~ /^\-/) {
+			do usage();
+		}
+	}
+	elsif ($str eq "-H") {
+		$horizontal_res = shift;
+		if ($horizontal_res =~ /^\-/) {
+			do usage();
+		}
+	}
+	elsif ($str eq "-V") {
+		$vertical_res = shift;
+		if ($vertical_res =~ /^\-/) {
+			do usage();
+		}
+	}
+	elsif ($str eq "-g") {
+		$geo_mask_file = shift;
+		if ($geo_mask_file =~ /^\-/) {
+			do usage();
+		}
+	}
+	elsif ($str eq "-p") {
+		$data_path = shift;
+		if ($data_path =~ /^\-/) {
+			do usage();
+		}
+	}
+	elsif ($str eq "-M") {
+		$keep_mudras_fname = shift;
+		if ($keep_mudras_fname =~ /^\-/) {
+			do usage();
+		}
+		$keep_mudras_file = 1;
+	}
+	elsif ($str eq "-d") {
+		$date_str = shift;
+		if ($date_str =~ /^\-/) {
+			do usage();
+		}
+		($yr, $mon, $day) = $date_str =~ /(\d\d)(\d\d)(\d\d)/;	
+		if ($mon eq "") {
+			do usage();
+		}
+		$sprint_options = "$sprint_options -d $yr$mon$day";	# 
+	}
+	elsif ($str eq "-m") {
+		local($str2) = shift;
+		if ($str2 =~ /^\-/) {
+			do usage();
+		}
+		$prog_options = "$prog_options $str $str2";	
+	}
+	else {
+		$options_end = 1;
+	}
+}
+
+if ($#ARGV > 1 || $str =~ /^\-/) {
+    do usage();
+}
+
+# extract input filename
+$uf_file = $str;  # 1C-51 product
+if ($#ARGV == 1) {  
+    $csmap_file = shift;  # 2A-54 product
+    $use_csmap = 1;
+}
+else { # if there is only one arg left, assume it isn't the csmap
+    $use_csmap = 0;
+}
+
+$out_hdf    = shift;  # Output HDF filename name.
+$out_hdf    = $output_dir. "/" . $out_hdf 
+	if ($output_dir ne "" && $out_hdf !~ /^\//);
+$sprint_options = $sprint_options." -s ".$sprint_input;
+
+$site = &get_site_name_from_uf_file($uf_file) if ($site eq "");
+$site =~ y/A-Z/a-z/;    # Convert to lowercase.
+
+$sprint_options = $sprint_options." -S ".$site;
+
+# Get land sea map for site.
+$geo_mask_file = $data_path."/".$site."_landsea_new.map.bin" 
+	if ($geo_mask_file eq "");
+if (!(-e $geo_mask_file)) {
+	$geo_mask_file = "$data_path/melb_landsea_new.map.bin";
+	print STDERR "$product: WARNING: Using geo_map <$geo_mask_file> for site <$site>.\n";
+}
+
+if ($verbose == 1) {
+	if ($result_log == 1) {
+		print STDERR "$product: result_log_file = $result_log_file\n";
+	}
+	print STDERR "$product: which program: $0\n"; 
+	print STDERR "$product: output_dir = $output_dir\n";
+	print STDERR "$product: site = $site\n";
+	print STDERR "$product: data_path = $data_path\n";
+	print STDERR "$product: horizontal res = $horizontal_res\n";
+	print STDERR "$product: vertical res = $vertical_res\n";
+	print STDERR "$product: geo_mask_file = $geo_mask_file\n";
+}
+
+# interpolate infile (UF file) into MUDRAS file
+
+$MUD_file = "mudras.pure";
+
+$cmd = "uf2mudras -H $horizontal_res -V $vertical_res $sprint_options $uf_file $MUD_file";
+if ($verbose == 1) {
+	print STDERR "$product: Executing: $cmd\n";
+}
+system ($cmd);
+$stat = $? >>8; # get exit code
+local($sig) = $? & 255;
+do doexit_handler($sig) if ($sig != 0);
+do doexit_handler('INT') if ($stat == -2 || $stat == 254);
+# note 255 is checked also -- pc uses unsigned char
+if ($stat == -1 || $stat == 255) {
+	if ($verbose == 1) {
+		print STDERR "$product: ERROR: Failed executing 'uf2mudras'. \n";
+		exit(-1);
+	}
+}
+elsif ($stat == 1) {
+	print STDERR "$product: WARNING: No product created.\n";
+	exit(1);
+}
+
+if ($use_csmap) {
+# Convert csmap in hdf file to ascii file
+    $prog = "2A-54_hdf2ascii";
+    $csmap_ascii_file = "csmap.ascii.tmp";
+    $cmd = "$prog $csmap_file $csmap_ascii_file";
+    if ($verbose == 1) {
+	print STDERR "$product: Executing $prog ...\n";
+    }
+    system($cmd);
+    $stat = $? >> 8;								# 
+    local($sig) = $? & 255;
+    do doexit_handler($sig) if ($sig != 0);
+    if ($stat != 0) {
+	do doexit_handler('INT') if ($stat == -2 || $stat == 254);
+	print STDERR "$product: ERROR: Failed executing $prog. Bye.\n";
+	exit(-1);
+    }
+}
+
+#
+# call the actual program
+$prog = "2A55";
+if($use_csmap) {
+    $cmd = "$prog $prog_options $MUD_file $csmap_ascii_file $geo_mask_file $site $out_hdf";
+}
+else {
+    $cmd = "$prog $prog_options $MUD_file $geo_mask_file $site $out_hdf";
+}
+if ($verbose) {
+	print STDERR "$product: Executing: $cmd\n";
+}
+system ($cmd);
+
+$stat = $? >> 8; # get exit code
+local($sig) = $? & 255;
+do doexit_handler($sig) if ($sig != 0);
+# remove csmap ascii file
+if ($use_csmap) {
+    system("rm $csmap_ascii_file");
+}
+if ($keep_mudras_file == 0) {
+	system("rm $MUD_file");
+} 
+else {
+	system("mv $MUD_file $keep_mudras_fname");
+}
+
+if ($stat != 0) {
+	do doexit_handler('INT') if ($stat == -2 || $stat == 254);
+	print STDERR "$product: ERROR: Failed executing $prog. Bye.\n";
+	exit(-1);
+}
+
+if ($result_log == 0) {
+		unlink "logfile";
+}
+else {
+	system("mv logfile $result_log_file");
+}
+
+if ($verbose) {
+	print STDERR "$product: Successful!\n";
+}
+exit(0);
+
+
+############################## Subroutines Section #######################
+
+
+sub cleanup {
+	unlink ($MUD_file)	if -e $MUD_file;
+	unlink "logfile" if -e "logfile";
+	unlink $csmap_ascii_file if -e $csmap_ascii_file;
+}
+
+sub doexit_handler {
+	# This routine was called when interrupt occurred.
+	# Clean up and exit.
+	local($signal) = @_;
+
+	# Restore STDERR and STDOUT.  This is required since both stderr and stdout
+    # were redirected in the calling program, all_tape_level_1n2.
+	close(1);
+	close(2);
+	open(STDOUT, ">/dev/tty");
+	open(STDERR, ">/dev/tty");
+	$| = 1;
+	do cleanup();
+	print STDERR "$product: Got signal <$signal>. Abort execution. \n";
+	kill $signal, 0;
+	exit(-2) if ($signal == 'KILL' || $signal == 'STOP' || $signal == 'INT');
+	exit(-1);
+}

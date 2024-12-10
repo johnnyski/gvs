@@ -1,0 +1,53 @@
+Check list for 2A-53 distribution:
+
+o cvs update
+
+o cvs commit
+
+o make clean
+
+o make
+
+o make clean
+
+o rcp -r 2A-53 echo (or ftp  ame; mput *):
+
+o On echo or ame:
+
+  - emacs makefile (change path & compiler)
+
+  - make clean
+
+  - make
+
+  - 2A-53 -v ref_melb_070193_1957.uf conv_strat.map out.f
+
+  - ls -l (check files' size)
+
+(does it look alright?)
+
+If everything looks cool, then, on radar, do:
+
+	o cvs tag v1_0
+
+    o cd ~/builds
+
+	o cvs export -d gvs-v1.0 -r v1_0 gvs
+
+	o make 
+
+	o 2A-53 -v ~/trmm/gvs/src/2A-53/ref_melb_070193_1957.uf ~/trmm/gvs/src/2A-53/conv_strat.map out.f
+
+	o ls -l (check files' size)
+
+	If everything still looks okay, then
+
+	o make clean
+
+	o rm out.f
+
+	o cd ..
+
+	o gtar zcf 2A-53-v1.0.tgz 2A-53
+
+	o rcp 2A-53-v1.0.tgz trmm:/PUBLIC/ftp/pub/software

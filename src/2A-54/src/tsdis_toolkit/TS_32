@@ -1,0 +1,32 @@
+TSDIS,2A54,32
+32000,W_2A54_BAD_USAGE,NULL,2A-54: Improper usage.
+32001,W_2A54_ABORT_EXEC,NULL,2A-54: Abort execution--interrupted signal received..
+32002,W_2A54_STOP_ON_ERROR,NULL,2A-54: Stop execution--non-interrupted signal received.
+32003,W_2A54_INVALID_SITE,NULL,2A-54: Invalid site.
+32004,W_2A54_OPEN_MUDRAS_FILE_FAILED,NULL,2A-54: Open mudras file failed.
+32005,W_2A54_DOCS_FAILED,NULL,2A-54: Do csmap failed.
+32006,W_2A54_CSMAP2HDF_FAILED,NULL,2A-54: Failed to write csmap to hdf file.
+32007,W_2A54_OPEN_THRESHOLD_FILE_FAILED,NULL,2A-54: Error: Cannot open threshold file.
+32008,W_2A54_OPEN_CFAD_ASCII_OFILE_FAILED,NULL,2A-54: Error opening CFAD ASCII output file.
+32009,W_2A54_OPEN_CFAD_ASCII_IFILE_FAILED,NULL,2A-54: Error opening CFAD ASCII input file.
+32010,W_2A54_OPEN_CFADRANGE_OFILE_FAILED,NULL,2A-54: Sorry, can't open range-dependant CFAD output file.
+32011,W_2A54_OPEN_GEN_OFILE_FAILED,NULL,2A-54: Sorry, can't open general output file.
+32012,W_2A54_BAD_USAGE2,NULL,2A-54: Improper usage for volume class.
+32013,W_2A54_OPEN_VALIDRANGE_IFILE_FAILED,NULL,2A-54: Sorry, can't open input valid data range file.
+32014,W_2A54_INVALID_FORMAT_VALIDRANGE_IFILE,NULL,2A-54: Problem with valid data range file.
+32015,W_2A54_OPEN_ZRTRAN_IFILE_FAILED,NULL,2A-54: Sorry, can't open input Z-R conversion information file.
+32016,W_2A54_GRID_DIM_TOO_BIG,NULL,2A-54: Grid dimensions too big!
+32017,W_2A54_INVALID_ANAL_LEVEL,NULL,2A-54: Invalid analysis level: must be 0 <= level.
+32018,W_2A54_INVALID_MAXTYPE_LEVEL,NULL,2A-54: Invalid maxtype: must be either 0 or 1!
+32019,W_2A54_INVALID_FORMAT_ZRTRAN_IFILE,NULL,2A-54: Problem with Z-R conversion file.
+32020,W_2A54_INVALID_ZRTRAN_TYPE,NULL,2A-54: Invalid type of Z-R conversion!
+32021,W_2A54_INVALID_RADAR_EST_GS,NULL,2A-54: Invalid determination of radar estimates at gauge sites!
+32022,W_2A54_NO_CONV_STRAT_SEP_ALG,NULL,2A-54: Error: No convective/stratiform separation algorithm.
+32023,W_2A54_NO_CONV_STRAT_GRID_ALG,NULL,2A-54: No convective/stratiform algorithm for grid resolution.
+32024,W_2A54_INTERNAL_ALG_FAILED,NULL,2A-54: Internal algorithm failure.
+32025,W_2A54_NEGATIVE_BG_COUNT,NULL,2A-54: bg_count<=0.
+32026,W_2A54_CANT_OPEN_RAINGUAGE,NULL,2A-54: Sorry, can't open input raingauge file.
+32027,W_2A54_INVALID_GEOG_MASK_DIM,NULL,2A-54: Geographical mask dimensions are not correct!
+32028,W_2A54_CANT_OPEN_GEOG_MAP,NULL,2A-54: Sorry, can't open input geographical map.
+32029,W_2A54_INVALID_GEOG_MAP_FORMAT,NULL,2A-54: Problem with geographical map file!
+32030,W_2A54_GEOG_MASK_WRONG,NULL,2A-54: Something is wrong with the geographical mask!

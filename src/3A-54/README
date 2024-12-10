@@ -1,0 +1,47 @@
+README for 3A-54: v1.3 (12/10/99) packaged w/ GVS v4.14.
+
+
+3A-54 has the following executable, documentation, and data files:
+    * 3A-54 - The perl script, the front end to actual algorithm program.
+	          This produces product (monthly rainfall map).
+	* 3A-54.html        - Documentation.
+	* 3A54_metadata.txt - Data file.
+
+
+              ------------------------------------------
+
+(a) Documentation is located in *.html and can be viewed with netscape 
+    or mosaic.
+
+(b) The directories which you have installed the executable files for 
+     this product and the required software should be in your search path.
+
+
+
+
+EXECUTION NOTES:
+================
+The program will exit if the specified year or month is not correspondent
+to the date from the input filename.
+
+
+QUESTIONS:
+=========
+
+Please contact the TRMM Office help via e-mail at help@trmm.gsfc.nasa.gov.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

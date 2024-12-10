@@ -1,0 +1,76 @@
+README for level_1: v1.19 (2/1/00) initially packaged w/ GVS v4.16.
+============
+
+
+level_1 uses the algorithm developed jointly by Daniel Rosenfeld and 
+David Wolff.  This package contains the following executable files,
+documentation, and data files:
+
+    Executable files:
+    ----------------
+	* level_1-- This program produces 1C-51 and 1B-51 products by default.
+                (It is created by the makefile). 
+
+    Documentation:
+    -------------
+	* level_1.html	 -- documentation.
+
+    Data files:
+    -----------
+    qc_params_* - Files contain qc parameters for specific sites.
+
+
+              ------------------------------------------
+
+(a) Documentation is located in *.html and can be viewed with netscape 
+    or mosaic.
+
+(b) The directories which you have installed the executable files for 
+     this product should be in your search path.
+
+
+
+
+EXECUTION NOTES:
+================
+
+1. Set enviroment variables: $GVS_DATA_PATH and $TSDISTK.
+
+2. See section Known bugs/problems for known bugs/problems.
+
+
+KNOWN BUGS/PROBLEMS:
+====================
+
+1. Level_1 is unable to process Berrimah data that is in RAPIC format.
+   The reason is simple to explain but hard to implement.  Azimuth
+   angles of one field type are shifted in other field types.
+   This makes alignment of a field type for a particular ray problematic.
+   Additionally, upper level sweeps are similarly misaligned.  The 
+   current implementation of the TSDIS toolkit requires that the
+   rays be properly aligned across all field types and all sweeps.
+
+
+
+QUESTIONS:
+=========
+
+Please contact TRMM Office help via e-mail at help@trmm.gsfc.nasa.gov.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

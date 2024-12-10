@@ -1,0 +1,79 @@
+C       Sprint Script for Base scan Interpolation
+C       TRMM - MMM DD, YYYY
+C  
+* Further documentation for sprint and the complete format of this
+* file can be found in the GVS documentation.
+*
+C  NOTES on the format of this file:
+C    1. Comments in this file must be 'C  ', NOTE THE TWO SPACES
+C       following the C, or '*' in column one (1).
+C    2. NO BLANK LINES please, but, blank comment are ok.
+C    3. Each field, be it character or number is 8 ascii characters wide.
+C
+*
+* This is the format of sprint directives (commands) used.
+* All directives must start in column 1 and be uppercase.
+* Each field, and the options for the directive, including the directive,
+* is 8 characters wide.  Except for INPUT:rewindstr, that field is one
+* character wide.
+* 
+*
+* The '<' and '>' delimit a field, but, are not part of the format of the
+* file.  They are present only to show the layout of the fields in this
+* description.  And, spaces are for readability only.  The first entry in
+* the angle brackets represents the logical name of the option.  The second
+* entry indicates the datatype and length in ascii bytes.
+*
+* When a field is missing, only spaces exist to fill the gap.
+* '\' means continued on next line and is not part of the file format.  It 
+* is only provided here for readibility.  All sprint directives (commands)
+* are completely contained on one line of this file.
+*
+* INPUT <unit# f8.0> <tapename a8> <#skip f8.0> <#experiment f8.0> \
+*       <radar# f8.0> <rewindstr a1> <xrad f8.0> <yrad f8.0> <zrad f8.0>
+*
+* GRIDPPI <x1 f8.0> <x2 f8.0> <y1 f8.0> <y2 f8.0> <xyd f8.0> \
+*         <z1 f8.0> <z2 f8.0> <zd f8.0> <angxax f8.0>
+* Where:
+C   X1        STARTING X                    P2    IN KM
+C   X2        ENDING X                      P3    IN KM
+C   Y1        STARTING Y                    P4    IN KM
+C   Y2        ENDING Y                      P5    IN KM
+C   XYD       DELTA(SPACING)FOR X ! Y AXES  P6    IN KM
+C   Z1        STARTING Z OR COPLANE ANGLE   P7    IN (KM + MSL)
+C   Z2        ENDING Z OR COPLANE ANGLE     P8    IN (KM + MSL)
+C   ZD        DELTA (SPACING) FOR 3RD CRD.  P9    IN KM
+C   ANGXAX    ANGLE OF X-AXIS,              P10   IN DEG,
+C                CLOCKWISE FROM NORTH                ROTATED ABOUT THE
+C                                                    LOWER LEFT CORNER
+C                                                    OF THE CARTESIAN
+C                                                    COORDINATE SYSTEM
+C
+* INTERP (I hope you get the idea.)
+*
+* Special GVS processing:
+*     The program 'uf2mudras', a perl program, makes the following
+*     substitutions in this file:
+*
+*     RADAR_NUM      is replaced by the radar number for experiment 24.
+*                    The radar number is hard coded in sprint.  This
+*                    number must match the radar number in the file
+*                    /usr/local/trmm/GVBOX/data/gv_radar_site_info.data.
+*     YYMMDD         is replaced with the date of the data.
+*     VERTICAL_RES   is replaced by the vertical resolution. Default 1km.
+*     HORIZONTAL_RES is replaced by the horizontal resolution. Default 1km.
+C
+C  1---12------23------34------45------56------67------78------89------90------0
+GRIDPPI -150.0  150.0   -150.0  150.0   HORIZONTAL_RES
+INPUT   10                      24      RADAR_NUM
+INTERP  BI-LIN  2       1       2
+C        DZ      LINEAR
+        CZ      LINEAR
+END
+RADAR   UF                      SUNFOR
+FXTABLE ACCEPT
+        1
+END
+OUTPUT  11              BEG                     STEINER TRMM    PUR
+PROCESS YYMMDD.                         FIXED   0.2                     FXTABLE
+QUIT

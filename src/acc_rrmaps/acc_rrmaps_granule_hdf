@@ -1,0 +1,782 @@
+#! /usr/bin/perl
+#-*-Perl-*-
+#
+# 
+#     Accumulate site rainfall map using granule HDF 2A-53 file as input. 
+#     The flag [BEGIN|MIDDLE|END] indicates whether to create the product 
+#     (either 3A-53 or 3A-54) in HDF format and/or to store the intermediate 
+#     product in ascii files.
+#
+#     If the specified flag is END, it will create the HDF file and the 
+#     ascii file that contains the dates and times of all VOSes included in the
+#     calculation.  When creating the HDF product, it will use some of the 
+#     metadata values from the input granule HDF file. Note: If either flag
+#     BEGIN or MIDDLE is specified, no HDF file nor vos_times_ASCII_oufile
+#     will be created.
+#
+#     If the specified flag is BEGIN, it will create the two intermediate 
+#     ascii files: one contains the time of the last VOS and the list of 
+#     times for all VOSes included in the accumulation, the second file 
+#     contains the accumulated rainfall map.
+#
+#     If the specified flag is either MIDDLE or END, the two intermediate ascii
+#     files will be modified.
+#
+#     Note: Go to Algorithm highlight for detail info on accumulation.
+#     
+#
+#  Program's exit code:
+#          -1 Failed.
+#           0 Successful.
+#           1 Warning occured -- accumulation of at least one map failed.
+#          -2 Program was aborted by SIGINT (^C).
+#     
+# Requires:
+#      acc_rrmaps_single_vos_ascii
+#      level_2_ghdf_to_singlevos_ascii
+#      create_level_3_rrmap_hdf
+#      get_info_from_file
+#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+# By: Thuy Nguyen
+#     Science Systems and Applications, Inc. (SSAI)
+#     NASA/TRMM Office
+#     August 21, 1997
+#
+##############################################################################
+############################################################################
+
+############################# Main Routine #################################
+$PROG_VERSION = "gvs-v4.21";
+unshift (@INC, ".", "/usr/local/trmm/GVBOX/bin");
+do 'gv_utilities.pl';
+
+$verbose = 0;
+$data_path =  $ENV{'GVS_DATA_PATH'};
+if ($data_path eq "") {
+	$data_path = "/usr/local/trmm/GVBOX/data";  # Default
+}
+$metadata_file = "$data_path/3A53_metadata.txt";
+
+$prod = "3A-53";    # Default.
+do process_argvs(*ARGV, *infile, *metadata_file, *prod, *vos_times_outfile,
+		 *hdf_outfile, *int_acc_map_file,
+		 *inter_admin_info_file, *period_flag, *year, *pentad_or_month,
+		 *max_time_gap, *const_time_gap);
+
+if ($verbose) {
+	print STDERR "$this_prog: infile:                $infile\n";
+	print STDERR "$this_prog: metadata_file:         $metadata_file\n";
+	print STDERR "$this_prog: vos_times_outfile:     $vos_times_outfile\n";
+	print STDERR "$this_prog: hdf_outfile:           $hdf_outfile\n";
+	print STDERR "$this_prog: int_acc_map_file:      $int_acc_map_file\n";
+	print STDERR "$this_prog: inter_admin_info_file: $inter_admin_info_file\n";
+	print STDERR "$this_prog: period_flag:           $period_flag\n";
+	print STDERR "$this_prog: year:                  $year\n";
+	print STDERR "$this_prog: pentad_or_month:       $pentad_or_month\n";
+	print STDERR "$this_prog: max_time_gap:          $max_time_gap\n";
+	print STDERR "$this_prog: const_time_gap:        $const_time_gap\n";
+	print STDERR "$this_prog: product:               $prod\n";
+}
+
+$dirname = `dirname $vos_times_outfile`;
+chomp $dirname;
+$inter_timegap_file = $dirname . "/time_gap_params.txt";
+
+# Validate input files, flag, year, and month. Exit if error occurs.
+do validate_user_inputs();
+
+
+$warning = 0;
+# Algorithm highlight:
+#    1. Convert granule HDF infile to single VOS ASCII file.
+#
+#    2. Keep date and time of each map (VOS) INCLUDED in the accumulation
+#       in a string list separated by space.
+#
+#    3. Accumulate the maps by calling 'acc_rrmaps_single_vos_ascii' with
+#       the correct multifactor (time gap in min/60) for each ASCII 2A53 map.
+#       The accumulated maps are added together which is part of 3A-53 or 
+#       3A-54 product.
+#       Determine whether to create the HDF file and the time file:
+#       - If period_type = BEGIN then write the result map
+#         to inter_acc_map_file.
+#       - else if period_type = MIDDLE then 
+#         add the result map to the map in inter_acc_map_file.
+#       - else if period_type = END then 
+#         add the result map to the map in inter_acc_map_file.
+#         Create 3A-53 or 3A-54 product in HDF format using the map
+#         in inter_acc_map_file and vos_times_outfile which contains a list 
+#         of dates and times of all VOSes included in the product.
+#
+#    4. Remove the ASCII files.
+#
+#    5. Create or modify inter_admin_info_file -- List the date/time of the 
+#       last VOS on the first line, then the list(s) of dates/times of all 
+#       VOSes included in the accumulation. Note that each list of dates/times
+#       belong to the same hour granule (of 2A-53).
+#
+
+
+# Convert granule hdf to single VOS ascii files.
+
+$curr_dir = `pwd`;
+chop $curr_dir;    # Remove \r
+$tmp_dir = "$curr_dir/acc_rrmap_tmpdir".getppid."/";  # Store all the single vos hdf and ascii files
+# Create dir
+system("mkdir -p $tmp_dir");
+
+print STDERR "$this_prog: Degranulizing hdf to single vos ascii files...\n" 
+	if ($verbose);
+if (&rrmap_granule_hdf_to_singlevos_ascii($infile, $tmp_dir,
+					  *vos_ascii_fnames) < 0) {
+	if ($verbose) {
+		print STDERR "$this_prog: Error: Failed converting granule HDF file <$infile> to ascii files.\n";
+	}
+	exit($SEVERE_ERROR_CODE);
+}
+
+# Sort ascii fnames.  These names contain no pathname.
+@vos_ascii_fnames = sort(@vos_ascii_fnames);
+
+if ($verbose) {
+	print STDERR "$this_prog: Reading last_vos_time_secs from file: $inter_admin_info_file\n";
+}
+
+# Read time info from the inter_admin_info_file.
+# Read previous time gap parameters.
+if ($period_flag ne "BEGIN") {
+	open(INTER_ADMIN_INFO_FILE, "$inter_admin_info_file") || 
+	(print STDERR "$this_prog: Error: Can't open admin info file: $inter_admin_info_file\n" &&
+		exit($SEVERE_ERROR_CODE));
+	@admin_info_list = <INTER_ADMIN_INFO_FILE>;
+	close(INTER_ADMIN_INFO_FILE);
+	open(TIME_GAPS, "$inter_timegap_file");
+	$prev_timegaps = <TIME_GAPS>;
+	close(TIME_GAPS);
+	@prev_timegaps = split / /, $prev_timegaps;
+	if ($prev_timegaps[0] != $max_time_gap ||
+			$prev_timegaps[1] != $const_time_gap) {
+		print STDERR "$this_prog: Error: Time gap parameters have ",
+		"changed during accumulation\n";
+		print STDERR "Previous: $prev_timegaps[0], $prev_timegaps[1]\n";
+		print STDERR "Current:  $max_time_gap, $const_time_gap\n";
+		exit $SEVERE_ERROR_CODE;
+	}
+}
+
+
+# The format of inter_admin_info_file:
+#  <begin of file>
+#  last_processed_vos_time   << Last VOS -- it may not be included in the
+#                            << accumulation.
+#  vos_time1 vos_time2 ...   << list of times of
+#  ...                       << all VOSes included in the  
+#  selected_vos_time_list    << accumulation.  Time format: mm/dd/yyyy hh:mm:ss
+#  <end of file>
+# Note: this file may contain only the first line because of empty granule.
+#
+
+# Get the last vos time from the admin info file.
+$last_vos_time_secs = 0;  # Time in seconds
+if ($#admin_info_list >= 0) {
+	# get the first line.
+	local(@last_vos_line) = split(' ', $admin_info_list[0]);
+		
+	$last_vos_date_str = $last_vos_line[0];
+	$last_vos_time_str = $last_vos_line[1];
+	local($hr, $min, $sec) = $last_vos_time_str =~ /(\d+):(\d+):(\d+)/;
+	local($mon, $day, $yr) = $last_vos_date_str =~ /(\d+)\/(\d+)\/(\d\d+)/;
+	do construct_time($hr, $min, $sec, $mon, $day,
+			  $yr, *last_vos_date_str,
+			  *last_vos_time_str, *last_vos_time_secs);
+} 
+
+@selected_vos_time_list = ();
+
+# Save inter acc map filename; we will copy this file to the tmp_dir and
+# will work from there.  Will copy the new result file to the original name
+# when done.
+$save_int_acc_map_file = $int_acc_map_file;
+$int_acc_map_file = $tmp_dir."tmp_int_rr_map";
+
+if (-e $save_int_acc_map_file) {
+	# Copy the inter. acc. map to the tmp_dir where all the ascii rrmap
+	# files are located. 
+	system("cp $save_int_acc_map_file $int_acc_map_file");
+}
+else {
+	if ($verbose) {
+		print STDERR "$this_prog:Warning: Intermediate acc. map does not exist.\n";
+	}
+}
+if ($verbose) {
+	print STDERR "$this_prog: Accumulating each ASCII rrmap...\n";
+	print STDERR "$this_prog: Last vos time: $last_vos_time_secs\n";
+}
+
+
+# For each ascii map, do:
+#   1. Call 'acc_rrmaps_single_vos_ascii' with this map as input. If the time 
+#      gap is <= maximum value use the correct multifactor (time gap in min/60).
+#      If the gap is > maximum value, use a constant multifactor (constant time
+#      gap in min/60).
+#   2. Add the result map from the previous step to the intermediate acc map,
+#      $int_acc_map_file.
+# Copy the $int_acc_map_file to the $save_int_acc_map_file when done.
+#
+# 
+while (@vos_ascii_fnames) {
+	local($vos_ascii_fname) = shift @vos_ascii_fnames;
+	do get_time_from_singlevos_product_filename($vos_ascii_fname,
+						    *vos_date_str, *vos_time_str,
+						    *vos_time_secs);
+	# Select vos to accumulate if the timegap between vos and the previous
+	# vos is <= max_time_gap min >= 0.
+	local($diff_time) = $vos_time_secs - $last_vos_time_secs;
+	if ($diff_time <= ($max_time_gap * 60)) {
+		$time_gap = $diff_time;
+	}
+	else {
+		$time_gap = $const_time_gap * 60
+	}
+	if ($diff_time >= 0) {
+		# Accumulate this vos.  And add its date/time to 
+		# selected_vos_time_list.
+		$tmp_acc_map_file = $tmp_dir."acc_rrmap_resultmap".getppid;
+		print STDERR "$this_prog: accumulating map <$vos_ascii_fname>\n"
+			if ($verbose);
+		if (&accumulate_map($int_acc_map_file, $time_gap,
+				    $vos_ascii_fname, $tmp_dir, 
+				    $tmp_acc_map_file) < 0) {
+			# Failed accumulating map. Give warning, ignore this
+			# map, and continue.  Do not include its date/time in
+			# the selected_vos_time_list.
+			print STDERR "$this_prog: Warning: Failed accumulating map (by time diff) $vos_ascii_fname\n";
+			$warning = 1;
+			goto NEXT;
+		}
+		# Move tmp_acc_map_file to int_acc_map_file
+		system("mv $tmp_acc_map_file $int_acc_map_file");
+		push(@selected_vos_time_list, $vos_date_str, $vos_time_str);
+			 
+	}
+	else {
+		print STDERR "$this_prog:Warning: Skip VOS <$vos_ascii_fname>\n";
+	}
+  NEXT:
+	# Reset last vos time. 
+	$last_vos_time_secs = $vos_time_secs;
+	$last_vos_date_time_str = "$vos_date_str $vos_time_str";
+	# Remove the ascii file.
+	unlink ($tmp_dir.$vos_ascii_fname);
+}
+
+# Copy the working inter. acc. map to the user specified filename.
+system("cp $int_acc_map_file $save_int_acc_map_file") 
+	if (-e $int_acc_map_file);
+
+if ($last_vos_date_time_str eq "") {
+	# The input file is an empty granule file.
+	# Use the end date/time from that hdf file as last vos date/time.
+	local($cmd) = "get_info_from_file -e HDF 2A53 $infile|";
+	if ($verbose) {
+		print STDERR "$this_prog:Executing <$cmd>...\n";
+	}
+	open(INFO, $cmd) || (do clean_up() && exit($SEVERE_ERROR_CODE));
+	local($tmp_last_vos_date_time_str) = <INFO>;
+	($last_vos_date_time_str) = $tmp_last_vos_date_time_str =~ /(\d+.\d+.\d+ \d+.\d+.\d+)/;
+	close(INFO);
+	if ($last_vos_date_time_str eq "") {
+		do clean_up();
+		exit($SEVERE_ERROR_CODE);
+	}
+}
+
+do write_admin_info_to_file($last_vos_date_time_str, *selected_vos_time_list, 
+						   $inter_admin_info_file);
+
+open(TIME_GAPS, ">$inter_timegap_file");
+print TIME_GAPS "$max_time_gap $const_time_gap\n";
+close(TIME_GAPS);
+
+if ($period_flag eq "END") {
+	if ($verbose) {
+		print STDERR "$this_prog: Creating HDF file...\n";
+	}
+	# Create an HDF product upon encountering the END flag.
+	$rc = &create_hdf_product($infile, $save_int_acc_map_file, 
+				  $inter_admin_info_file, $prod,
+				  $metadata_file, $pentad_or_month, 
+				  $vos_times_outfile, $hdf_outfile);
+	if ($rc < 0) {
+		print STDERR "$this_prog: Failed to create HDF file.\n";
+		do clean_up();
+		exit($SEVERE_ERROR_CODE);
+	}
+}
+
+DONE:
+do clean_up();
+exit(1) if ($warning);
+
+printf STDERR "$this_prog: Successful.\n" if ($verbose);
+
+exit($SUCCESS_CODE);
+
+
+############################## Subroutines ##############################
+
+######################################################################
+#                                                                    #
+#                           process_argvs                            #
+#                                                                    #
+######################################################################
+sub process_argvs {
+	local(*argvs, *infile, *metadata_file, *prod, *vos_times_outfile,
+		  *hdf_outfile, *int_acc_map_file, *inter_admin_info_file,
+		  *period_flag, *year,
+		  *pentad_or_month, *max_time_gap, *const_time_gap) = @_;
+
+	if ($#argvs < 9) {
+		do usage();
+	}
+
+	while (@argvs) {
+		local($str) = shift @argvs;
+		if ($str =~ /^\-/) {
+			if ($str eq "-v") {
+				$verbose = 1; 
+				$verbose_opt = "-v";
+			}
+			elsif ($str eq "-m") {
+				$metadata_file = shift @argvs;
+				do usage() if ($metadata_file =~ /^\-/);
+			}
+			elsif ($str eq "-p") {
+				$prod = shift @argvs;
+				do usage() if ($prod =~ /^\-/);
+			}
+			else {
+				print STDERR "option $str is undefined\n";
+				do usage();
+			}
+		}
+		else {
+			unshift(argvs, $str);
+			last;
+		}
+    }
+	# must have 10 params listed 
+	do usage() if ($#argvs != 9);
+
+	$infile = shift @argvs;
+	$hdf_outfile = shift @argvs;
+	$vos_times_outfile = shift @argvs;
+	$int_acc_map_file = shift @argvs;
+	$inter_admin_info_file = shift @argvs;
+	$period_flag = shift @argvs;
+	$year = shift @argvs;
+	$pentad_or_month = shift @argvs;
+	$max_time_gap = shift @argvs;
+	$const_time_gap = shift @argvs;
+	
+} # process_argvs 
+
+
+######################################################################
+#                                                                    #
+#                            usage                                   #
+#                                                                    #
+######################################################################
+sub usage {
+  print STDERR "Accumulate Site Rainfall Maps in Granule HDF Format.\n";
+  print STDERR " Usage ($PROG_VERSION)\n";
+  print STDERR "   $this_prog [-v] [-m metadata_file] [-p {3A-53 | 3A-54}] \n",
+               "      2A-53_HDF_infile HDF_outfile vos_times_ASCII_outfile\n",
+               "      inter_acc_map_ASCII_InOut inter_admin_info_file_ASCII_InOut \n",
+               "      {BEGIN | MIDDLE | END} year {pentad | month} max_time_gap const_time_gap\n";
+  print STDERR "  where,\n",
+               "    -v: Print diagnostic messages.\n",
+               "    -m: Specify filename for metadata file. \n",
+               "        Default:\"\$GVS_DATA_PATH/3A53_metadata.txt\"\n",
+               "    -p: Specify product (3A-53 or 3A-54). Default: 3A-53.\n",
+               "\n",
+               "    2A-53_HDF_infile: Granule 2A-53 HDF file. Compression is allowed.\n",
+               "    HDF_outfile:      Filename for product in HDF format. This file \n",
+               "                      will only be created when the END flag is specified.\n",
+               "    vos_times_ASCII_outfile: Filename that will contain a list of dates and\n",
+               "                      times of all VOSes included in the product. This file\n",
+               "                      will only be created when the END flag is specified.\n",
+               "    inter_acc_map_ASCII_InOut: Filename for intermediate accumulated rain\n",
+               "                      map in ASCII format.  If the BEGIN flag is specified, this\n",
+               "                      file will be created.  If either the MIDDLE or END flag\n",
+               "                      is specified, this file will be used in the accumulation \n",
+               "                      calculation and will be updated with the new result. \n",
+               "    inter_admin_info_file_ASCII_InOut: Filename for admin. info. file in ASCII\n",
+               "                      format.  It contains info. required to build product.\n",
+	       "                      If the BEGIN flag is specified, this file will be \n",
+               "                      created.  If either the MIDDLE or END flag\n",
+               "                      is specified, this file will be used in the accumulation \n",
+               "                      calculation and will be updated.\n",
+               "    BEGIN|MIDDLE|END: Flag indicates whether this is the beginning, middle,\n",
+               "                      or end of the pentad or monthly period. HDF output file\n",
+               "                      and vos_times_outfile will be created if the flag is END.\n",
+               "    year:             Four digit year.\n",
+               "    pentad|month:     The number of the current pentad or month being processed.\n",
+               "                      Number starts at 1.\n",
+               "    max_time_gap:     Maximum time gap (minutes) allowed between VOSes for use\n",
+	       "                      of time difference factor.\n",
+               "    const_time_gap:   Constant time factor (minutes) to use if\n",
+	       "                      time gap > max_time_gap.\n",
+               "\n";
+                 
+  exit($SEVERE_ERROR_CODE);
+		  
+} 
+
+
+######################################################################
+#                                                                    #
+#                     rrmap_granule_hdf_to_singlevos_ascii           #
+#                                                                    #
+######################################################################
+sub rrmap_granule_hdf_to_singlevos_ascii {
+	local($hdf_fname, $outdir, *vos_ascii_fnames) = @_;
+
+	# Converts rain rate maps granule HDF file to multiple single VOS ascii
+	# file(s).  Compressed file is allowed. Store single VOS' filename 
+	# in vos_ascii_fnames. The ascii files will be stored in the specified 
+	# outdir; outdir will be created if it does not exist.
+	#
+	# Return 1 upon successful; -1, otherwise.
+
+
+	return -1 if ($hdf_fname eq "" || $outdir eq "");
+
+	# Degranulize the granule hdf file to single VOS ASCII file(s). 
+	# Store the outfiles in outdir. 
+	local($cmd) =  "level_2_ghdf_to_singlevos_ascii $verbose_opt -d $outdir 3 $hdf_fname";
+	local($rc) = do do_system_call($cmd);
+	if ($rc < 0) {
+		print STDERR "$this_prog:Error: Failed to degranulize file $hdf_fname\n";
+		
+		return -1;
+	}
+
+	opendir(SVOS_ASCII_DIR, $outdir);
+	@vos_ascii_fnames = grep (/^2A53.+ascii$/, readdir(SVOS_ASCII_DIR));
+	close(SVOS_ASCII_DIR);
+	return 1;
+} # rrmap_granule_hdf_to_singlevos_ascii 
+
+
+
+######################################################################
+#                                                                    #
+#                             accumulate_map                         #
+#                                                                    #
+######################################################################
+sub accumulate_map {
+	local($int_acc_map_fname, $timegap,
+		  $map_fname, $fname_prefix_path, 
+		  $map_fname_result) = @_;
+	# Accumulates $rmap_fname by calling 'acc_rrmaps_single_vos_ascii'
+	# with the multifactor =  timegap in min/60. Add that accumulated 
+	# map to the map in $int_acc_map_fname. Store the result
+	# accumulated map in the result file, $map_fname_result. 
+	#
+	# Return 1 upon successful; -1, otherwise.
+   
+
+  	return -1 if ($int_acc_map_fname eq "" || $map_fname eq "" ||
+				  $map_fname_result eq "");
+
+	# multfactor = timegap in min/60.
+	local($multfactor) = $timegap / 3600;
+	# Create a file that contains the map filename
+	local($file_list_fname) = $tmp_dir."acc_rrmap_filelist".getppid;
+
+	open(FILE_LIST_FILE, ">$file_list_fname") || 
+		(print STDERR "$this_prog:Error: Failed to create file<$file_list_fname\n" && return -1);
+
+	print FILE_LIST_FILE "$map_fname\n";
+	close(FILE_LIST_FILE);
+  
+	local($cmd) = "acc_rrmaps_single_vos_ascii $verbose_opt $file_list_fname $map_fname_result 151 $multfactor $fname_prefix_path";
+	print STDERR "$this_prog: Executing <$cmd>...\n" if ($verbose);
+	local($rc) = do do_system_call($cmd);
+	unlink ($file_list_fname);
+	if ($rc < 0) {
+		print STDERR "$this_prog: Failed executing ...<$cmd>\n";
+		return -1;
+	}
+	# If the $int_acc_map_fname doesnot exist, return done.
+	# Else add that accumulated map and the map in $int_acc_map_fname and
+	# store the result in $map_fname_result.
+	#
+	return 1 if (!(-e $int_acc_map_fname)); # The inter acc file didnot exist.
+	print STDERR "$this_prog: Adding the contents of $int_acc_map_fname and $map_fname_result\n" if ($verbose);
+	open(FILE1, "<$int_acc_map_fname") || 
+		(unlink $map_fname_result && print STDERR "$this_prog: Failed to open <$int_acc_map_fname>\n" && return (-1));
+	local(@file1_lines) = <FILE1>;
+	close(FILE1);
+
+	open(FILE2, "<$map_fname_result") || 
+		 (unlink $map_fname_result && print STDERR "$this_prog: Failed to open for read <$map_fname_result>\n" && return (-1));
+	local(@file2_lines) = <FILE2>;
+	close(FILE2);
+
+	# Open the result file for output and add the rain rates there.
+	open(FILE2, ">$map_fname_result") || 
+		 (unlink $map_fname_result && print STDERR "$this_prog: Failed to open fro write <$map_fname_result>\n" && return (-1));
+	local($l, $i);
+	for ($l = 0; $l <= $#file1_lines && $l <= $#file2_lines; $l++) {
+		local(@file1_line) = split(' ', $file1_lines[$l]);
+		local(@file2_line) = split(' ', $file2_lines[$l]);
+		for($i = 0; $i <= $#file1_line && $i <= $#file2_line; $i++) {
+			local($r1) = $file1_line[$i];
+			local($r2) = $file2_line[$i];
+			local($rr) =  0.0;
+			if ($r1 == -99.0) {
+				$rr = $r2;
+			}
+			elsif ($r2 == -99.0) {
+				$rr = $r1;
+			}
+			else {
+				$rr = $r1 + $r2;
+			}
+			local($str) = sprintf "%.3f ", $rr;
+			print FILE2 "$str";
+		}
+		print FILE2 "\n";
+	}
+	close(FILE2);
+
+	return 1;
+
+} # accumulate_map 
+
+######################################################################
+#                                                                    #
+#                       write_admin_info_to_file                     #
+#                                                                    #
+######################################################################
+sub write_admin_info_to_file {
+	local($last_processed_vos_date_time_str, *selected_vos_time_list, 
+		  $inter_admin_info_file) = @_;
+	# Add product administrative info to file.
+	# The format of inter_admin_info_file:
+	#  <begin of file>
+	#  last_processed_vos_time   << time of last VOS processed.
+	#  vos_time1 vos_time2 ...   << list of times of
+	#  ...                       << all VOSes included in the accumulation.
+	#  selected_vos_time_list    << Time format: mm/dd/yyyy hh:mm:ss
+	#  <end of file>
+
+
+	return if ($inter_admin_info_file eq "" ||
+			   $last_processed_vos_date_time_str eq "");
+
+	local(@lines) = ();
+	# Open, read data from file, and close file.
+	if (-e $inter_admin_info_file) {
+		open (THIS_FILE, $inter_admin_info_file) || return;
+		@lines = <THIS_FILE>;
+		close(THIS_FILE);
+		# Modify the first line 
+		$lines[0] = "$last_processed_vos_date_time_str\n";
+	}
+	else {
+		push(@lines, "$last_processed_vos_date_time_str\n");
+	}
+
+	# Open, write lines 
+	# to the same file, and close it.
+	open (THIS_FILE, ">$inter_admin_info_file") || return;
+	local($i);
+	for ($i = 0; $i <= $#lines; $i++) {
+		print THIS_FILE "$lines[$i]";
+	}
+	print THIS_FILE join(' ', @selected_vos_time_list)."\n" 
+		if ($#selected_vos_time_list >= 0);        
+	
+	close(THIS_FILE);
+
+
+} # write_admin_info_to_file 
+
+
+ 
+
+######################################################################
+#                                                                    #
+#                        create_hdf_product                          #
+#                                                                    #
+######################################################################
+sub create_hdf_product {
+	local($hdf_infile, $int_acc_map_file, $admin_info_file, 
+		  $product, $metadata_file, $pentad_or_month, 
+		  $vos_times_outfile, $hdf_outfile) = @_;
+	# Create an HDF file and vos times file for product.  
+	# It uses the metadata from hdf_infile; vos times from admin_info_file.
+	# Return 1 for successful; -1, otherwise.
+
+	return -1 if ($int_acc_map_file eq "" || $hdf_infile eq "" ||
+				  $admin_info_file eq "" || $product eq "");
+	
+	return -1 if ($product ne "3A-53" && $product ne "3A-54");
+		
+	if (!(-e $metadata_file)) {
+		print STDERR "$this_prog: Error: Metadata file <$metadata_file> doesnot exist.\n";
+		return -1;
+	}
+	$hdf_options_str = "-m $metadata_file";
+
+	local $cmd;
+	if (!(-e $int_acc_map_file)) {
+		# Create an empty granule product
+		$cmd = "create_level_3_rrmap_hdf $verbose_opt -e $hdf_options_str $product $hdf_infile $vos_times_outfile $hdf_outfile";
+	}
+	else {
+		# Create a granule product
+		$cmd = "create_level_3_rrmap_hdf $verbose_opt $hdf_options_str $product $int_acc_map_file $hdf_infile $admin_info_file $vos_times_outfile $hdf_outfile";
+	}
+	print STDERR "$this_prog: Executing ...<$cmd>\n" if ($verbose);	
+    local($rc) = &do_system_call($cmd);
+	return -1 if ($rc < 0);
+	return 1;
+} # create_hdf_product
+
+
+######################################################################
+#                                                                    #
+#                            do_system_call                          #
+#                                                                    #
+######################################################################
+sub do_system_call {
+	local($cmd) = @_;
+	# Return 1 for success; -1, otherwise.
+	return -1 if ($cmd eq "");
+	local($rc) = 1;
+#print STDERR "CMD: <$cmd>\n";
+	system($cmd);
+
+	$status = $? >> 8;
+	local($signal) = $? & 255;
+
+	do doexit_handler('INT') if (&interrupted($status) || 
+			$signal eq 'INT' || $signal eq 'KILL' || $signal eq 'STOP');
+
+	if (&is_severe_error($status) || $signal != 0) {
+		$rc = -1; # failed
+	}
+	return $rc;
+}
+
+######################################################################
+#                                                                    #
+#                             clean_up                               #
+#                                                                    #
+######################################################################
+sub clean_up {
+	system("rm -rf $tmp_dir") if ($tmp_dir ne "" && -d $tmp_dir);
+
+}
+
+######################################################################
+#                                                                    #
+#                           doexit_handler                           #
+#                                                                    #
+######################################################################
+sub doexit_handler {
+	local($signal) = @_;
+	do clean_up();
+	$rc = $SEVERE_ERROR_CODE;
+	$rc = $INTER_CODE if ($signal eq 'INT' || $signal eq 'KILL' || $signal eq 'STOP');
+	if ($verbose) {
+		print STDERR "Received signal <$sig>\n";
+	}
+	exit($rc);
+}
+
+######################################################################
+#                                                                    #
+#                            validate_user_inputs                    #
+#                                                                    #
+######################################################################
+sub validate_user_inputs {
+	# Validate input files, flag, year, and  month. Exit if error
+	# occurs.
+
+	# Files validation checking.
+	#
+	if ($period_flag eq "BEGIN") {
+		# Give error message and exit if intermediate files exist.
+		if (-e $int_acc_map_file) {
+			print STDERR "$this_prog:Error:Period flag is BEGIN and inter. acc. map file exist.\n";
+			exit($SEVERE_ERROR_CODE);
+		}
+		if (-e $inter_admin_info_file) {
+			print STDERR "$this_prog:Error:Period flag is BEGIN and inter. admin info file exist.\n";
+			exit($SEVERE_ERROR_CODE);
+		}
+	}
+
+	# Give error message if either the hdf outfile or vos times file
+	#  exists and exit.
+	if (-e $vos_times_outfile) {
+		print STDERR "$this_prog:Error:Period flag is END and VOS times file <$vos_times_outfile> exists.\n";
+		exit($SEVERE_ERROR_CODE);
+	}
+	if (-e $hdf_outfile) {
+		print STDERR "$this_prog:Error:Period flag is END and HDF outfile <$hdf_outfile> exists.\n";
+		exit($SEVERE_ERROR_CODE);
+	}
+
+
+	# Check if the input file belongs to the specified year and month.
+	# Can't validate pentad--since can't know its number.
+	# Use date from the input filename, i.e., 2A53.yymmdd.*HDF*
+	
+	$infile_mon = 0;
+	$infile_day = 0;
+	$infile_yr = 0;
+	do get_date_from_granule_product_filename($infile, *infile_mon, 
+						  *infile_day, *infile_yr);
+	if ($year != $infile_yr) {
+		print STDERR "$this_prog:Error: The input file's year <$infile_yr> is not correspondent to the specified year <$year>.\n";
+		exit($SEVERE_ERROR_CODE);
+	}
+	if ($prod eq "3A-54") {
+		if ($infile_mon != $pentad_or_month) {
+			print STDERR "$this_prog:Error: The input file's month <$infile_mon> is not correspondent to the specified month <$pentad_or_month>.\n";
+			exit($SEVERE_ERROR_CODE);
+		}
+	}
+	elsif ($prod eq "3A-53") {
+		local($infile_pentad) = &date2pentad_number($infile_mon, $infile_day, $infile_yr);
+		if ($infile_pentad != $pentad_or_month) {
+			print STDERR "$this_prog:Error: The input file's date <$infile_mon/$infile_day/$infile_yr> belonged to pentad <$infile_pentad> is not correspondent to the specified pentad <$pentad_or_month>.\n";
+
+			exit($SEVERE_ERROR_CODE);
+		}
+	}
+} # validate_user_inputs
+
+
+sub date2pentad_number {
+	local($mon, $day, $yr) = @_;
+	# Return pentad number based on mon, day, yr.
+	# Valid pentad starts at 1.
+
+	local($cmd) = "date2pentad_number $day $mon $yr|";
+	open(PENTAD, $cmd) || return 0;
+	local($pentad) = <PENTAD>;
+	close(PENTAD);
+	$pentad =~ s/[\n|\r]//;   # Remove \n or \r
+	return $pentad;
+	
+} #date2pentad_number

@@ -1,0 +1,227 @@
+Changes for level_1:
+--------------------
+
+03/08/05
+--------------------------------------------------------------
+1. Changed QC_TABLE_SIZE to 15000 (lines) to allow more lines in qc_parameter
+   files, as requested by D. Marks.
+
+08/07/01
+--------------------------------------------------------------
+1. Modified setvos.f to handle elevation angle of 0, which causes
+   divide by 0 in computation of maximum range.
+
+03/22/01
+--------------------------------------------------------------
+1. level_1_qc.c: Modified to handle the case of an azimuth crossing from
+   360 to 0.  Thanks Dave Silberstein.
+
+02/23/01
+--------------------------------------------------------------
+1. Increased the number of bins in vosqc.par for Kwajalein processing.
+2. level_1/data: Updated qc_params files (DARW, HSTN, KWAJ, MELB) with
+   current production versions.  Added qc_params files for NOAA and TOGA.
+
+01/07/01
+1. level_1_qc.c : Added a statement in function applyCluttermapToSweep()
+   for bounds checking.
+
+10/02/00
+--------------------------------------------------------------
+1. level_1/data 
+   Using automatically generated KWAJ_cluttermap instead of 
+   Univ. Washington cluttermap.
+
+
+09/19/00
+--------------------------------------------------------------
+1. Modified level_1.c 
+   Added -k (cluttermap) option, uses <site>.cluttermap from 
+   $GVS_DATA_PATH
+2. Modified leve1_1_qc.c to apply cluttermap - 
+   CZ range bins below 2 deg. elevation are set to BADVAL based on 
+   ranges in $GVS_DATA_PATH/<site>.cluttermap file.
+   Added clutterMapInit() - Reads in ascii cluttermap.
+   Added applyClutterMap() - Applies clutter map to cz volume (sweeps below 2 degree elev.)
+   Added applyClutterMapToSweep() - Applies cluttermap to rays of an individual sweep.
+
+
+03/10/00
+--------------------------------------------------------------
+1. Modified level_1.c
+   Writes VR data to UF file only if vrMask processing done.
+   Fixed Y2K problem in filenames.
+2. Modified vosqc.f
+   Added a check for out-of-bounds array indices.
+
+v1.19 2/1/2000 initially packaged w/ GVS v4.16.
+----------------------------------------------------------------
+
+01/04/00
+1. Added VR mask processing to files level_1.c and level_1_qc.c
+2. Added VR data to UF files.
+3. Added command line options for 1B51/1C51 product version numbers.
+4. Added pgm file creation.
+
+v1.18 ?/1999 initially packaged w/ GVS v4.13.
+----------------------------------------------------------------
+1. Modified level_1.c to pass the algorithm metadata string to
+   the RSL radar_to_hdf routines.
+2. Modified level_1_qc.c :
+   Added function 'add_calibr_factor()' to adjust CZ values
+   by the Z_calibr_factor.
+3. Added '-P product_version' option to level_1.
+   Default is HDF_PRODUCT_VERSION ("2").
+
+v1.17 (9/21/98) initially packaged w/ GVS v4.12
+----------------------------------------------
+1. Modified vosqc.f to fix MIT problem.
+2. Modified level_1.c to recognize Kwaj 'DR' field.
+3. Requires rsl v1.19 or later
+
+v1.16 (8/18/98) initially packaged w/ GVS v4.10
+----------------------------------------------
+1. Modified radar site determination code to handle MIT data files.
+
+
+v1.15 (8/13/98) initially packaged w/ GVS v4.9
+-----------------------------------------------
+1. Small bug fix in level_1_qc.c
+2. Moved HDF_FILE_VERSION definition from RSL file into level_1.c
+3. HDF_FILE_VERSION = 2.
+4. Requires rsl v1.18 or later -- This version removes ZDR data from 1C-51 HDF.
+
+v1.14 ((7/27/98) initially packaged w/ GVS v4.8.1
+-----------------------------------------------
+1. Modified level_1_qc.c. No longer QCs ZDR data.
+2. vosqc.f modified by Danny to fix TAMU problem. Experimental only.
+
+
+v1.13 (6/15/98) initially packaged w/ GVS v4.8
+----------------------------------------------
+1. level_1.c, level_1_null_granule.c modified to use gv_utils to identify
+   radar site. Removed file 'radar_sites'.
+2. Requires gv_utils v1.8.
+3. Added reference to gv_radar_site_info.data in level_1.html.
+
+Note: 
+
+   Level_1 is unable to process Berrimah data that is in RAPIC format.
+   The reason is simple to explain but hard to implement.  Azimuth
+   angles of one field type are shifted in other field types.
+   This makes alignment of a field type for a particular ray problematic.
+   Additionally, upper level sweeps are similarly misaligned.  The 
+   current implementation of the TSDIS toolkit requires that the
+   rays be properly aligned across all field types and all sweeps.
+
+
+v1.12 (6/9/98) initially packaged w/ GVS v4.7
+--------------------------------------------
+* Corrected WSR88D_ID for Miami and Key West in radar_sites.
+* Added qc_params_DARB, qc_params_TAMP, qc_params_MIAM, qc_params_KEYW,
+  qc_params_LKCH, qc_params_NWBR, qc_params_CORC, qc_params_JACK,
+  qc_params_TALL, qc_params_BROW, qc_params_GRAN, qc_params_TAMU,
+  qc_params_HAWA, qc_params_THPH
+
+v1.11 (5/29/98) initially packaged w/ GVS v4.6
+--------------------------------------------
+1. qc.f: Included JCET QC mod.
+2. Updated documentation.
+3. Added the capability for uninstalling the software.
+4. level_1.c: VosValidityCheck(): Either 'DZ' or 'ZT' is OK.
+5. Uncommented all site entries in 'radar_sites' and changed Berrimah site
+   name from DARW to DARB.
+
+v1.10 (1/26/98) initially packaged w/ GVS v4.5
+---------------------------------------------
+1. Increased char buffer size in 'ImgCreate' to accomodate
+	 JCET's request for negative height values.
+2. Added version# in the usage message of 'level_1_null_granule
+3. vosqc.par: increased max steps to 26 for QC routine.
+4. level_1.c: Changed decision algorithm regarding
+   whether or not to write a VOS into a 1C-51 HDF file.
+5. level_1.c: Set the date/time in the Radar_header to that of
+   the first recorded ray of the VOS. This is a kludge to duck a
+   UF-related problem discovered by JCET.
+6. Requires rsl-v1.13.tgz or later.
+
+
+v1.9 (12/08/97) initially packaged w/ GVS v4.4
+----------------------------------------------
+1. Increased sweeps limit to 20 in 'vosqc.par'.
+2. Added front-end error checks to 'vosqc.f'. level_1 now
+   shuts down if VOS too big for QC routine.
+3. Changed 'radar_sites'
+
+v1.8 (11/13/97) initially packaged w/ GVS v4.2
+----------------------------------------------
+1. Increased the length of the gif filenames.
+2. Requires gv_utils.
+
+v1.7 (10/24/97) initially packaged w/ GVS v4.1
+----------------------------------------------
+1. Added zdr image generation.
+2. Changed HDF (and UF) filenames to conform with official TSDIS
+   documentation. (removed leading zero from granule no.)
+2. Initialized siteName buffer.
+3. Added QC parameter 'zThresh0', added velocity gifs.
+   Modified files: qc.f, vosqc.f, level_1_qc.c, level_1.c
+4. Uses ZT field rather than DZ for raw Z data.
+5. Requires rsl v1.10 or later.
+
+v1.6 (8/19/97)  Packaged with gvs v4.0
+-----------------------------------------------
+1. Added 'data/qc_params_HSTN' -- for Houston TX.
+2. Added file level_1_null_granule.c
+3. Removed null_granule functionality from level_1.c
+4. Requires rsl v1.9 or later.
+
+v1.5 5 Aug 97  Initially packaged with gvs v3.7
+-----------------------------------------------
+1. Corrected error in the documentation.
+2. Requires TO-modified toolkit 'toolkit_4.5r1.1'.
+3. Plugged memory leak in qc routines.
+4. Added on-line tutorial for adding a radar site to L1.
+5. Extended temporal windows to 30 mins for 1C-HDF processing.
+6. Miscellaneous mods from JCET testing.
+7. Renamed 'qc_params_OMKOI' to 'qc_params_THOM'.
+8. Requires rsl 1.8 or later.
+9. Added new qc_params_* files.
+
+v1.4 (7/25/97) Initially packaged with gvs v3.6
+-----------------------------------------------
+1. Changed Houston callID.
+2. Added qc_params_OMKOI
+3. Changed the minimum number of sweeps.
+4. Constructs products based on sat. coincident data
+5. Requires libgvs_utils.a -- source located in ../utils
+6. Requires rsl 1.7 or later.
+
+v1.3 (7/2/97)
+-------------
+1. Added file: radar_sites.
+2. Requires rsl 1.6 and toolkit 4.5r1
+3. Removed options: -s; added options: -M
+4. Program determines site automatically based on the input file.
+
+v1.2 (4/30/97)
+---------------
+1. Fixed the Makefile w.r.t. install_doc
+2. Requires rsl v1.5
+3. Added 'qc_params_KWAJ'
+4. Added new options: [-m minimum_sweeps], 
+   [-g Image_output_dir], [-n Number_sweeps_for_image]
+5. Can accept HDF file (1B-51) or UF file for input.
+6. Program does more bad data checking.
+
+v1.1 (1/6/97)
+--------------------
+1. Removed gvs.gif and changed 'install_doc' in Makefile.
+2. Changed filename's format.
+3. Renamed the parameter files.
+4. Changed command's options.
+5. Updated doc.
+
+v1.0 (Froze: 12/12/96)
+--------------------
+1.  Initially created.

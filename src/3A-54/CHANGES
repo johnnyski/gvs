@@ -1,0 +1,29 @@
+CHANGES for 3A-54
+
+v4.20 (4/01/2003)
+-------------------------------------------------
+* Changed 3A-54 to handle two new command line parameters, max_time_gap and
+  const_time_gap, which are passed to acc_rrmaps_granule_hdf and used in
+  computing VOS time gap weighting factors. See gvs/src/acc_rrmaps/CHANGES for
+  details.
+
+v1.3 (5/29/98) initially packaged w/ GVS v4.6
+-------------------------------------------------
+* Fixed interrupt signal checking.
+* Changed 3A-54 to execute in a tmp dir.
+* Requires gv_utils v1.3
+* Hardcoded some of the metadata fields: alg_id, data_id, alg_version, contact.
+* Added the capability for uninstalling the software.
+* Clarified usage message.
+
+v1.2 (11/13/97) initially packaged w/ GVS v4.2
+-------------------------------------------------
+* Requires gv_utils.
+
+v1.1 (10/24/97) initially packaged w/ GVS v4.1
+-------------------------------------------------
+1. Removed data center source from '3A54_metadata.txt'.
+
+v1.0 (10/10/97) initially packaged w/ gvs pre-v4.1
+-------------------------------------------------
+Initially created.

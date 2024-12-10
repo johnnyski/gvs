@@ -1,0 +1,38 @@
+README for 2A-53-d (12/10/99): Packaged w/ GVS v4.14.
+
+
+2A-53-d uses Danny Rosenfeld's algorithm.  This package has the 
+following executable files, documentation, and data files:
+
+  Executable files:
+  ----------------
+  * 2A-53-d - The perl script, the front end to Danny's algorithm program.
+	          This produces product for one hour-granule.
+  * singlevos_2A-53-d - The perl script, the front end to Danny's 
+              algorithm program.  This produces product for a single VOS.
+  * 2A53d - Actual algorithm program.
+
+  Documentation:
+  -------------
+  * 2A-53-d.html - Documentation for 2A-53-d.
+
+  Data files:
+  ----------
+  * sitelist_cscale, mlb_sitelist - Gauge coordinates lookup tables.
+  * zr_{drw|mlb}.out - Ze-R tables for Darwin and Melbourn data sets.
+
+
+EXECUTION NOTES:
+================
+
+1. Have the data files installed under $GVS_DATA_PATH in order to use the
+    default options.
+
+2. Recommend to use options specified in 'p_drw.pl' and 'p_mlb.pl' for 
+   Darwin and Melbourne data, respectively.
+
+
+QUESTIONS:
+=========
+
+Please contact TRMM Office help via email at help@trmm.gsfc.nasa.gov.

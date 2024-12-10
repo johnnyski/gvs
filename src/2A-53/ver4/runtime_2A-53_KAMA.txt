@@ -1,0 +1,33 @@
+# The program that parses this file is called 'grep_qc_parm.pl'
+#
+# Output the entry for the time.  I.e., if this were a crontab,
+# then this would output the command.
+#
+# NOTE: THE LAST TIME MATCH IS OUTPUTTED!
+#
+# The format of each line is:
+# MIN HOUR DAY MONTH YEAR PARAMETERS
+#
+# where:
+# MIN      : 0 - 59
+# HOUR     : 0 - 23
+# DAY      : 1 - 31
+# MONTH    : 1 - 12
+# YEAR     : 1997...
+# 
+# You can specify:
+#    *              --  Wild match.  This matches all possibilities.
+#    n-m            --  Range.  n=begin, m=end, inclusive.
+#    Exact values   --  Exact time specification.
+#
+# Examples:
+# #at 6:10 a.m. every day
+#  10 6 * * * parm1
+# #
+# #at 11:00-11:59 a.m. on the 4th for 1997 and 1998. 
+#  * 11 4 * 1997-1998 parm2
+#
+# #Hour 4 on january 1st
+#  * 4 1 1 * parm3
+
+* * * * * -z KAMA_05-1994_FACE_uniform.zr

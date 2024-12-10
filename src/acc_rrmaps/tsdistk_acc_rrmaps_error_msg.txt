@@ -1,0 +1,7 @@
+W_ACC_RRMAP_BAD_USAGE,           ACC_RRMAP: Improper usage.
+W_ACC_RRMAP_GET_METADATA_FAILED, ACC_RRMAP: Get metadata failed.
+W_ACC_RRMAP_CREATE_HDF_FAILED,   ACC_RRMAP: Failed to construct hdf product.
+W_ACC_RRMAP_CREATE_TIME_FILE_FAILED, ACC_RRMAP: Failed to create vos times file.
+W_ACC_RRMAP_INVALID_PROG,        ACC_RRMAP: Program only recognizes 3A-53 and 3A-54.
+W_ACC_RRMAP_ABORT_EXEC,          ACC_RRMAP: Abort execution -- interrupted signal received.
+W_ACC_RRMAP_STOP_ON_ERROR,       ACC_RRMAP: Stop execution -- non-interrupted signal received.

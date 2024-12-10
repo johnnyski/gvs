@@ -1,0 +1,158 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+   <TITLE></TITLE>
+   <META NAME="GENERATOR" CONTENT="Mozilla/3.01Gold (X11; I; Linux 2.0.28 i686) [Netscape]">
+</HEAD>
+<BODY BACKGROUND="gvs_bg.gif">
+
+<CENTER><TABLE BORDER=2 CELLPADDING=0 WIDTH="100%" >
+<TR ALIGN=CENTER VALIGN=CENTER>
+<TD ALIGN=CENTER VALIGN=CENTER><IMG SRC="gvs_logo.gif" HEIGHT=100 WIDTH=256 ALIGN=LEFT></TD>
+
+<TD>
+<H1><FONT COLOR="#000080">2A-53-w:</FONT> <FONT COLOR="#800080">Rain Rate
+Maps</FONT></H1>
+</TD>
+</TR>
+</TABLE></CENTER>
+
+<P>
+<HR WIDTH="100%">
+<HR></P>
+
+<H3><FONT COLOR="#000080">Synopsis</FONT></H3>
+
+<PRE><B><FONT COLOR="#B22222">2A-53 [-v] [<I><TT>options_list</TT></I>] 2A-53-w <I><TT>qc_ghdf_file csmap_ghdf_file rrmap_ghdf_file</TT></I></FONT></B></PRE>
+
+<PRE><B><FONT COLOR="#B22222">singlevos_2A-53-w [-v] [<I><TT>options_list</TT></I>] <I><TT>qc_uf_file csmap_shdf_file rrmap_shdf_file</TT></I></FONT></B>
+</PRE>
+
+<PRE><B><I><TT>where:</TT></I></B></PRE>
+
+<PRE><B><FONT COLOR="#B22222">options_list </FONT><FONT COLOR="#000000">:=</FONT><FONT COLOR="#B22222"> [-S <I><TT>site_name</TT></I>] [-P <I><TT>pathname_of_lookup_tables</TT></I>] 
+                        [-p <I><TT>parameters_file</TT></I>]</FONT></B>
+</PRE>
+
+<P>
+<HR></P>
+
+<H3><FONT COLOR="#000080">Description</FONT></H3>
+
+<P>Radar site rain rate map. <B><FONT COLOR="#B22222">2A-53 </FONT></B><FONT COLOR="#000000">calls<B>
+</B></FONT><B><FONT COLOR="#B22222">singlevos_2A-53-w</FONT></B> which
+converts reflectivities of a single VOS for 1C-51 product to rain rates.
+It applies polar-cartesian transformation with rain rate field and produces
+a 2 km x 2 km CARPI (Constant Altitude Rectangular Position Image) to 200
+km from radar. <B><FONT COLOR="#B22222">2A-53</FONT></B> produces rain
+rate maps for one hour-granule.</P>
+
+<P>
+<HR WIDTH="100%"></P>
+
+<H3><FONT COLOR="#000080">Options</FONT></H3>
+
+<P><B><FONT COLOR="#B22222">2A-53</FONT></B> and <B><FONT COLOR="#B22222">singlevos_2A-53-w</FONT></B>
+recognize the following options: </P>
+
+<P><B><FONT COLOR="#B22222">-v</FONT></B> Prints arguments and status of
+the program execution. </P>
+
+<P><B><FONT COLOR="#B22222">-S site_name</FONT></B> Specify site name. It is case
+insensitive and can either be a long or 4-digit name. See file, <I><TT>$GVS_DATA_PATH/sprint_radar_sites</TT></I>,
+for a list of sites. Default: Will obtain from the UF file. </P>
+
+<P><B><FONT COLOR="#B22222">-P pathname_of_lookup_tables</FONT></B> Pathname
+of lookup tables. Value of the environment variable, <I><TT>GVS_DATA_PATH</TT></I>,
+or '<I><TT>/usr/local/trmm/data</TT></I>' when <I><TT>$GVS_DATA_PATH</TT></I>=&quot;&quot;
+is used for default. </P>
+
+<P><B><FONT COLOR="#B22222">-p parameters_file</FONT></B> File containing
+program's parameters. Default = &lt;<I><TT>pathname_of_lookup_tables</TT></I>&gt;/<I><TT>{melb|darw}_rainest.par</TT></I></P>
+
+<P>
+<HR></P>
+
+<H3><FONT COLOR="#000080">Input Files</FONT></H3>
+
+<OL>
+<LI><FONT COLOR="#B22222">qc_uf_file</FONT> - Quality controlled reflectivity
+for a single VOS in Universal Format (1C-51 product). </LI>
+
+<LI><FONT COLOR="#B22222">qc_ghdf_file</FONT> - Quality controlled reflectivity
+for one hour-granule in Hierarchical Data Format (HDF) (1C-51 products).
+</LI>
+
+<LI><FONT COLOR="#B22222">csmap_shdf_file</FONT><B> </B>- Convective/stratiform
+map for a single VOS in HDF (2A-54 product). </LI>
+
+<LI><FONT COLOR="#B22222">csmap_ghdf_file</FONT><B> </B>- Convective/stratiform
+map for one hour-granule in HDF (2A-54 products).</LI>
+
+<LI>&lt;<I><TT>pathname_of_lookup_tables</TT></I>&gt;/carttopol.{FL|DR}
+- Lookup tables.</LI>
+
+<LI>&lt;<I><TT>pathname_of_lookup_tables</TT></I>&gt;/poltocart.{FL|DR}
+- Lookup tables.</LI>
+
+<LI>&lt;<I><TT>pathname_of_lookup_tables</TT></I>&gt;/{melb|darw}_rainest.par
+- Lookup tables.</LI>
+</OL>
+
+<P>Note: Lookup tables, <I><TT>*.FL</TT></I>/<I><TT>melb</TT></I> and <I><TT>*.DR</TT></I>/<I><TT>darw</TT></I>,
+are used for Melbourne and Darwin data set, respectively.</P>
+
+<P>
+<HR></P>
+
+<H3><FONT COLOR="#000080">Temporary Files</FONT></H3>
+
+<P>The following files are created and removed upon completion. </P>
+
+<OL>
+<LI>tmp&lt;<I><TT>process_id</TT></I>&gt;/&lt;<I><TT>YYMMDD</TT></I>&gt;.&lt;<I><TT>granule#</TT></I>&gt;.&lt;<I><TT>radar_site</TT></I>&gt;.&lt;<I><TT>version#</TT></I>&gt;.&lt;<I><TT>HHMM</TT></I>&gt;.uf.gz</LI>
+
+<LI>tmp&lt;<I><TT>process_id</TT></I>&gt;/&lt;<I><TT>csmap_ghdf_file prefix</TT></I>&gt;.<I><TT>HHMM</TT></I>.hdf</LI>
+
+<LI>tmp&lt;<I><TT>process_id</TT></I>&gt;/&lt;<I><TT>uf file prefix</TT></I>&gt;<I><TT>.hdf</TT></I>.2A-53-w</LI>
+
+<LI>nrainest.&lt;<I><TT>process_id</TT></I>&gt;.tmp </LI>
+</OL>
+
+<P>Note: <I><TT>KMLB</TT></I> and <I><TT>DARW</TT></I> are for Melbourne
+and Darwin data set, respectively.</P>
+
+<P>
+<HR width="100%"></P>
+
+<H3><FONT COLOR="#000080">Output Files</FONT></H3>
+
+<OL>
+<LI><FONT COLOR="#B22222">rrmap_shdf_file</FONT><B> </B>-<B> </B>Rain rate
+map for a single VOS in HDF file. Map consists of a 151x151 pixel image,
+with radar located at 76x76. Resolution is 2 km/pixel, thus data extends
+150 km radius from the radar.</LI>
+
+<LI><FONT COLOR="#B22222">rrmap_ghdf_file</FONT><B> </B>-<B> </B>Rain rate
+maps for one hour-granule in HDF file.</LI>
+</OL>
+
+<H3>
+<HR><FONT COLOR="#000080">Return value</FONT></H3>
+
+<P><B><FONT COLOR="#B22222">2A-53</FONT> </B>returns 0 upon successful
+completion; 1 upon successful processing for some VOSs of granule; 2 upon
+interruption; non-zero, otherwise. </P>
+
+<P><B><FONT COLOR="#B22222">singlevos_2A-53-w</FONT></B> returns 0 upon
+successful completion; -2 upon interruption; -1 upon failure. </P>
+
+<P>
+<HR></P>
+
+<H3><FONT COLOR="#000080">Author</FONT></H3>
+
+<P>Witold Krajewski et al., <I><TT>University of Iowa</TT></I>. </P>
+
+</BODY>
+</HTML>

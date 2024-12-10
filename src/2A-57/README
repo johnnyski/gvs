@@ -1,0 +1,62 @@
+README for 2A-57: v1.2 (12/10/99) packaged w/ GVS v4.14.
+
+    NASA/TRMM, Code 910.1.
+    This is TRMM Office Software.
+    Copyright (C) 1996, 1997
+            John H. Merritt
+            Space Applications Corporation
+            Vienna, Virginia
+
+    This library is free software; you can redistribute it and/or
+    modify it under the terms of the GNU Library General Public
+    License as published by the Free Software Foundation; either
+    version 2 of the License, or (at your option) any later version.
+
+    This library is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Library General Public License for more details.
+
+    You should have received a copy of the GNU Library General Public
+    License along with this library; if not, write to the Free
+    Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0
+
+2A-57 contains the following executable files and documentations:
+  * disdro_to_granule_ascii - The perl script, user interface, that produces
+                              monthly granule ascii files of disdrometer data.
+  * granulate_disdro_files -  The perl script that granulizes the input 
+                              disdrometer files into multiple files (monthly
+                              granule).  This program is called by 
+                              'disdro_to_granule_ascii'.
+
+              ------------------------------------------
+(a) Documentation is located in *.html and can be viewed with netscape 
+    or mosaic.
+
+(b) The directories which you have installed the executable files for 
+     this product should be in your search path.
+
+
+EXECUTION NOTES:
+================
+Proper usage of the programs in the 2A-56 Ground Validation Software (GVS):
+
+1. disdro_to_granule_ascii *.gmin
+ 
+   This creates one monthly granule for each disdrometer; for each
+   disdrometer there will be at most 12 granules per year.
+
+2. Ship the *.ascii files to TSDIS or the Goddard DAAC.
+
+
+Does not require GSL.  These programs manipulate the ascii files only.
+
+
+QUESTIONS:
+=========
+
+Please contact TRMM Office help via e-mail at help@trmm.gsfc.nasa.gov.
+
+

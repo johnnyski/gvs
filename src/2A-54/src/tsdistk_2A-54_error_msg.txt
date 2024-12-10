@@ -1,0 +1,31 @@
+W_2A54_BAD_USAGE,                2A-54: Improper usage.
+W_2A54_ABORT_EXEC,               2A-54: Abort execution--interrupted signal received..
+W_2A54_STOP_ON_ERROR,            2A-54: Stop execution--non-interrupted signal received.
+W_2A54_INVALID_SITE,             2A-54: Invalid site -- must be ber or mel.
+W_2A54_OPEN_MUDRAS_FILE_FAILED,  2A-54: Open mudras file failed.
+W_2A54_DOCS_FAILED,              2A-54: Do csmap failed.
+W_2A54_CSMAP2HDF_FAILED,             2A-54: Failed to write csmap to hdf file.
+W_2A54_OPEN_THRESHOLD_FILE_FAILED,   2A-54: Error: Cannot open threshold file.
+W_2A54_OPEN_CFAD_ASCII_OFILE_FAILED, 2A-54: Error opening CFAD ASCII output file.
+W_2A54_OPEN_CFAD_ASCII_IFILE_FAILED, 2A-54: Error opening CFAD ASCII input file.
+W_2A54_OPEN_CFADRANGE_OFILE_FAILED,  2A-54: Sorry, can't open range-dependant CFAD output file.
+W_2A54_OPEN_GEN_OFILE_FAILED,        2A-54: Sorry, can't open general output file.
+W_2A54_BAD_USAGE2,                   2A-54: Improper usage for volume class.
+W_2A54_OPEN_VALIDRANGE_IFILE_FAILED, 2A-54: Sorry, can't open input valid data range file.
+W_2A54_INVALID_FORMAT_VALIDRANGE_IFILE, 2A-54: Problem with valid data range file.
+W_2A54_OPEN_ZRTRAN_IFILE_FAILED,     2A-54: Sorry, can't open input Z-R conversion information file.
+W_2A54_GRID_DIM_TOO_BIG,             2A-54: Grid dimensions too big!
+W_2A54_INVALID_ANAL_LEVEL,           2A-54: Invalid analysis level: must be 0 <= level.
+W_2A54_INVALID_MAXTYPE_LEVEL,        2A-54: Invalid maxtype: must be either 0 or 1!
+W_2A54_INVALID_FORMAT_ZRTRAN_IFILE,  2A-54: Problem with Z-R conversion file.
+W_2A54_INVALID_ZRTRAN_TYPE,          2A-54: Invalid type of Z-R conversion!
+W_2A54_INVALID_RADAR_EST_GS,         2A-54: Invalid determination of radar estimates at gauge sites!
+W_2A54_NO_CONV_STRAT_SEP_ALG,        2A-54: Error: No convective/stratiform separation algorithm.
+W_2A54_NO_CONV_STRAT_GRID_ALG,       2A-54: No convective/stratiform algorithm for grid resolution.
+W_2A54_INTERNAL_ALG_FAILED,          2A-54: Internal algorithm failure.
+W_2A54_NEGATIVE_BG_COUNT,            2A-54: bg_count<=0.
+W_2A54_CANT_OPEN_RAINGUAGE,          2A-54: Sorry, can't open input raingauge file.
+W_2A54_INVALID_GEOG_MASK_DIM,        2A-54: Geographical mask dimensions are not correct!
+W_2A54_CANT_OPEN_GEOG_MAP,           2A-54: Sorry, can't open input geographical map.
+W_2A54_INVALID_GEOG_MAP_FORMAT,      2A-54: Problem with geographical map file!
+W_2A54_GEOG_MASK_WRONG,              2A-54: Something is wrong with the geographical mask!

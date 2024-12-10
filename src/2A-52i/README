@@ -1,0 +1,22 @@
+README for 2A-52i: Packaged w/ GVS v4.14
+
+2A-52i has the following executable file(s) and documentation:
+
+  *2A-52i - the program that is to be built and installed by the Makefile.
+  *process_new_closest_vos_in_the_previous_granule - Script called by '2A-52i'.
+  *sort_2A52_and_remove_dups - Script called by '2A-52i'.
+  *2A-52i.html - documentation
+
+
+EXECUTION NOTES:
+================
+
+1. Set enviroment variables: $GVS_DATA_PATH and $TSDISTK
+
+
+QUESTIONS:
+=========
+
+Please contact TRMM Office help via e-mail at help@trmm.gsfc.nasa.gov.
+
+

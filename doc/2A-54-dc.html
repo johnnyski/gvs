@@ -1,0 +1,151 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+                
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=iso-8859-1">
+                
+  <meta name="GENERATOR"
+ content="Mozilla/4.04 [en] (X11; I; Linux 2.0.28 i686) [Netscape]">
+  <title></title>
+</head>
+  <body background="gvs_bg.gif">
+    &nbsp;    
+<center>   
+<table border="2" cellpadding="0" width="100%">
+    <tbody>
+       <tr align="center" valign="CENTER">
+    <td align="center" valign="CENTER"><img src="gvs_logo.gif"
+ height="100" width="256" align="left">
+         </td>
+     <td>                      
+      <h1> <font color="#000080">2A-54-dc:</font> <font color="#800080">Stratiform/Convective
+  Map</font>&nbsp;</h1>
+    </td>
+    </tr>
+             
+  </tbody>   
+</table>
+   </center>
+        
+<hr width="100%"><b>Last updated:</b> 7/31/2003    
+<hr>    
+<h3> <font color="#000080">Synopsis</font></h3>
+        
+<pre><b><tt><font color="#b22222">2A-54-dc [-v] [<i>options_list</i>] <i>qc_ghdf_file 2A-55_ghdf_file csmap_ghdf_file<br></i></font></tt></b></pre>
+        
+<pre><b><tt><font color="#b22222">singlevos_2A-54-dc [-v] [<i>options_list</i>] <i>2A-55_shdf_file csmap_shdf_file</i></font></tt></b></pre>
+        
+<pre><b>where:<br><br><font color="#b22222">options_list</font> := <font
+ color="#b22222">[-S<i><tt> site_name</tt></i>] [-d <i><tt>YYMMDD</tt></i>] [-H <i>horizontal_resolution</i>] <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [-l <i><tt>result_log_file</tt></i>] [-D <i><tt>output_dir</tt></i>] <tt>[-m <i>metadata_fname</i>]</tt></font></b></pre>
+        
+<hr>    
+<h3> <font color="#000080">Description</font></h3>
+  This is the Dual CAPPI version of the radar site convective/stratiform
+mapping  program. <b><font color="#b22222">2A-54-dc</font></b> uses the same
+<b><font color="#b22222">2A-54</font></b> algorithm, but instead of using the 1C-51
+base scan as input, it uses
+the 1.5 and 3.0 km constant altitude reflectivity planes (CAPPIs) from <b><font color="#b22222">2A-55</font></b>
+granular HDF files. <b><font color="#b22222">2A-54-dc</font></b> calls <b><font
+ color="#b22222">singlevos_2A-54-dc</font></b>  for each VOS in the granular 
+product. The algorithm determines whether a given pixel is associated with 
+convective rain, stratiform rain, no rain, or missing/bad data, for each point
+in the scan and produces a convective/stratiform map. <b><font
+ color="#b22222">2A-54-dc</font></b> produces csmaps for a one hour-granule.
+     
+<p> </p>
+     
+<hr>    
+<h3> <font color="#000080">Options</font></h3>
+    <b><font color="#b22222">2A-54-dc</font></b> and <b><font
+ color="#b22222">singlevos_2A-54-dc  </font></b>recognize the following options: 
+    
+<p><b><font color="#b22222">-v</font> </b>Prints arguments and status of
+the program execution.  </p>
+     
+<p><b><font color="#b22222">-S</font> </b>Specify TSDIS site name. It is
+case insensitive. See file, <i><tt>$GVS_DATA_PATH/gv_radar_site_info.data</tt></i>,
+  for a list of sites. Default: Will obtain from the UF file.  </p>
+     
+<p><b><font color="#b22222">-d <i><tt>YYMMDD</tt></i></font>: </b>Date of 
+ radar data. Default is the date string from 1C-51_product (<i><tt>*&lt;YYMMDD&gt;*</tt></i>).
+   </p>
+     
+<p><b><font color="#b22222">-H</font></b> Specify horizontal resolution in 
+ km (2.0 or 4.0). Default: 2.0.  </p>
+     
+<p><b><font color="#b22222">-l <i><tt>result_log_filename</tt></i></font>:</b>
+  Log file produced by 2A54 (default = "<i><tt>logfile</tt></i>").  </p>
+     
+<p><b><font color="#b22222">-D <i><tt>output_dir</tt></i></font>:</b> Directory
+  for the result file(s) (default = "<i><tt>./</tt></i>"). Note: If 2A-54_product
+  name includes path, then output_dir will not be used.  </p>
+     
+<p><b><font color="#b22222">-m</font></b> Specify filename for metadata file. 
+ Default: <i>$GVS_DATA_PATH</i>/2A54_metadata.txt. </p>
+     
+<h3>     
+<hr></h3>
+        
+<h3> <font color="#000080">Input Files</font></h3>
+        
+<ol>
+     <li> <font color="#b22222">qc_ghdf_file</font> - Quality controlled
+reflectivity   for one hour-granule in Hierarchical Data Format (HDF) (1C-51
+products).  It must follow the following naming convention in order to use
+default date value: <i><tt>*&lt;yymmdd&gt;*</tt></i>. This file is now
+used only for metadata retrieval.</li>
+     <li> <font color="#b22222">2A-55_ghdf_file</font> - Three Dimensional 
+Reflectivity  for one hour-granule in Hierarchical Data Format (HDF). </li>
+     <li> <font color="#b22222">2A-55_shdf_file</font> - Three Dimensional 
+Reflectivity   for single VOS in Hierarchical Data Format (HDF) (2A-55 product).
+           </li>
+     <li> <font color="#000000"><i>$GVS_DATA_PATH</i>/gv_radar_site_info.data 
+ -This is not specified on the command line (Note: Check and modify the DARW 
+ entry if necessary when data is from Darwin).</font></li>
+       
+</ol>
+        
+<hr>    
+<h3> <font color="#000080">Temporary Files</font></h3>
+    The following files are created and removed upon completion.    
+<ul>
+   2A-54-dc_&lt;<i>process_id</i>&gt;/   
+</ul>
+        
+<hr>    
+<h3> <font color="#000080">Output Files</font></h3>
+        
+<ol>
+    <li> <font color="#b22222">csmap_shdf_file</font> - Convective/stratiform 
+ map for a single VOS in HDF file. Map is 151x151 cartesian grid with the 
+radar located at center of grid box at location (76,76). The entries are unitless
+as followed: 0 -&gt; no echo; 1 -&gt; stratiform; 2 -&gt; convective; -99
+-&gt; missing/bad data.&nbsp; No echo means the pixel from the basescan has
+missing value. Missing/bad means the distance of the pixel is less than 13
+or greater 150.</li>
+     <li> logfile (if '<i><tt>-l</tt></i>' was specified).</li>
+     <li> <font color="#b22222">csmap_ghdf_file</font> - Convective/stratiform 
+ map for one hour-granule in HDF file.</li>
+       
+</ol>
+        
+<h3>     
+<hr><font color="#000080">Return value</font></h3>
+    <b><font color="#b22222">2A-54-dc</font></b> returns 0 upon successful 
+completion;  1 upon successful processing for some VOSs of granule; non-zero, 
+otherwise.      
+<p><b><font color="#b22222">singlevos_2A-54-dc</font></b> returns 0 upon successful
+ completion; -2 upon interruption; -1 upon failure.  </p>
+     
+<p> </p>
+     
+<hr>    
+<h3> <font color="#000080">Author</font></h3>
+    Matthias Steiner et al., <i><tt>University of Washington</tt></i>. <br>
+    Galen Wilkerson, <i><tt>Science Systems and Applications, Inc., Lanham, MD</tt></i><br>
+   <br>
+  <br>
+ <br>
+</body>
+</html>

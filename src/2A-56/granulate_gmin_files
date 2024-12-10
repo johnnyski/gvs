@@ -1,0 +1,184 @@
+#! /usr/bin/perl
+#
+#
+# USE: gmin_to_hdf as the interface to this script.
+#-------------------------------------------------------------
+#
+# Granulates the input GMIN files.  It processes only
+# one gauge dataset at a time, but, more than one GMIN file may be
+# specified on the command line.  The input can be GZIP-ed.
+# The output file is called:
+#
+#    One or several ascii files having the name:
+#      2A56_<site>_<network>_<gaugeid>_YYYYMM_<ver#>.ascii
+#    where:
+#         <site>    - MELB, DARW, KWAJ, HSTN, ...
+#         <network> - KSC, STJ, ...
+#         <gaugeid> - #### (4 digit number)
+#         YYYY      - Year (4 digit number)
+#         MM        - Month(2 digit number)
+#         <ver#>    - version (1)
+#
+# Collect the data for an arbitrary number of gauges.
+# Sort by time.  Time will be the rows, gauges will be the columns.
+# Output by grouping the data by day.  Multiple gauges will be delimited
+# and their headers included.
+#
+# Example output file is 2a56.KSC_0005.95.03
+#
+# The contents of the output file are identically formated as GMIN files,
+# but, only the data for the granule are saved.
+#
+
+$version = 2;
+
+#! /usr/bin/perl
+
+sub julian_to_gregorian {
+	local ($jday, $year) = @_;
+
+	# Return $mo $day.
+
+	@mo_noleap = (31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31);
+	@mo_leap   = (31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31);
+
+    @mo = (@mo_noleap, @mo_leap);
+
+	$qleap = 0;
+	if($year % 100 != 0 && $year % 4 == 0 || $year % 400 == 0) {$qleap = 1;}
+	$index = $qleap * 12;
+	$sum = 0;
+	for (0..11) {
+		$mo = $_+1;
+		last if ($jday - $mo[$index] <= 0);
+		$jday -= $mo[$index];
+		$index++;
+	}
+	return ($mo, $jday);
+}
+
+sub granulate_it {
+	local($file) = @_;
+	
+	open(FILE, "gzip -d -f --stdout $file |") || die "Can't open file $file\n";
+
+	$n = 0;
+	$prev_granule = 0;
+	
+	while (<FILE>) {
+		$n++;
+		chop;
+		if ($n == 1) {
+			split;
+			$header = $_;
+			
+			if ($#_ > 11) {
+# Header looks like:
+# 2A-56 FLA KSC 0002 ksc_02 TIP 1.0 28.687 -80.323 KMLB 65. 354. -99.9 ...
+# GMIN  FLA KSC 0002 ksc_02 TIP 1.0 28.687 -80.323 KMLB 65. 354. -99.9 ...
+# 2A-57 FLA KSC 0002 ksc_02 DIS 1.0 28.687 -80.323 KMLB 65. 354. -99.9 ...
+### Possibly a new header format, so use the line below.
+				($id, $net, $site, $gauge_no) = (@_[4,2,1,3]);
+				$new_gmin_format = 1;
+				# Rewrite the header slightly.
+				$header = join(' ', "2A-56", @_[1..$#_]);
+			} else {
+### Else, the line below is the original gmin format.
+# Header looks like:
+# 0005 ksc_05  FLA KSC TIP 1.00  28.65811 -80.69950 -999 061 356
+				($id, $net, $gauge_no) = @_[1,3,0];
+				$new_gmin_format = 0;
+# The 'ole format is missing the radar; a bit of hard code here.
+				# Rewrite the header slightly.
+				$header = join(' ', "2A-56", @_[2,3,0,1,4..$#_]);
+			}
+			$gauge_no = sprintf("%4.4d", $gauge_no);
+			next;
+		}
+		($year, $jday, $hour, $min, $sec, $amount) = split;
+		$year += 1900 if $year < 100;
+		($month, $day) = &julian_to_gregorian($jday, $year);
+
+		$cur_granule = sprintf("%.4d%2.2d", $year, $month);
+		if ($prev_granule eq $cur_granule) {
+			
+#			print "LINE: 1:<$year> <$jday> <$hour> <$min> <$amount>", "\n";
+			printf(OUT "%4d %2d %2d %3d %2d %2d %2d %7.2f\n", $year,$month, $day, $jday, $hour, $min, $sec, $amount);
+			sprintf($last_date_time, "%d/%d/%d %d:%d",
+					$month, $day, $year, $hour, $min);
+			if ($the_month eq "") { $the_month = $month;}
+			if ($the_year  eq "") { $the_year  = $year;}
+
+		} else {
+#			print "=================== NEW GRANULE ==============\n";
+			close(OUT);
+			open(OUT, "> 2A56_".$site."_".$net."_".$gauge_no."_".$cur_granule."_".$version.".asc");
+# Save some of rec 1 information.
+#			print OUT "---- NEW GAUGE ----\n";
+			print OUT $header,"\n";
+			printf(OUT "%4d %2d %2d %3d %2d %2d %2d %7.2f\n", $year,$month, $day, $jday, $hour, $min, $sec, $amount);
+		}
+		$prev_granule = $cur_granule;
+		$the_month = $month;
+		$the_year  = $year;
+	}
+	close(OUT);	
+}
+
+sub rebuild_header {
+	local ($file) = @_;
+
+	# The second and last record define the start and stop date/time.
+    # This information must be appended to the header record.  What a pain!
+
+	open(IN, $file);
+	@entire_file = <IN>;
+	close(IN);
+	
+	local($yy, $mm, $dd, $junk, $hh, $min);
+	($yy, $mm, $dd, $junk, $hh, $min) = split(/[ \t\n]+/, $entire_file[1]);
+	chop($entire_file[0]);
+	$h = $entire_file[0];
+	$h = sprintf("%s %.2d/%.2d/%.4d %.2d:%.2d",
+				 $h, $mm, $dd, $yy, $hh, $min);
+	($yy, $mm, $dd, $junk, $hh, $min) = split(/[ \t\n]+/, $entire_file[$#entire_file]);
+	$h = sprintf("%s %.2d/%.2d/%.4d %.2d:%.2d",
+				 $h, $mm, $dd, $yy, $hh, $min);
+	$entire_file[0] = $h . "\n";
+	
+	printf("OUTFILE is <$file>\n");
+	open(OUT, "> $file");
+	print OUT @entire_file;
+	close(OUT);
+	
+}
+	
+
+######### MAIN ##########
+# Don't run if pre-existing 2A56*.ascii files.
+
+open(LS, "ls 2A56*.ascii 2>/dev/null |");
+@pre_exist = <LS>;
+close(LS);
+if ($#pre_exist >= 0) {
+	print STDERR "Can't run with pre-existing 2A56*.ascii files.  Files are:\n", @pre_exist, "\n";
+	exit(-1);
+}
+
+while (@ARGV) {
+	$file = shift @ARGV;
+	print "Working on file $file\n";
+	&granulate_it($file);
+
+}
+
+unless(opendir(LS, ".")) {
+	die "Couldn't open the directory . for 2A56*.ascii.";
+}
+while($_ = readdir(LS)) {
+	next if $_ !~ /2A56.*\.asc/;
+	&rebuild_header($_);
+}
+closedir(LS);
+
+exit(0);

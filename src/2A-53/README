@@ -1,0 +1,27 @@
+README for 2A-53: (12/10/99) packaged w/ GVS v4.14
+
+2A-53 contains four programs developed by:
+   1. Witold (Witek) Krajewski, The University of Iowa (witek) 
+   2. Danny Rosenfeld, The Hebrew University of Jerusalem (danny)
+   3. John Merritt, Applied Research Corp -- Simple simon algorithm (pi-c), 
+   4. Sandra Yuter, The University of Washington and 
+      John Merritt, Applied Research Corp -- Version 4 of 2A-53 (ver4)
+
+
+See witek/README, pi-c/README, ver4/README, and danny/README for 
+more information.
+
+The libgvs_utils.so is located in gvs/src/utils.
+
+NOTE:
+-----
+ Only 2A-53 (ver4) meets TSDIS' requirements after gvs v4.0
+ released on 8/19/97; the other 2A-53 algorithms do not meet TSDIS' 
+ requirements.
+
+QUESTIONS:
+=========
+
+Please contact TRMM Office help via e-mail at help@trmm.gsfc.nasa.gov.
+
+
